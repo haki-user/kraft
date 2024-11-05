@@ -1,13 +1,17 @@
 {
   "exclude": ["node_modules"],
-  "extends": "@repo/typescript-config/nextjs.json",
+  "extends": "@kraft/typescript-config/nextjs.json",
   "compilerOptions": {
     "outDir": "dist",
     "plugins": [
       {
         "name": "next"
       }
-    ]
+    ],
+    "baseUrl": "src",
+    "paths": {
+      "@/*": ["./*"]
+    }
   },
   "include": ["src", "next.config.js", "next-env.d.ts", ".next/types/**/*.ts"]
 }

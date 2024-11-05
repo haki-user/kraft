@@ -1,10 +1,14 @@
 {
-  "extends": "@repo/typescript-config/react-library.json",
+  "extends": "@kraft/typescript-config/react-library.json",
   "compilerOptions": {
     "lib": ["dom", "ES2015"],
     "sourceMap": true,
-    "types": ["jest", "node"]
+    "types": ["jest", "node"],
+    "baseUrl": "src",
+    "paths": {
+      "@/*": ["*"]
+    }
   },
-  "include": ["."],
+  "include": ["src"],
   "exclude": ["dist", "build", "node_modules"]
 }

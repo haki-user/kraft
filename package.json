@@ -17,5 +17,5 @@
   "engines": {
     "node": ">=18"
   },
-  "name": "kitchen-sink"
+  "name": "kraft"
 }

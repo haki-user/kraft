@@ -7,7 +7,8 @@ const project = resolve(process.cwd(), "tsconfig.json");
  * Next.js apps.
  *
  * This config extends the Vercel Engineering Style Guide.
- * For more information, see https://github.com/vercel/style-guide
+ * For more information, see https:pnpm add @radix-ui/react-icons
+//github.com/vercel/style-guide
  *
  */
 
