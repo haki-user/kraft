@@ -5,5 +5,5 @@ module.exports = {
   parserOptions: {
     project: true,
   },
-  
+  ignores: ["tailwind.config.js"],
 };

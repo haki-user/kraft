@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-pascal-case -- Icons.logo */
 "use client";
 import * as React from "react";
 import Link from "next/link";

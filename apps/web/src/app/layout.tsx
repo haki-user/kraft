@@ -1,6 +1,5 @@
-import { ThemeProvider } from "@kraft/ui";
+import { ThemeProvider , Separator } from "@kraft/ui";
 import { Navbar } from "@/components/navbar";
-import { Separator } from "@kraft/ui";
 
 import "./styles.css";
 

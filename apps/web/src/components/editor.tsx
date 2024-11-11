@@ -1,8 +1,8 @@
 "use client";
 
 import { Editor as MonacoEditor } from "@monaco-editor/react";
-import { LangaugesDropdown } from "./languages-select";
 import { useState } from "react";
+import { LangaugesDropdown } from "./languages-dropdown";
 
 interface IeditorProps {
   width?: number | string;
