@@ -1,5 +1,6 @@
-import { ThemeProvider , Separator } from "@kraft/ui";
+import { ThemeProvider, Separator } from "@kraft/ui";
 import { Navbar } from "@/components/navbar";
+import { Toaster } from "@/components/toaster";
 
 import "./styles.css";
 
@@ -24,7 +25,8 @@ export default function RootLayout({
           </nav> */}
           <Navbar />
           <Separator />
-          {children}
+          <main>{children}</main>
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

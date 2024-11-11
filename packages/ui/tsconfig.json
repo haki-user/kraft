@@ -2,7 +2,7 @@
   "extends": "@kraft/typescript-config/react-library.json",
   "compilerOptions": {
     "module": "ESNext",
-    "lib": ["dom", "ES2015"],
+    "lib": ["dom", "ES2020"],
     "sourceMap": true,
     "types": ["jest", "node"],
     "baseUrl": "src",

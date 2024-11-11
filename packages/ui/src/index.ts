@@ -44,5 +44,16 @@ export {
 } from "./components/navigation-menu";
 export * from "./components/icons";
 export { Separator } from "./components/separator";
+export {
+  type ToastProps,
+  type ToastActionElement,
+  ToastProvider,
+  ToastViewport,
+  Toast,
+  ToastTitle,
+  ToastDescription,
+  ToastClose,
+  ToastAction,
+} from "./components/toast";
 
 // export * from "./theme/tailwind-theme";
