@@ -5,7 +5,7 @@ export const metadata = {
   title: "Kraft",
 };
 
-export default function Store(): JSX.Element {
+export default function Home(): JSX.Element {
   log("Hey! This is the Store page.");
 
   return (

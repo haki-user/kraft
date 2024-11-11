@@ -13,5 +13,11 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["src", "next.config.js", "next-env.d.ts", ".next/types/**/*.ts"]
+  "include": [
+    "src",
+    "next.config.js",
+    "next-env.d.ts",
+    ".next/types/**/*.ts",
+    "*.config.ts"
+, "../../packages/ui/src/components/select/index.ts"  ]
 }
