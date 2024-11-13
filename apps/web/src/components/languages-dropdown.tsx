@@ -24,7 +24,7 @@ export function LangaugesDropdown({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button className="w-24" variant="outline">
+        <Button className="w-20" size="sm" variant="outline">
           {activeLanguage}
         </Button>
       </DropdownMenuTrigger>

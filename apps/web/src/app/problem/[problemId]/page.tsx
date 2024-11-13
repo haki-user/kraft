@@ -4,13 +4,32 @@ import {
   ResizableHandle,
 } from "@kraft/ui";
 import EditorC from "@/components/editor";
-import { useToast } from "@/hooks/use-toast";
+import { ExecutionPanel } from "@/components/execution-panel";
+// import { useToast } from "@/hooks/use-toast";
+
+type TestCaseInput = Record<string, string>;
+
+interface TestCase {
+  readonly id: number;
+  input: TestCaseInput[];
+  outpt?: string;
+}
 
 export default function Problem({
   params,
 }: {
   params: { problemId: string };
 }): JSX.Element {
+  const initialTestCases: TestCase[] = [
+    {
+      id: 1,
+      input: [{ nums: "1, 2, 3" }, { k: "2" }],
+    },
+    {
+      id: 2,
+      input: [{ nums: "3, 4, 5" }, { nums2: "5, 6, 7, 8" }],
+    },
+  ];
   return (
     <div>
       {/* <div className="flex debu-1 w-full h-full min-h-[100vh]"> */}
@@ -41,8 +60,9 @@ export default function Problem({
               </ResizablePanel>
               <ResizableHandle className="border-2 border-gray-400" />
               <ResizablePanel>
-                <div>
-                  <div className="flex justify-between p-2">
+                <div className="w-full h-full">
+                  <ExecutionPanel initialTestCases={initialTestCases} />
+                  {/* <div className="flex justify-between p-2">
                     <div className="flex gap-5">
                       <div>Test Cases</div>
                       <div>Test Result</div>
@@ -68,7 +88,7 @@ export default function Problem({
                         <TestResultsTab testCase={1} />
                       </div>
                     )}
-                  </div>
+                  </div> */}
                 </div>
               </ResizablePanel>
               {/* </div> */}

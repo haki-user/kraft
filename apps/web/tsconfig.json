@@ -19,5 +19,5 @@
     "next-env.d.ts",
     ".next/types/**/*.ts",
     "*.config.ts"
-, "../../packages/ui/src/components/select/index.ts"  ]
+, "../../packages/ui/src/components/select/index.tsx"  ]
 }

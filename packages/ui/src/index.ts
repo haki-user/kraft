@@ -55,5 +55,34 @@ export {
   ToastClose,
   ToastAction,
 } from "./components/toast";
+export { Tabs, TabsList, TabsTrigger, TabsContent } from "./components/tabs";
+export { Input } from "./components/input";
+export { Label } from "./components/label";
+export { ScrollArea, ScrollBar } from "./components/scroll-area";
+export { Skeleton } from "./components/skeleton";
+export {
+  Select,
+  SelectGroup,
+  SelectValue,
+  SelectTrigger,
+  SelectContent,
+  SelectLabel,
+  SelectItem,
+  SelectSeparator,
+  SelectScrollUpButton,
+  SelectScrollDownButton,
+} from "components/select";
+export {
+  Dialog,
+  DialogPortal,
+  DialogOverlay,
+  DialogTrigger,
+  DialogClose,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+} from "components/dialog";
 
 // export * from "./theme/tailwind-theme";
