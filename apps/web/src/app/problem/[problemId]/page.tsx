@@ -3,7 +3,7 @@ import {
   ResizablePanel,
   ResizableHandle,
 } from "@kraft/ui";
-import EditorC from "@/components/editor";
+import Editor from "@/components/editor";
 import { ExecutionPanel } from "@/components/execution-panel";
 // import { useToast } from "@/hooks/use-toast";
 
@@ -55,40 +55,13 @@ export default function Problem({
               {/* <div className="debug-3"> */}
               <ResizablePanel>
                 <div className="">
-                  <EditorC />
+                  <Editor />
                 </div>
               </ResizablePanel>
               <ResizableHandle className="border-2 border-gray-400" />
               <ResizablePanel>
                 <div className="w-full h-full">
                   <ExecutionPanel initialTestCases={initialTestCases} />
-                  {/* <div className="flex justify-between p-2">
-                    <div className="flex gap-5">
-                      <div>Test Cases</div>
-                      <div>Test Result</div>
-                    </div>
-                    <div className="flex gap-5">
-                      <div>Run</div>
-                      <div>Submit</div>
-                    </div>
-                  </div>
-                  <div>
-                    {true ? (
-                      <div>
-                        <div className="flex gap-5">
-                          <div>Case 1</div>
-                        </div>
-                        <TestCasesTab testCase={1} />
-                      </div>
-                    ) : (
-                      <div>
-                        <div className="flex gap-5">
-                          <div>Case 1</div>
-                        </div>
-                        <TestResultsTab testCase={1} />
-                      </div>
-                    )}
-                  </div> */}
                 </div>
               </ResizablePanel>
               {/* </div> */}
@@ -96,22 +69,6 @@ export default function Problem({
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>
-    </div>
-  );
-}
-
-function TestCasesTab({ testCase }: { testCase: number }): JSX.Element {
-  return (
-    <div>
-      <div>{testCase}</div>
-    </div>
-  );
-}
-
-function TestResultsTab({ testCase }: { testCase: number }): JSX.Element {
-  return (
-    <div>
-      <div>{testCase}</div>
     </div>
   );
 }
