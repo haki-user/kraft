@@ -1,10 +1,15 @@
 "use client";
 
-import { Settings } from "lucide-react";
+import { Settings, Sun, Moon } from "lucide-react";
+import { SunIcon, MoonIcon } from "@radix-ui/react-icons";
 
 type IconProps = React.HTMLAttributes<SVGElement>;
 
 export const Icons = {
+  radixSun: SunIcon,
+  radixMoon: MoonIcon,
+  moon: Moon,
+  sun: Sun,
   settings: Settings,
   logo: (props: IconProps) => (
     <svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg" {...props}>

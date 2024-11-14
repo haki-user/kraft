@@ -30,7 +30,7 @@ export {
 } from "./components/dropdown-menu";
 export { Button, buttonVariants } from "./components/button";
 export { Test } from "./components/test";
-export { ThemeProvider } from "./components/theme-provider";
+export { ThemeProvider, useTheme } from "./components/theme-provider";
 export {
   navigationMenuTriggerStyle,
   NavigationMenu,

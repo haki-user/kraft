@@ -40,16 +40,17 @@ export default function Editor({
   height,
   editorSettings = { keyBindings: "normal", lineNumbers: "on", tabSize: 2 },
 }: EditorProps): JSX.Element {
-  const languages = ["C++", "JavaScript", "TypeScript", "Go", "python"];
+  const languages = ["C++", "JavaScript", "TypeScript", "Go", "Python"];
   const [activeLanguage, setActiveLanguage] = useState("JavaScript");
   const [code, setCode] = useState<string>("");
   const [settings, setSettings] = useState<EditorSettings>(editorSettings);
   const [tempSettings, setTempSettings] = useState<EditorSettings>(settings);
   const [open, setOpen] = useState(false);
+  console.log(editorSettings, tempSettings);
 
   return (
     <div className="border-[1px] border-solid">
-      <div className="flex py-1/2 gap-2 scale-[.85] -mx-12 justify-between">
+      <div className="flex px-1 gap-2 scale-y-90 justify-between">
         <Select
           defaultValue={activeLanguage}
           onValueChange={(value: string) => {
@@ -185,7 +186,8 @@ export default function Editor({
             setCode(value || "");
           }}
           options={{
-            tabSize: editorSettings.tabSize,
+            tabSize: settings.tabSize,
+            detectIndentation: false,
             theme: "tomorrow-night",
             minimap: {
               enabled: false,
@@ -193,7 +195,7 @@ export default function Editor({
             scrollbar: {
               verticalScrollbarSize: 8,
             },
-            lineNumbers: editorSettings.lineNumbers,
+            lineNumbers: settings.lineNumbers,
             padding: {
               top: 10,
             },
