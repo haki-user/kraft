@@ -159,7 +159,7 @@ function Tasks({
             </Link>
           ))}
         </div>
-        <ScrollBar className="scroll" orientation="vertical" />
+        <ScrollBar orientation="vertical" />
       </ScrollArea>
     </div>
   );

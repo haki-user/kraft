@@ -4,7 +4,8 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useTheme ,
+import {
+  useTheme,
   Icons,
   NavigationMenu,
   NavigationMenuItem,
@@ -43,7 +44,7 @@ export function Navbar(): JSX.Element {
   const navigationItems = React.useMemo(
     () =>
       navLinks.map(({ href, text, icon = null }) => (
-        <NavigationMenuItem key={href}>
+        <NavigationMenuItem key={href} style={{ marginLeft: 0 }}>
           <Link href={href} legacyBehavior passHref>
             <NavigationMenuLink className={navLinkClass}>
               {icon}

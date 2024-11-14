@@ -32,6 +32,65 @@ interface Problem {
   // readonly constraints: string;
 }
 
+interface Submission {
+  id: number;
+  problemId: number;
+  userId: string;
+  code: string;
+  language: string;
+  status: "accepted" | "wrong_answer" | "runtime_error" | "time_limit_exceeded";
+  runtime: number;
+  memory: number;
+  timestamp: number; // Unix timestamp for better performance
+}
+
+interface Submissions {
+  // readonly solved: boolean;
+  readonly submissions: readonly Submission[];
+  readonly totalCount: number;
+  readonly acceptedCount: number;
+}
+
+const submissions1: Submissions = {
+  submissions: [
+    {
+      id: 1,
+      problemId: 1,
+      userId: "user123",
+      code: "function twoSum(nums: number[], target: number): number[] {...}",
+      language: "typescript",
+      status: "accepted",
+      runtime: 76,
+      memory: 42.3,
+      timestamp: 1703116800000,
+    },
+    {
+      id: 2,
+      problemId: 1,
+      userId: "user123",
+      code: "function twoSum(nums: number[], target: number): number[] {...}",
+      language: "typescript",
+      status: "wrong_answer",
+      runtime: 82,
+      memory: 43.1,
+      timestamp: 1703116700000,
+    },
+    {
+      id: 3,
+      problemId: 1,
+      userId: "user123",
+      code: "function twoSum(nums: number[], target: number): number[] {...}",
+      language: "typescript",
+      status: "runtime_error",
+      runtime: 0,
+      memory: 0,
+      timestamp: 1703116600000,
+    },
+  ],
+  totalCount: 3,
+  acceptedCount: 1,
+};
+
 const problem1: Problem = {
   id: 1,
   name: "Two Sum",
@@ -100,16 +159,29 @@ export default function ProblemPage({
       <div>
         <div className="h-screen max-h-[calc(100vh-2.3rem)] debug-">
           <ResizablePanelGroup className="w-full h-full" direction="horizontal">
-            <ResizablePanel className="w-full h-full">
-              <div className="m-5 w-full h-full">
+            <ResizablePanel className="w-full h-full" defaultSize={50}>
+              <div className="p-5 pr-0 pb-0 w-full h-full">
                 <Tabs className="w-full h-full" defaultValue="problem">
-                  <TabsList>
-                    <TabsTrigger value="problem">Problem</TabsTrigger>
-                    <TabsTrigger value="submissions">Submissions</TabsTrigger>
-                    <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
-                  </TabsList>
-                  <div className="w-[calc(100%-1.28rem)] h-[calc(100%-3.6rem)] debug- mt-2">
-                    <ScrollArea className="w-full h-full">
+                  <div className="flex justify-between items-center w-full pr-5">
+                    <TabsList>
+                      <TabsTrigger value="problem">Problem</TabsTrigger>
+                      <TabsTrigger value="submissions">Submissions</TabsTrigger>
+                      {/* <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger> */}
+                    </TabsList>
+                    {submissions1.acceptedCount > 0 ? (
+                      <div className="text-primary-foreground bg-primary shadow-md shadow-secondary px-2.5 rounded-md">
+                        Solved
+                      </div>
+                    ) : (
+                      submissions1.totalCount > 0 && (
+                        <div className="text-primary-foreground bg-orange-500 dark:text-opacity-[87%] shadow-md shadow-secondary px-2.5 rounded-md">
+                          Attempted
+                        </div>
+                      )
+                    )}
+                  </div>
+                  <div className="w-full h-[calc(100%-3rem)] mt-2">
+                    <ScrollArea className="w-full h-full pr-2">
                       <TabsContent value="problem">
                         <ProblemSection problemData={problem1} />
                       </TabsContent>
@@ -122,19 +194,19 @@ export default function ProblemPage({
               </div>
             </ResizablePanel>
             <ResizableHandle className="border-[1px] border-solid border-gray-400" />
-            <ResizablePanel className="w-full h-full">
+            <ResizablePanel className="w-full h-full" defaultSize={50}>
               <ResizablePanelGroup
                 className="w-full h-full"
                 direction="vertical"
               >
-                <ResizablePanel>
+                <ResizablePanel defaultSize={55}>
                   <div>
                     <Editor />
                   </div>
                 </ResizablePanel>
                 <ResizableHandle className="border-2 border-gray-400" />
                 <ResizablePanel>
-                  <div className="w-full h-full p-4">
+                  <div className="w-full h-full p-4 pb-0">
                     <ExecutionPanel initialTestCases={initialTestCases} />
                   </div>
                 </ResizablePanel>

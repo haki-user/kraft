@@ -213,7 +213,7 @@ export function ExecutionPanel({
             ))}
           </TabsList>
           {/* <Separator className="mt-1" /> */}
-          <ScrollArea className="w-full h-[calc(100%-5.2rem)]">
+          <ScrollArea className="w-full h-[calc(100%-5.2rem)] pt-2">
             {testCases.map(({ id: testCaseId, input }) => (
               <TabsContent
                 className="pb-2 px-2"

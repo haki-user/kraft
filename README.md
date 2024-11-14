@@ -14,15 +14,15 @@ This Turborepo includes the following packages and apps:
 - `@kraft/eslint-config`: ESLint configurations used throughout the monorepo
 - `@kraft/jest-presets`: Jest configurations
 - `@kraft/logger`: isomorphic logger (a small wrapper around console.log)
-- `@kraft/ui`: a dummy React UI library (which contains `<CounterButton>` and `<Link>` components)
 - `@kraft/typescript-config`: tsconfig.json's used throughout the monorepo
+- `@kraft/ui`: UI library
 
 Each package and app is 100% [TypeScript](https://www.typescriptlang.org/).
 
 ### Utilities
 
-This Turborepo has some additional tools already setup for you:
-
+- [Tailwind](https://tailwindcss.com) for utility-first CSS styling
+- [Shadcn](https://ui.shadcn.com) for beautifully designed components and primitives
 - [TypeScript](https://www.typescriptlang.org/) for static type checking
 - [ESLint](https://eslint.org/) for code linting
 - [Jest](https://jestjs.io) test runner for all things JavaScript
