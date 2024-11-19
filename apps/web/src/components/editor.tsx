@@ -1,7 +1,9 @@
 "use client";
+/* eslint-disable react/jsx-pascal-case -- will refactor it later */
 
-import { Editor as MonacoEditor } from "@monaco-editor/react";
-import { useState } from "react";
+import { Editor as MonacoEditor, useMonaco } from "@monaco-editor/react";
+import { editor } from "monaco-editor";
+import { useEffect, useRef, useState } from "react";
 import {
   Select,
   SelectContent,
@@ -23,33 +25,79 @@ import {
   Input,
 } from "@kraft/ui";
 
+interface EditorSettings {
+  keyBindings: "normal" | "vim";
+  lineNumbers: "on" | "off" | "relative";
+  tabSize: number;
+  theme: "light" | "vs-dark" | "tomorrow-night";
+  fontSize: number;
+}
+
 interface EditorProps {
   width?: number | string;
   height?: number | string;
   editorSettings?: EditorSettings;
 }
 
-interface EditorSettings {
-  keyBindings: "normal" | "vim";
-  lineNumbers: "on" | "off" | "relative";
-  tabSize: number;
-}
+const saveEditorSettingsLocal = (settings: EditorSettings): void => {
+  localStorage.setItem("editorSettings", JSON.stringify(settings));
+};
+
+const getEditorSettingsLocal = (): EditorSettings | null => {
+  const settings = localStorage.getItem("editorSettings");
+  return settings ? (JSON.parse(settings) as EditorSettings) : null;
+};
 
 export default function Editor({
   width,
   height,
-  editorSettings = { keyBindings: "normal", lineNumbers: "on", tabSize: 2 },
+  editorSettings = {
+    keyBindings: "normal",
+    lineNumbers: "on",
+    tabSize: 2,
+    theme: "tomorrow-night",
+    fontSize: 12,
+  },
 }: EditorProps): JSX.Element {
+  const monaco = useMonaco();
+  const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const languages = ["C++", "JavaScript", "TypeScript", "Go", "Python"];
   const [activeLanguage, setActiveLanguage] = useState("JavaScript");
   const [code, setCode] = useState<string>("");
   const [settings, setSettings] = useState<EditorSettings>(editorSettings);
   const [tempSettings, setTempSettings] = useState<EditorSettings>(settings);
   const [open, setOpen] = useState(false);
-  console.log(editorSettings, tempSettings);
+
+  useEffect(() => {
+    const editorSettingsLocal = getEditorSettingsLocal();
+    if (editorSettingsLocal) {
+      setSettings(editorSettingsLocal);
+      setTempSettings(editorSettingsLocal);
+    }
+  }, []);
+  console.log({ settings });
+
+  useEffect(() => {
+    if (monaco) {
+      const loadTheme = async (): Promise<void> => {
+        if (settings.theme === "tomorrow-night") {
+          const data = await import("monaco-themes/themes/Tomorrow-Night.json");
+          monaco.editor.defineTheme("tomorrow-night", data as never);
+          monaco.editor.setTheme("tomorrow-night");
+        } else {
+          monaco.editor.setTheme(settings.theme || "vs-dark");
+        }
+      };
+      void loadTheme();
+    }
+  }, [monaco, settings.theme]);
+
+  useEffect(() => {
+    setTempSettings(settings);
+  }, [open]);
 
   return (
-    <div className="border-[1px] border-solid">
+    <div className="w-full h-full border-b-[1px] border-solid">
       <div className="flex px-1 gap-2 scale-y-90 justify-between">
         <Select
           defaultValue={activeLanguage}
@@ -76,7 +124,6 @@ export default function Editor({
         <Dialog onOpenChange={setOpen} open={open}>
           <DialogTrigger asChild>
             <Button variant="ghost">
-              {/* eslint-disable-next-line react/jsx-pascal-case -- figure out solution for it */}
               <Icons.settings />
             </Button>
           </DialogTrigger>
@@ -129,7 +176,9 @@ export default function Editor({
                   <SelectContent>
                     <SelectGroup>
                       <SelectItem value="normal">Normal</SelectItem>
-                      <SelectItem value="vim">Vim</SelectItem>
+                      <SelectItem value="vim" disabled>
+                        Vim
+                      </SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
@@ -137,13 +186,34 @@ export default function Editor({
               <div className="flex gap-5 items-center justify-between">
                 <Label
                   className="text-right text-nowrap"
-                  htmlFor="select-key-bindings"
+                  htmlFor="input-editor-font-size"
+                >
+                  Font Size
+                </Label>
+                <Input
+                  id="input-editor-font-size"
+                  className="w-24"
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    setTempSettings({
+                      ...tempSettings,
+                      fontSize: parseInt(e.target.value),
+                    });
+                  }}
+                  type="number"
+                  value={tempSettings.fontSize}
+                />
+              </div>
+              <div className="flex gap-5 items-center justify-between">
+                <Label
+                  className="text-right text-nowrap"
+                  htmlFor="input-editor-tab-size"
                 >
                   Tab size
                 </Label>
                 <Input
+                  id="input-editor-tab-size"
                   className="w-24"
-                  onChange={(e) => {
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     setTempSettings({
                       ...tempSettings,
                       tabSize: parseInt(e.target.value),
@@ -153,11 +223,39 @@ export default function Editor({
                   value={tempSettings.tabSize}
                 />
               </div>
+
+              <div className="flex gap-5 items-center justify-between">
+                <Label className="text-right" htmlFor="select-editor-theme">
+                  Editor Theme
+                </Label>
+                <Select
+                  defaultValue={tempSettings.theme}
+                  onValueChange={(
+                    value: "light" | "vs-dark" | "tomorrow-night"
+                  ) => {
+                    setTempSettings({ ...tempSettings, theme: value });
+                  }}
+                >
+                  <SelectTrigger className="w-[150px]" id="select-editor-theme">
+                    <SelectValue defaultValue={tempSettings.theme} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="light">Light</SelectItem>
+                      <SelectItem value="vs-dark">VS Dark</SelectItem>
+                      <SelectItem value="tomorrow-night">
+                        Tomorrow Night
+                      </SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             <DialogFooter>
               <Button
                 onClick={() => {
                   setSettings(tempSettings);
+                  saveEditorSettingsLocal(tempSettings);
                   setOpen(false);
                 }}
                 type="submit"
@@ -168,27 +266,21 @@ export default function Editor({
           </DialogContent>
         </Dialog>
       </div>
-      <div>
+      <div className="h-full w-full">
         <MonacoEditor
-          beforeMount={(monaco) => {
-            void import("monaco-themes/themes/Tomorrow-Night.json").then(
-              (data) => {
-                monaco.editor.defineTheme("tomorrow-night", data as never);
-                monaco.editor.setTheme("tomorrow-night");
-              }
-            );
-          }}
-          defaultLanguage="javascript"
           defaultValue="// Write code here"
-          height={height || "90vh"}
-          // language={activeLanguage.toLowerCase()}
+          height={height}
+          language={activeLanguage.toLowerCase()}
+          loading={<div>Loading...</div>}
           onChange={(value) => {
             setCode(value || "");
+          }}
+          onMount={(editor, _monaco) => {
+            editorRef.current = editor;
           }}
           options={{
             tabSize: settings.tabSize,
             detectIndentation: false,
-            theme: "tomorrow-night",
             minimap: {
               enabled: false,
             },
@@ -199,10 +291,9 @@ export default function Editor({
             padding: {
               top: 10,
             },
-            // fontSize: 14,
-            // fontFamily: "Fira Code",
+            fontSize: settings.fontSize,
           }}
-          theme="tomorrow-night"
+          theme={settings.theme}
           value={code}
           width={width}
         />

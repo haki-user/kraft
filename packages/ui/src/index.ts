@@ -84,5 +84,24 @@ export {
   DialogTitle,
   DialogDescription,
 } from "components/dialog";
+export {
+  Table,
+  TableHeader,
+  TableBody,
+  TableFooter,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableCaption,
+} from "components/table";
+export {
+  Card,
+  CardHeader,
+  CardFooter,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "./components/card";
+export { Badge, badgeVariants } from "./components/badge";
 
 // export * from "./theme/tailwind-theme";

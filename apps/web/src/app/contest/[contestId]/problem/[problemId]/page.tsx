@@ -1,4 +1,10 @@
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
   Tabs,
   TabsContent,
   TabsList,
@@ -8,6 +14,7 @@ import {
   ResizableHandle,
   ScrollArea,
   ScrollBar,
+  Badge,
 } from "@kraft/ui";
 import Editor from "@/components/editor";
 import { ExecutionPanel } from "@/components/execution-panel";
@@ -158,7 +165,11 @@ export default function ProblemPage({
     <div>
       <div>
         <div className="h-screen max-h-[calc(100vh-2.3rem)] debug-">
-          <ResizablePanelGroup className="w-full h-full" direction="horizontal">
+          <ResizablePanelGroup
+            autoSaveId="contest-page-resizable-vertical"
+            className="w-full h-full"
+            direction="horizontal"
+          >
             <ResizablePanel className="w-full h-full" defaultSize={50}>
               <div className="p-5 pr-0 pb-0 w-full h-full">
                 <Tabs className="w-full h-full" defaultValue="problem">
@@ -166,17 +177,21 @@ export default function ProblemPage({
                     <TabsList>
                       <TabsTrigger value="problem">Problem</TabsTrigger>
                       <TabsTrigger value="submissions">Submissions</TabsTrigger>
-                      {/* <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger> */}
                     </TabsList>
                     {submissions1.acceptedCount > 0 ? (
-                      <div className="text-primary-foreground bg-primary shadow-md shadow-secondary px-2.5 rounded-md">
+                      // <div className="text-primary-foreground bg-primary shadow-md shadow-secondary px-2.5 rounded-md text-sm">
+                      <Badge className="bg-primary dark:bg-primary dark:text-opacity-[87%]">
                         Solved
-                      </div>
+                      </Badge>
                     ) : (
+                      // Solved
+                      // </div>
                       submissions1.totalCount > 0 && (
-                        <div className="text-primary-foreground bg-orange-500 dark:text-opacity-[87%] shadow-md shadow-secondary px-2.5 rounded-md">
+                        // <div className="text-primary-foreground bg-orange-500 dark:text-opacity-[87%] shadow-md shadow-secondary px-2.5 rounded-md">
+                        <Badge className="text-primary-foreground bg-orange-500 dark:text-opacity-[87%] shadow-md shadow-secondary">
                           Attempted
-                        </div>
+                        </Badge>
+                        //  </div>
                       )
                     )}
                   </div>
@@ -185,27 +200,35 @@ export default function ProblemPage({
                       <TabsContent value="problem">
                         <ProblemSection problemData={problem1} />
                       </TabsContent>
-                      <TabsContent value="submissions">Submissions</TabsContent>
-                      <TabsContent value="leaderboard">Leaderboard</TabsContent>
+                      <TabsContent value="submissions">
+                        <SubmissionSection />
+                      </TabsContent>
                       <ScrollBar orientation="vertical" />
                     </ScrollArea>
                   </div>
                 </Tabs>
               </div>
             </ResizablePanel>
-            <ResizableHandle className="border-[1px] border-solid border-gray-400" />
+            <ResizableHandle
+              className="bg-secondary hover:bg-primary"
+              withHandle
+            />
             <ResizablePanel className="w-full h-full" defaultSize={50}>
               <ResizablePanelGroup
+                autoSaveId="contest-page-resizable-horizontal"
                 className="w-full h-full"
                 direction="vertical"
               >
                 <ResizablePanel defaultSize={55}>
-                  <div>
+                  <div className="w-full h-full">
                     <Editor />
                   </div>
                 </ResizablePanel>
-                <ResizableHandle className="border-2 border-gray-400" />
-                <ResizablePanel>
+                <ResizableHandle
+                  className="bg-secondary hover:bg-primary"
+                  withHandle
+                />
+                <ResizablePanel defaultSize={45}>
                   <div className="w-full h-full p-4 pb-0">
                     <ExecutionPanel initialTestCases={initialTestCases} />
                   </div>
@@ -236,6 +259,83 @@ function ProblemSection({
             dangerouslySetInnerHTML={{ __html: problemData.description }}
           />
         </div>
+      </div>
+    </div>
+  );
+}
+
+function SubmissionSection(): JSX.Element {
+  const formatDate = (timestamp: number) => {
+    return new Date(timestamp).toLocaleString();
+  };
+
+  const getStatusBadgeClass = (status: Submission["status"]) => {
+    switch (status) {
+      case "accepted":
+        return "bg-green-500/20 text-green-500 dark:bg-green-500/10";
+      case "wrong_answer":
+        return "bg-red-500/20 text-red-500 dark:bg-red-500/10";
+      case "runtime_error":
+        return "bg-orange-500/20 text-orange-500 dark:bg-orange-500/10";
+      case "time_limit_exceeded":
+        return "bg-yellow-500/20 text-yellow-500 dark:bg-yellow-500/10";
+      default:
+        return "bg-gray-500/20 text-gray-500 dark:bg-gray-500/10";
+    }
+  };
+
+  const formatStatus = (status: string) => {
+    return status
+      .split("_")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
+
+  return (
+    <div className="w-full space-y-4">
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="max-w-[150px]">Status</TableHead>
+              <TableHead>Language</TableHead>
+              <TableHead>Runtime</TableHead>
+              <TableHead>Memory</TableHead>
+              <TableHead className="text-right">Submitted</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {submissions1.submissions.map((submission) => (
+              <TableRow key={submission.id}>
+                <TableCell>
+                  <span
+                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClass(
+                      submission.status
+                    )}`}
+                  >
+                    {formatStatus(submission.status)}
+                  </span>
+                </TableCell>
+                <TableCell className="font-medium">
+                  {submission.language}
+                </TableCell>
+                <TableCell>
+                  {submission.runtime > 0 ? `${submission.runtime} ms` : "-"}
+                </TableCell>
+                <TableCell>
+                  {submission.memory > 0 ? `${submission.memory} MB` : "-"}
+                </TableCell>
+                <TableCell className="text-right">
+                  {formatDate(submission.timestamp)}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+      <div className="text-sm text-muted-foreground">
+        Total Submissions: {submissions1.totalCount} | Accepted:{" "}
+        {submissions1.acceptedCount}
       </div>
     </div>
   );

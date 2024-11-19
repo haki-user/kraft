@@ -1,11 +1,15 @@
 "use client";
 
-import { Settings, Sun, Moon } from "lucide-react";
+import { Settings, Sun, Moon, CalendarDays, Users, Trophy, Timer } from "lucide-react";
 import { SunIcon, MoonIcon } from "@radix-ui/react-icons";
 
 type IconProps = React.HTMLAttributes<SVGElement>;
 
 export const Icons = {
+  Timer,
+  CalendarDays,
+  Users,
+  Trophy,
   radixSun: SunIcon,
   radixMoon: MoonIcon,
   moon: Moon,
