@@ -1,86 +1,86 @@
-import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { z } from "zod";
+import { RegisterDTO, LoginDTO, AuthResponse } from "@kraft/types";
+import prisma from "../../lib/prisma";
 
-const prisma = new PrismaClient();
-
-// Validation Schemas
-const RegisterSchema = z.object({
-  email: z.string().email(),
-  name: z.string().min(2),
-  password: z.string().min(6),
-  organizationName: z.string().optional(),
-  organizationDomain: z.string().optional(),
-});
-
-const LoginSchema = z.object({
-  email: z.string().email(),
-  password: z.string(),
-});
-
-export const registerUser = async (
-  userData: z.infer<typeof RegisterSchema>
-) => {
-  // Validate input
-  const validatedData = RegisterSchema.parse(userData);
-
-  // Check if user exists
+export const register = async (data: RegisterDTO): Promise<AuthResponse> => {
   const existingUser = await prisma.user.findUnique({
-    where: { email: validatedData.email },
+    where: { email: data.email },
   });
 
   if (existingUser) {
     throw new Error("User already exists");
   }
 
-  // Hash password
-  const hashedPassword = await bcrypt.hash(validatedData.password, 10);
+  const hashedPassword = await bcrypt.hash(data.password, 10);
 
-  // Create user
   const user = await prisma.user.create({
     data: {
-      ...validatedData,
+      ...data,
       password: hashedPassword,
     },
   });
 
-  // Generate token
   const token = jwt.sign(
-    { id: user.id, email: user.email },
-    process.env.JWT_SECRET || "default_secret",
+    {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    },
+    process.env.JWT_SECRET!,
     { expiresIn: "1d" }
   );
 
-  return { user, token };
+  return {
+    user: {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      organizationName: user.organizationName || undefined,
+      organizationDomain: user.organizationDomain || undefined,
+    },
+    token,
+  };
 };
 
-export const loginUser = async (credentials: z.infer<typeof LoginSchema>) => {
-  // Validate input
-  const validatedData = LoginSchema.parse(credentials);
-
-  // Find user
+export const login = async (credentials: LoginDTO): Promise<AuthResponse> => {
   const user = await prisma.user.findUnique({
-    where: { email: validatedData.email },
+    where: { email: credentials.email },
   });
 
   if (!user) {
     throw new Error("Invalid credentials");
   }
 
-  // Check password
-  const isMatch = await bcrypt.compare(validatedData.password, user.password);
+  const isValidPassword = await bcrypt.compare(
+    credentials.password,
+    user.password
+  );
 
-  if (!isMatch) {
+  if (!isValidPassword) {
     throw new Error("Invalid credentials");
   }
 
-  // Generate token
   const token = jwt.sign(
-    { id: user.id, email: user.email },
-    process.env.JWT_SECRET || "default_secret",
+    {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    },
+    process.env.JWT_SECRET!,
     { expiresIn: "1d" }
   );
 
-  return { user, token };
+  return {
+    user: {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      organizationName: user.organizationName || undefined,
+      organizationDomain: user.organizationDomain || undefined,
+    },
+    token,
+  };
 };

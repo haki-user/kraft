@@ -1,9 +1,12 @@
 import express from "express";
-import type { Express, Request, Response, NextFunction } from "express";
+import type {
+  Express,
+} from "express";
 import morgan from "morgan";
 import cors from "cors";
 import helmet from "helmet";
-import { log } from "@kraft/logger";
+import authRoutes from "./modules/auth/auth.routes";
+import { errorHandler } from "./middlewares/errorHandler";
 
 export const createServer = (): Express => {
   const app = express();
@@ -13,18 +16,11 @@ export const createServer = (): Express => {
     .use(cors())
     .use(helmet())
     .use(express.json())
+    .use("/api/auth", authRoutes)
     .get("/status", (_, res) => {
       res.json({ ok: true });
-    });
-
-  // Global Error Handler
-  app.use((err: Error, _: Request, res: Response, next: NextFunction) => {
-    log(err);
-    res.status(500).json({
-      message: "Something went wrong",
-      error: process.env.NODE_ENV === "development" ? err.message : {},
-    });
-  });
+    })
+    .use(errorHandler);
 
   return app;
 };

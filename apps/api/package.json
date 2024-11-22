@@ -32,6 +32,7 @@
     "@kraft/eslint-config": "workspace:*",
     "@kraft/jest-presets": "workspace:*",
     "@kraft/typescript-config": "workspace:*",
+    "@kraft/types": "workspace:*",
     "@types/bcryptjs": "^2.4.6",
     "@types/express": "^5.0.0",
     "@types/jsonwebtoken": "^9.0.7",
