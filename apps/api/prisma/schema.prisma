@@ -101,8 +101,8 @@ model Problem {
 }
 
 model TestCase {
-  id             String @id @default(uuid())
-  isSample       String
+  id             String  @id @default(uuid())
+  isPublic       Boolean
   input          String
   expectedOutput String
 

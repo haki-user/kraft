@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { JWTPayload } from "@kraft/types";
+import { UserRole } from "@kraft/types";
 
 declare global {
   namespace Express {
@@ -19,7 +20,8 @@ export const authMiddleware = (
     const token = req.headers.authorization?.split(" ")[1];
 
     if (!token) {
-      return res.status(401).json({ message: "Authentication required" });
+      res.status(401).json({ message: "Authentication required" });
+      return;
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JWTPayload;
@@ -30,14 +32,17 @@ export const authMiddleware = (
   }
 };
 
-export const roleGuard = (...roles: string[]) => {
+export const roleGuard = (...roles: UserRole[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
-      return res.status(401).json({ message: "Authentication required" });
+      res.status(401).json({ message: "Authentication required" });
+      return;
     }
 
     if (!roles.includes(req.user.role)) {
-      return res.status(403).json({ message: "Insufficient permissions" });
+      console.log({ roles, userRole: req.user.role });
+      res.status(403).json({ message: "Insufficient permissions" });
+      return;
     }
 
     next();

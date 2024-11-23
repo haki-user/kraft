@@ -1,11 +1,10 @@
 import express from "express";
-import type {
-  Express,
-} from "express";
+import type { Express } from "express";
 import morgan from "morgan";
 import cors from "cors";
 import helmet from "helmet";
 import authRoutes from "./modules/auth/auth.routes";
+import problemsRoutes from "./modules/problems/problems.routes";
 import { errorHandler } from "./middlewares/errorHandler";
 
 export const createServer = (): Express => {
@@ -17,6 +16,7 @@ export const createServer = (): Express => {
     .use(helmet())
     .use(express.json())
     .use("/api/auth", authRoutes)
+    .use("/api/problems/", problemsRoutes)
     .get("/status", (_, res) => {
       res.json({ ok: true });
     })

@@ -1,4 +1,7 @@
+export type UserRole = "ADMIN" | "ORGANIZER" | "PARTICIPANT";
+
 export interface RegisterDTO {
+  username: string;
   email: string;
   password: string;
   name: string;
@@ -16,7 +19,7 @@ export interface AuthResponse {
     id: string;
     email: string;
     name: string;
-    role: string;
+    role: UserRole;
     organizationName?: string;
     organizationDomain?: string;
   };
@@ -26,5 +29,5 @@ export interface AuthResponse {
 export interface JWTPayload {
   id: string;
   email: string;
-  role: string;
+  role: UserRole;
 }

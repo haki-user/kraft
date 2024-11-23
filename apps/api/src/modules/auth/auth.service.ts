@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { RegisterDTO, LoginDTO, AuthResponse } from "@kraft/types";
+import type { RegisterDTO, LoginDTO, AuthResponse } from "@kraft/types";
 import prisma from "../../lib/prisma";
 
 export const register = async (data: RegisterDTO): Promise<AuthResponse> => {

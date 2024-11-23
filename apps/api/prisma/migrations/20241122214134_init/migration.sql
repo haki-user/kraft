@@ -57,7 +57,7 @@ CREATE TABLE "Problem" (
 -- CreateTable
 CREATE TABLE "TestCase" (
     "id" TEXT NOT NULL,
-    "isSample" TEXT NOT NULL,
+    "isPublic" BOOLEAN NOT NULL,
     "input" TEXT NOT NULL,
     "expectedOutput" TEXT NOT NULL,
     "problemId" TEXT NOT NULL,
