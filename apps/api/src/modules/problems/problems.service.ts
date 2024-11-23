@@ -90,7 +90,7 @@ export const getProblemById = async (id: string): Promise<Problem | null> => {
 };
 
 export const createProblem = async (problem: CreateProblemDTO) => {
-  console.log({problem})
+  console.log({ problem });
   const newProblem = await prisma.problem.create({
     data: {
       ...problem,
@@ -109,15 +109,11 @@ export const updateProblemById = async (
   id: string,
   problemData: ProblemUpdateDTO
 ) => {
-  const { contestId, ...rest } = problemData;
   const updatedProblem = await prisma.problem.update({
     where: {
       id,
     },
-    data: {
-      ...rest,
-      contestId: contestId ?? null,
-    },
+    data: problemData,
   });
   return updatedProblem;
 };

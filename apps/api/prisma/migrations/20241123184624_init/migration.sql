@@ -28,8 +28,20 @@ CREATE TABLE "User" (
 );
 
 -- CreateTable
+CREATE TABLE "ContestProblem" (
+    "id" TEXT NOT NULL,
+    "contestId" TEXT NOT NULL,
+    "problemId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "ContestProblem_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Contest" (
     "id" TEXT NOT NULL,
+    "titleSlug" TEXT NOT NULL,
     "title" TEXT NOT NULL,
     "description" TEXT NOT NULL,
     "creatorId" TEXT NOT NULL,
@@ -45,11 +57,11 @@ CREATE TABLE "Contest" (
 -- CreateTable
 CREATE TABLE "Problem" (
     "id" TEXT NOT NULL,
+    "titleSlug" TEXT NOT NULL,
     "title" TEXT NOT NULL,
     "description" TEXT NOT NULL,
     "difficulty" "ProblemDifficulty" NOT NULL,
     "isPublic" BOOLEAN NOT NULL DEFAULT false,
-    "contestId" TEXT,
 
     CONSTRAINT "Problem_pkey" PRIMARY KEY ("id")
 );
@@ -113,11 +125,20 @@ CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
--- AddForeignKey
-ALTER TABLE "Contest" ADD CONSTRAINT "Contest_creatorId_fkey" FOREIGN KEY ("creatorId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+-- CreateIndex
+CREATE UNIQUE INDEX "Contest_titleSlug_key" ON "Contest"("titleSlug");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Problem_titleSlug_key" ON "Problem"("titleSlug");
 
 -- AddForeignKey
-ALTER TABLE "Problem" ADD CONSTRAINT "Problem_contestId_fkey" FOREIGN KEY ("contestId") REFERENCES "Contest"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "ContestProblem" ADD CONSTRAINT "ContestProblem_contestId_fkey" FOREIGN KEY ("contestId") REFERENCES "Contest"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ContestProblem" ADD CONSTRAINT "ContestProblem_problemId_fkey" FOREIGN KEY ("problemId") REFERENCES "Problem"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Contest" ADD CONSTRAINT "Contest_creatorId_fkey" FOREIGN KEY ("creatorId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "TestCase" ADD CONSTRAINT "TestCase_problemId_fkey" FOREIGN KEY ("problemId") REFERENCES "Problem"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

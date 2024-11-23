@@ -66,8 +66,20 @@ model User {
   AuditLog              AuditLog[]
 }
 
+model ContestProblem {
+  id        String  @id @default(uuid())
+  contestId String
+  contest   Contest @relation(fields: [contestId], references: [id])
+  problemId String
+  problem   Problem @relation(fields: [problemId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Contest {
   id          String @id @default(uuid())
+  titleSlug   String @unique
   title       String
   description String
 
@@ -81,23 +93,22 @@ model Contest {
   allowedDomains  String[]
   maxParticipants Int?
 
-  problems     Problem[]
-  participants ContestParticipation[]
+  contestProblems ContestProblem[] // Many-to-many relationship
+  participants    ContestParticipation[]
 }
 
 model Problem {
   id          String            @id @default(uuid())
+  titleSlug   String            @unique
   title       String
   description String
   difficulty  ProblemDifficulty
 
   isPublic Boolean @default(false)
 
-  contestId String?
-  contest   Contest? @relation(fields: [contestId], references: [id])
-
-  testCases   TestCase[]
-  submissions Submission[]
+  contestProblems ContestProblem[] // Many-to-many relationship
+  testCases       TestCase[]
+  submissions     Submission[]
 }
 
 model TestCase {
