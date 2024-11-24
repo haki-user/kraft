@@ -42,17 +42,32 @@ export const login = async (req: Request, res: Response) => {
 export const refreshAccessToken = async (req: Request, res: Response) => {
   try {
     const refreshToken = req.cookies.refreshToken;
+    console.log(refreshToken);
     if (!refreshToken) {
       res.status(401).json({ message: "No refresh token found" });
       return;
     }
 
-    const newAccessToken = await AuthService.refreshAccessToken(refreshToken);
+    const result = await AuthService.refreshAccessToken(refreshToken);
 
-    res.status(200).json({ accessToken: newAccessToken });
+    setRefreshTokenCookie(result.refreshToken, res);
+    res
+      .status(200)
+      .json({ user: result.user, accessToken: result.accessToken });
   } catch (error) {
     res.status(401).json({
       message: error instanceof Error ? error.message : "Invalid refresh token",
     });
   }
+};
+
+export const logout = async (req: Request, res: Response) => {
+  res.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+    path: "/",
+  });
+
+  res.status(200).json({ message: "Logged out successfully" });
 };

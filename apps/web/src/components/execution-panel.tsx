@@ -232,7 +232,7 @@ export function ExecutionPanel({
                       <Input
                         className="mt-1"
                         id={`test-case-${testCaseId}-input-${key}`}
-                        onChange={(e) => {
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                           handleTestCaseInputChange(
                             testCaseId,
                             key,

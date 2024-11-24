@@ -85,11 +85,11 @@ export const login = async (
 
 export const refreshAccessToken = async (
   refreshToken: string
-): Promise<string> => {
+): Promise<AuthResponse & { refreshToken: string }> => {
   try {
     const decoded = jwt.verify(
       refreshToken,
-      process.env.JWT_SECRET!
+      process.env.JWT_REFRESH_SECRET!
     ) as JWTPayload;
 
     const user = await prisma.user.findUnique({
@@ -100,7 +100,18 @@ export const refreshAccessToken = async (
       throw new Error("User not found");
     }
 
-    return generateAccessToken(user);
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        organizationName: user.organizationName || undefined,
+        organizationDomain: user.organizationDomain || undefined,
+      },
+      accessToken: generateAccessToken(user),
+      refreshToken: generateRefreshToken(user),
+    };
   } catch (error) {
     throw new Error("Invalid or expired refresh token");
   }

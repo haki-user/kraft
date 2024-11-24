@@ -29,13 +29,14 @@
   },
   "devDependencies": {
     "@kraft/eslint-config": "workspace:*",
-    "@kraft/typescript-config": "workspace:*",
     "@kraft/types": "workspace:*",
+    "@kraft/typescript-config": "workspace:*",
     "@next/eslint-plugin-next": "^14.1.1",
     "@types/node": "^20.11.24",
     "@types/react": "^18.2.62",
     "@types/react-dom": "^18.2.19",
     "autoprefixer": "^10.4.20",
+    "eslint": "^9.15.0",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.14",
     "typescript": "5.5.4"
