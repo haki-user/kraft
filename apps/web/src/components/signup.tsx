@@ -1,10 +1,14 @@
 "use client";
 import Link from "next/link";
-import { Input, Card } from "@kraft/ui";
+import { Button, Card, Input, Icons } from "@kraft/ui";
 import { useState } from "react";
 import type { RegisterDTO } from "@kraft/types";
+import { useRouter } from "next/navigation";
+import { registerUser, loginUser } from "@/services/auth-service";
+import { useToast } from "@/hooks/use-toast";
+import { AxiosError } from "axios";
 
-export function SignIn(): JSX.Element {
+export function Signup(): JSX.Element {
   const [user, setUser] = useState<RegisterDTO>({
     name: "",
     username: "",
@@ -13,8 +17,38 @@ export function SignIn(): JSX.Element {
     organizationDomain: undefined,
     organizationName: undefined,
   });
+  const router = useRouter();
+  const { toast } = useToast();
+  const handleRegister = async () => {
+    setIsLoading(true);
+    try {
+      await registerUser(user);
+      toast({
+        title: "Success",
+        description: "Account created successfully",
+        variant: "success",
+      });
+      if (document.referrer && document.referrer !== window.location.href) {
+        router.back();
+      } else {
+        router.push("/");
+      }
+    } catch (err: unknown) {
+      console.error(err);
+      if (err instanceof AxiosError) {
+        toast({
+          title: "Error",
+          description: err.response?.data.message || err.message,
+          variant: "destructive",
+        });
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   return (
-    <Card className="md:w-96">
+    <Card className="sm:w-96 transition-all max-sm:p-5 p-2">
       <div className="mx-auto flex w-full flex-col justify-center space-y-6 mt-5 sm:w-[350px]">
         <div className="flex flex-col space-y-2 text-center">
           <h1 className="text-2xl font-semibold tracking-tight">
@@ -90,7 +124,6 @@ export function SignIn(): JSX.Element {
               }
             />
           </div>
-
           <div>
             <Input
               placeholder="Password"
@@ -105,6 +138,18 @@ export function SignIn(): JSX.Element {
               }
             />
           </div>
+        </div>
+        <div>
+          <Button
+            disabled={isLoading}
+            onClick={handleRegister}
+            className="w-full"
+          >
+            {isLoading && (
+              <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+            )}
+            Sign In with Email
+          </Button>
         </div>
         <p className="px-8 text-center text-sm text-muted-foreground">
           By clicking continue, you agree to our{" "}

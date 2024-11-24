@@ -14,6 +14,8 @@ import {
   navigationMenuTriggerStyle,
   Button,
 } from "@kraft/ui";
+import { useAuthStore } from "@/store/auth-store";
+import { verifyToken } from "@/services/auth-service";
 
 const navLinks: { href: string; text: string; icon?: JSX.Element }[] = [
   {
@@ -30,8 +32,10 @@ const navLinkClass = `${navigationMenuTriggerStyle()} rounded-none`;
 export function Navbar(): JSX.Element {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
-
+  const { user, logout } = useAuthStore();
+  console.log({ user });
   React.useEffect(() => {
+    void verifyToken();
     setMounted(true);
   }, []);
 
@@ -62,20 +66,39 @@ export function Navbar(): JSX.Element {
         {navigationItems}
       </NavigationMenuList>
       <NavigationMenuList>
-        {mounted ? (
-          <Button
-            className="rounded-none"
-            onClick={handleThemeToggle}
-            type="button"
-            variant="ghost"
-          >
-            {resolvedTheme === "light" ? (
-              <Icons.radixMoon fill="black" height={20} width={20} />
-            ) : (
-              <Icons.radixSun height={20} width={20} />
-            )}
-          </Button>
-        ) : null}
+        {user ? (
+          <NavigationMenuItem className="hover:bg-destructive ">
+            <Link href="/auth" legacyBehavior passHref>
+              <NavigationMenuLink className={navLinkClass} onClick={logout}>
+                Logout
+              </NavigationMenuLink>
+            </Link>
+          </NavigationMenuItem>
+        ) : (
+          <NavigationMenuItem>
+            <Link href="/auth" legacyBehavior passHref>
+              <NavigationMenuLink className={navLinkClass}>
+                Login
+              </NavigationMenuLink>
+            </Link>
+          </NavigationMenuItem>
+        )}
+        <NavigationMenuItem>
+          {mounted ? (
+            <Button
+              className="rounded-none"
+              onClick={handleThemeToggle}
+              type="button"
+              variant="ghost"
+            >
+              {resolvedTheme === "light" ? (
+                <Icons.radixMoon fill="black" height={20} width={20} />
+              ) : (
+                <Icons.radixSun height={20} width={20} />
+              )}
+            </Button>
+          ) : null}
+        </NavigationMenuItem>
       </NavigationMenuList>
     </NavigationMenu>
   );
