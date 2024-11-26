@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Card,
   CardHeader,
@@ -14,64 +14,72 @@ import {
   ScrollArea,
   ScrollBar,
 } from "@kraft/ui";
+import { useContestStore } from "@/store/contests-store";
+import type { Contest } from "@kraft/types";
+import { useAuthStore } from "@/store/auth-store";
+import {
+  registerForContest,
+  fetchAllContests,
+} from "@/services/contests-service";
 
-// Enhanced contest type
-interface Contest {
-  id: number;
-  title: string;
-  description: string;
-  startDate: string;
-  endDate: string;
-  participants: number;
-  problems: number;
-  isRegistered?: boolean;
-  status: "upcoming" | "active" | "ended";
-}
+// // Enhanced contest type
+// interface Contest {
+//   id: number;
+//   title: string;
+//   description: string;
+//   startTime: string;
+//   endTime: string;
+//   participantsCount: number;
+//   problemsCount: number;
+//   isRegistered?: boolean;
+//   status: "upcoming" | "active" | "ended";
+// }
 
 // Sample data with more contests and status
-const sampleContests: Contest[] = [
-  {
-    id: 1,
-    title: "Weekly Programming Contest 1",
-    description: "Algorithmic challenges focusing on data structures",
-    startDate: "2024-02-20T15:00:00",
-    endDate: "2024-02-20T17:00:00",
-    participants: 156,
-    problems: 4,
-    isRegistered: true,
-    status: "upcoming",
-  },
-  {
-    id: 2,
-    title: "Dynamic Programming Special",
-    description: "Contest focused on DP problems with increasing difficulty",
-    startDate: "2024-11-05T18:00:00",
-    endDate: "2024-12-25T21:00:00",
-    participants: 89,
-    problems: 6,
-    status: "upcoming",
-  },
-  {
-    id: 3,
-    title: "Graph Theory Challenge",
-    description: "Master graph algorithms and problem-solving",
-    startDate: "2024-12-15T10:00:00",
-    endDate: "2024-12-15T13:00:00",
-    participants: 234,
-    problems: 5,
-    status: "ended",
-  },
-  {
-    id: 4,
-    title: "Graph Theory Challenge",
-    description: "Master graph algorithms and problem-solving",
-    startDate: "2024-12-15T10:00:00",
-    endDate: "2024-12-15T13:00:00",
-    participants: 234,
-    problems: 5,
-    status: "ended",
-  },
-];
+// const sampleContests: Contest[] = [
+//   {
+//     id: 1,
+//     title: "Weekly Programming Contest 1",
+//     description: "Algorithmic challenges focusing on data structures",
+//     startTime: "2024-02-20T15:00:00",
+//     endTime: "2024-02-20T17:00:00",
+//     participantsCount: 156,
+//     problemsCount: 4,
+//     isRegistered: true,
+//     status: "upcoming",
+//   },
+//   {
+//     id: 2,
+//     title: "Dynamic Programming Special",
+//     description:
+//       "Contest focused on DP problemsCount with increasing difficulty",
+//     startTime: "2024-11-05T18:00:00",
+//     endTime: "2024-12-25T21:00:00",
+//     participantsCount: 89,
+//     problemsCount: 6,
+//     status: "upcoming",
+//   },
+//   {
+//     id: 3,
+//     title: "Graph Theory Challenge",
+//     description: "Master graph algorithms and problem-solving",
+//     startTime: "2024-12-15T10:00:00",
+//     endTime: "2024-12-15T13:00:00",
+//     participantsCount: 234,
+//     problemsCount: 5,
+//     status: "ended",
+//   },
+//   {
+//     id: 4,
+//     title: "Graph Theory Challenge",
+//     description: "Master graph algorithms and problem-solving",
+//     startTime: "2024-12-15T10:00:00",
+//     endTime: "2024-12-15T13:00:00",
+//     participantsCount: 234,
+//     problemsCount: 5,
+//     status: "ended",
+//   },
+// ];
 
 // export default function Contests(): JSX.Element {
 //   const [contests, setContests] = useState(sampleContests);
@@ -90,8 +98,8 @@ const sampleContests: Contest[] = [
 //     contest: Contest
 //   ): "upcoming" | "active" | "ended" => {
 //     const now = new Date();
-//     const start = new Date(contest.startDate);
-//     const end = new Date(contest.endDate);
+//     const start = new Date(contest.startTime);
+//     const end = new Date(contest.endTime);
 
 //     if (now < start) return "upcoming";
 //     if (now > end) return "ended";
@@ -115,8 +123,8 @@ const sampleContests: Contest[] = [
 //                 if (statusA === "active" && statusB !== "active") return -1;
 //                 if (statusB === "active" && statusA !== "active") return 1;
 //                 return (
-//                   new Date(a.startDate).getTime() -
-//                   new Date(b.startDate).getTime()
+//                   new Date(a.startTime).getTime() -
+//                   new Date(b.startTime).getTime()
 //                 );
 //               })
 //               .map((contest) => (
@@ -142,39 +150,60 @@ const sampleContests: Contest[] = [
 //   );
 // }
 
-
-
 export default function Contests(): JSX.Element {
-  const [contests, setContests] = useState(sampleContests);
+  // const [contests1, setContests1] = useState(sampleContests);
+  const { contests, setContests } = useContestStore();
+  const { user, accessToken } = useAuthStore();
 
-  const handleRegister = (contestId: number): void => {
-    setContests((prev) =>
-      prev.map((contest) =>
-        contest.id === contestId
-          ? { ...contest, isRegistered: !contest.isRegistered }
-          : contest
-      )
-    );
+  const fetchContests = async () => {
+    try {
+      const contests = await fetchAllContests();
+      setContests(contests);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
-  const getContestStatus = (
-    contest: Contest
-  ): "upcoming" | "active" | "ended" => {
-    const now = new Date();
-    const start = new Date(contest.startDate);
-    const end = new Date(contest.endDate);
+  useEffect(() => {
+    // void fetchContests();
+    void fetchContests();
+  }, []);
 
-    if (now < start) return "upcoming";
-    if (now > end) return "ended";
-    return "active";
+  console.log({ contests }, { user, accessToken }, "zzzz");
+
+  // return <></>;
+  const handleRegister = async (contestId: string): Promise<void> => {
+    console.log("registering...", contestId);
+    await registerForContest(contestId);
+    // setContests((prev) =>
+    //   prev.map((contest) =>
+    //     contest.id === contestId
+    //       ? { ...contest, isRegistered: !contest.isRegistered }
+    //       : contest
+    //   )
+    // );
   };
 
-  const groupedContests = contests.reduce((acc, contest) => {
-    const status = getContestStatus(contest);
-    if (!acc[status]) acc[status] = [];
-    acc[status].push(contest);
-    return acc;
-  }, {} as Record<Contest['status'], Contest[]>);
+  // const getContestStatus = (
+  //   contest: Contest
+  // ): "SCHEDULED" | "ONGOING" | "COMPLETED" => {
+  //   const now = new Date();
+  //   const start = new Date(contest.startTime);
+  //   const end = new Date(contest.endTime);
+
+  //   if (now < start) return "SCHEDULED";
+  //   if (now > end) return "COMPLETED";
+  //   return "ONGOING";
+  // };
+
+  const groupedContests = contests.reduce(
+    (acc, contest) => {
+      if (!acc[contest.status]) acc[contest.status] = [];
+      acc[contest.status].push(contest);
+      return acc;
+    },
+    {} as Record<Contest["status"], Contest[]>
+  );
 
   return (
     <div className="container mx-aut py2 px 4 p-0">
@@ -185,7 +214,7 @@ export default function Contests(): JSX.Element {
 
         <ScrollArea className="h-[calc(100vh-2.25rem)] w-full rounded-md border">
           <div className="space-y-8 p-4">
-            {(['active', 'upcoming', 'ended'] as const).map((status) => (
+            {(["ONGOING", "SCHEDULED", "COMPLETED"] as const).map((status) => (
               <section key={status} className="space-y-4">
                 <h2 className="text-2xl font-semibold capitalize sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-10 py-2">
                   {status} Contests
@@ -193,13 +222,14 @@ export default function Contests(): JSX.Element {
                 {groupedContests[status]?.length ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {groupedContests[status]
-                      ?.sort((a, b) => 
-                        new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+                      ?.sort(
+                        (a, b) =>
+                          new Date(a.startTime).getTime() -
+                          new Date(b.startTime).getTime()
                       )
                       .map((contest) => (
                         <ContestCard
                           contest={contest}
-                          contestStatus={status}
                           handleRegister={handleRegister}
                           key={contest.id}
                         />
@@ -228,23 +258,16 @@ export default function Contests(): JSX.Element {
   );
 }
 
-
-
-
 function ContestCard({
   contest,
-  contestStatus,
   handleRegister,
 }: {
   contest: Contest;
-  contestStatus: "upcoming" | "active" | "ended";
-  handleRegister: (contestId: number) => void;
+  handleRegister: (contestId: string) => void;
 }): JSX.Element {
-  const currentStatus = contestStatus;
-  const canRegister = currentStatus === "upcoming" && !contest.isRegistered;
-  const canEnter =
-    contest.isRegistered &&
-    (currentStatus === "active" || currentStatus === "upcoming");
+  const currentStatus = contest.status;
+  const canRegister = currentStatus === "SCHEDULED" && !contest.isRegistered;
+  const canEnter = contest.isRegistered && currentStatus === "ONGOING";
 
   const getStatusBadge = (status: string) => {
     const statusStyles = {
@@ -277,7 +300,7 @@ function ContestCard({
             <Icons.CalendarDays className="mr-2 h-4 w-4" />
             <span>
               Starts{" "}
-              {new Date(contest.startDate).toLocaleDateString("en-US", {
+              {new Date(contest.startTime).toLocaleDateString("en-US", {
                 day: "numeric",
                 month: "short",
                 hour: "2-digit",
@@ -289,8 +312,8 @@ function ContestCard({
             <Icons.Timer className="mr-2 h-4 w-4" />
             <span>
               Duration:{" "}
-              {(new Date(contest.endDate).getTime() -
-                new Date(contest.startDate).getTime()) /
+              {(new Date(contest.endTime).getTime() -
+                new Date(contest.startTime).getTime()) /
                 (1000 * 60)}{" "}
               minutes
             </span>
@@ -298,11 +321,11 @@ function ContestCard({
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center text-muted-foreground">
               <Icons.Users className="mr-2 h-4 w-4" />
-              <span>{contest.participants} participants</span>
+              <span>{contest.participantsCount} participants</span>
             </div>
             <div className="flex items-center text-muted-foreground">
               <Icons.Trophy className="mr-2 h-4 w-4" />
-              <span>{contest.problems} problems</span>
+              <span>{contest.problemsCount} problems</span>
             </div>
           </div>
           <div className="flex justify-end gap-2 mt-4">
@@ -319,11 +342,16 @@ function ContestCard({
             {canEnter ? (
               <Link href={`/contest/${contest.id}`}>
                 <Button>
-                  {currentStatus === "active" ? "Enter" : "View Details"}
+                  {currentStatus === "ONGOING" ? "Enter" : "View Details"}
                 </Button>
               </Link>
             ) : null}
-            {currentStatus === "ended" && (
+            {contest.isRegistered &&
+            !canEnter &&
+            contest.status === "SCHEDULED" ? (
+              <Button disabled>Enter</Button>
+            ) : null}
+            {currentStatus === "COMPLETED" && (
               <Link href={`/contest/${contest.id}`}>
                 <Button variant="outline">View Results</Button>
               </Link>

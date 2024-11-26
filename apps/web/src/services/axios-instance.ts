@@ -50,9 +50,13 @@ const handleLogout = (): void => {
 };
 
 const refreshAccessToken = async (): Promise<string> => {
+  console.log("refreshing token request...");
   const { data } = await axios.post<RefreshResponse>(
     `${BASE_API_URL}/auth/refresh`,
-    {}
+    {},
+    {
+      withCredentials: true,
+    }
   );
 
   if (!data?.accessToken) {
@@ -66,9 +70,11 @@ const refreshAccessToken = async (): Promise<string> => {
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = useAuthStore.getState().accessToken;
+    console.log("intercepting", token);
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    console.log({ config, token });
     return config;
   },
   (error) => Promise.reject(error)
@@ -81,6 +87,7 @@ api.interceptors.response.use(
     const originalRequest = error.config as InternalAxiosRequestConfig & {
       _retry?: boolean;
     };
+    console.log("Error intercepted...");
 
     // Prevent refresh token loops
     if (originalRequest?.url?.includes("/auth/refresh")) {
@@ -88,8 +95,10 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
+    console.log("not refresh");
     // Handle 401 errors
     if (error.response?.status === 401 && !originalRequest._retry) {
+      console.log("401");
       if (refreshState.isRefreshing) {
         return new Promise((resolve, reject) => {
           refreshState.failedQueue.push({ resolve, reject });

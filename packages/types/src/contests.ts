@@ -1,5 +1,17 @@
 export type ContestStatus = "DRAFT" | "SCHEDULED" | "ONGOING" | "COMPLETED";
 
+export interface ContestState {
+  contests: Contest[];
+  loading: boolean;
+  error: string | null;
+
+  // Actions
+  addProblemToContest: (data: AddProblemToContestDTO) => Promise<void>;
+  removeProblemFromContest: (
+    data: RemoveProblemFromContestDTO
+  ) => Promise<void>;
+}
+
 export interface Contest {
   id: string;
   title: string;
@@ -9,6 +21,9 @@ export interface Contest {
   endTime: Date;
   status: ContestStatus;
   creatorId: string;
+  participantsCount: number;
+  problemsCount: number;
+  isRegistered: boolean;
 }
 
 /**
@@ -31,7 +46,7 @@ export interface CreateContestDTO {
  * DTO for updating a contest
  */
 export type ContestUpdateDTO = Partial<
-  Omit<Contest, "id" | "problems" | "creatorId"> & {
+  Omit<Contest, "id" | "problems" | "creatorId" | "participants"> & {
     allowedDomains?: string[];
     maxParticipants?: number;
   }
@@ -40,15 +55,15 @@ export type ContestUpdateDTO = Partial<
 /**
  * Interface for adding problems to a contest
  */
-export interface AddProblemsToContestDTO {
+export interface AddProblemToContestDTO {
   contestId: string;
-  problemIds: string[]; // IDs of problems to associate with the contest
+  problemIds: string; // IDs of problems to associate with the contest
 }
 
 /**
  * Interface for removing problems from a contest
  */
-export interface RemoveProblemsFromContestDTO {
+export interface RemoveProblemFromContestDTO {
   contestId: string;
-  problemIds: string[]; // IDs of problems to disassociate from the contest
+  problemIds: string; // IDs of problems to disassociate from the contest
 }

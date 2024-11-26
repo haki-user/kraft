@@ -18,7 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 type TestCaseInput = Record<string, string>;
 
 interface TestCase {
-  readonly id: number;
+  readonly id: string;
   input: TestCaseInput[];
   outpt?: string;
 }
@@ -92,7 +92,7 @@ export function ExecutionPanel({
   >("test-cases");
 
   const handleTestCaseInputChange = useCallback(
-    (testCaseId: number, key: string, value: string) => {
+    (testCaseId: string, key: string, value: string) => {
       setTestCases((prevTestCases) =>
         prevTestCases.map((testCase) =>
           testCase.id === testCaseId
@@ -204,11 +204,14 @@ export function ExecutionPanel({
         <SkeletonCard />
       </TabsContent>
       <TabsContent className="w-full h-full" value="test-cases">
-        <Tabs className="w-full h-full p-1" defaultValue="test-case-1">
+        <Tabs
+          className="w-full h-full p-1"
+          defaultValue={`test-case-${testCases[0].id}`}
+        >
           <TabsList>
-            {testCases.map((testCase) => (
+            {testCases.map((testCase, idx) => (
               <TabsTrigger key={testCase.id} value={`test-case-${testCase.id}`}>
-                Case {testCase.id}
+                Case {idx + 1}
               </TabsTrigger>
             ))}
           </TabsList>
@@ -292,7 +295,7 @@ export function ExecutionPanel({
               {executionResult.status !== TestStatus.Error ? (
                 <Tabs
                   className="w-full h-full p-1"
-                  defaultValue="test-result-1"
+                  defaultValue={`test-case-${testCases[0].id}`}
                 >
                   <TabsList>
                     {testResults.map((testResult) => (

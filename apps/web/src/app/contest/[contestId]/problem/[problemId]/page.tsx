@@ -1,3 +1,5 @@
+"use client";
+import { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -18,26 +20,29 @@ import {
 } from "@kraft/ui";
 import Editor from "@/components/editor";
 import { ExecutionPanel } from "@/components/execution-panel";
+import { fetchProblemById } from "@/services/problems-service";
+import type { Problem } from "@kraft/types";
+import type { TestCase } from "@kraft/types";
 
 import "./styles.css";
 
-type TestCaseInput = Record<string, string>;
+// type TestCaseInput = Record<string, string>;
 
-interface TestCase {
-  readonly id: number;
-  input: TestCaseInput[];
-  output?: string;
-}
+// interface TestCase {
+//   readonly id: number;
+//   input: TestCaseInput[];
+//   output?: string;
+// }
 
-interface Problem {
-  readonly id: number;
-  readonly name: string;
-  readonly description: string;
-  // readonly input: string;
-  // readonly output: string;
-  // readonly examples: string;
-  // readonly constraints: string;
-}
+// interface Problem {
+//   readonly id: number;
+//   readonly name: string;
+//   readonly description: string;
+//   // readonly input: string;
+//   // readonly output: string;
+//   // readonly examples: string;
+//   // readonly constraints: string;
+// }
 
 interface Submission {
   id: number;
@@ -99,8 +104,11 @@ const submissions1: Submissions = {
 };
 
 const problem1: Problem = {
-  id: 1,
-  name: "Two Sum",
+  difficulty: "EASY",
+  testCases: [],
+  titleSlug: "two-sum",
+  id: "1",
+  title: "Two Sum",
   description: `<p>Given an array of integers <code>nums</code>&nbsp;and an integer <code>target</code>, return <em>indices of the two numbers such that they add up to <code>target</code></em>.</p>
 
 <p>You may assume that each input would have <strong><em>exactly</em> one solution</strong>, and you may not use the <em>same</em> element twice.</p>
@@ -144,16 +152,16 @@ const problem1: Problem = {
 <strong>Follow-up:&nbsp;</strong>Can you come up with an algorithm that is less than <code>O(n<sup>2</sup>)</code><font face="monospace">&nbsp;</font>time complexity?`,
 };
 
-const initialTestCases: TestCase[] = [
-  {
-    id: 1,
-    input: [{ nums: "1, 2, 3" }, { k: "2" }],
-  },
-  {
-    id: 2,
-    input: [{ nums: "3, 4, 5" }, { nums2: "5, 6, 7, 8" }],
-  },
-];
+// const initialTestCases: TestCase[] = [
+//   {
+//     id: 1,
+//     input: [{ nums: "1, 2, 3" }, { k: "2" }],
+//   },
+//   {
+//     id: 2,
+//     input: [{ nums: "3, 4, 5" }, { nums2: "5, 6, 7, 8" }],
+//   },
+// ];
 
 export default function ProblemPage({
   params,
@@ -161,6 +169,37 @@ export default function ProblemPage({
   params: { contestId: string; problemId: string };
 }): JSX.Element {
   const { problemId } = params;
+  const [problem, setProblem] = useState<Problem>();
+  const [testCases, setTestCases] = useState<TestCase[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchProblem = async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetchProblemById(problemId);
+      console.log({ res });
+      setProblem({
+        title: res.title,
+        description: res.description,
+        testCases: res.testCases,
+        id: res.id,
+        titleSlug: res.titleSlug,
+        difficulty: res.difficulty,
+      });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void fetchProblem();
+  }, []);
+
+  if (!problem) return <div>Error problem not found.</div>;
+  if (isLoading) return <div>Loading...</div>;
+
   return (
     <div>
       <div>
@@ -198,7 +237,7 @@ export default function ProblemPage({
                   <div className="w-full h-[calc(100%-3rem)] mt-2">
                     <ScrollArea className="w-full h-full pr-2">
                       <TabsContent value="problem">
-                        <ProblemSection problemData={problem1} />
+                        <ProblemSection problemData={problem} />
                       </TabsContent>
                       <TabsContent value="submissions">
                         <SubmissionSection />
@@ -230,7 +269,7 @@ export default function ProblemPage({
                 />
                 <ResizablePanel defaultSize={45}>
                   <div className="w-full h-full p-4 pb-0">
-                    <ExecutionPanel initialTestCases={initialTestCases} />
+                    <ExecutionPanel initialTestCases={problem.testCases} />
                   </div>
                 </ResizablePanel>
               </ResizablePanelGroup>
@@ -252,7 +291,7 @@ function ProblemSection({
       <div className="w-full h-full flex flex-col space-y-6">
         <div className="space-y-4">
           <h1 className="text-2xl font-bold dark:text-opacity-90 dark:text-white">
-            {problemData.name}
+            {problemData.title}
           </h1>
           <div
             className="problem-description dark:text-opacity-[60%] dark:text-white"

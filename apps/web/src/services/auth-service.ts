@@ -27,17 +27,18 @@ export const verifyToken = async (): Promise<void> => {
   console.log("verifying...", ct++)
   try {
     const response = await api.post(
-      `${API_BASE_URL}/auth/refresh`,
+      `${API_BASE_URL}/auth/verify-token`,
 
-      {},
-      {
-        headers: {
-          "Skip-Interceptor": "true",
-          "Content-Type": "application/json",
-        },
-      }
+      // {},
+      // {
+      //   headers: {
+      //     // "Skip-Interceptor": "true",
+      //     "Content-Type": "application/json",
+      //   },
+      // }
     );
     const authData = response.data;
+    console.log("new data", authData)
     useAuthStore.getState().login(authData);
   } catch (err) {
   console.log("error verifying...", ct++)

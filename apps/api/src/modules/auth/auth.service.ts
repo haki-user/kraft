@@ -116,3 +116,23 @@ export const refreshAccessToken = async (
     throw new Error("Invalid or expired refresh token");
   }
 };
+
+export const getUserDetails = async (userId: string) => {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      role: true,
+      organizationName: true,
+      organizationDomain: true,
+    },
+  });
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  return user;
+};

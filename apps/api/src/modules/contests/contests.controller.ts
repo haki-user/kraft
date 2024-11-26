@@ -2,19 +2,22 @@ import { Request, Response } from "express";
 import {
   createContest,
   getAllContests,
-  getContestsByAllowedDomain,
-  getPaginatedContests,
-  getAllUpcomingContests,
-  getContestsByDateRange,
+  // getContestsByAllowedDomain,
+  // getPaginatedContests,
+  // getAllUpcomingContests,
+  // getContestsByDateRange,
   getContestById,
+  getContestProblemDetails,
   addProblemToContest,
   removeProblemFromContest,
   registerUserForContest,
-  getContestsCreatedByUser,
-  getContestsUserParticipating,
+  // getContestsCreatedByUser,
+  // getContestsUserParticipating,
   updateContest,
   deleteContest,
+  getAllContestsForUser,
 } from "./contests.service"; // Import service functions
+import { Contest } from "@kraft/types";
 
 /**
  * Create a new contest
@@ -51,87 +54,87 @@ export const getAllContestsHandler = async (req: Request, res: Response) => {
 /**
  * Get contests by allowed domain
  */
-export const getContestsByDomainHandler = async (
-  req: Request,
-  res: Response
-) => {
-  const { domain } = req.query as { domain: string };
-  try {
-    const contests = await getContestsByAllowedDomain(domain);
-    res.status(200).json(contests);
-  } catch (error) {
-    if (error instanceof Error) {
-      res.status(500).json({ message: error.message });
-    } else {
-      res.status(500).json({ message: "An unknown error occurred." });
-    }
-  }
-};
+// export const getContestsByDomainHandler = async (
+//   req: Request,
+//   res: Response
+// ) => {
+//   const { domain } = req.query as { domain: string };
+//   try {
+//     const contests = await getContestsByAllowedDomain(domain);
+//     res.status(200).json(contests);
+//   } catch (error) {
+//     if (error instanceof Error) {
+//       res.status(500).json({ message: error.message });
+//     } else {
+//       res.status(500).json({ message: "An unknown error occurred." });
+//     }
+//   }
+// };
 
 /**
  * Get paginated contests
  */
-export const getPaginatedContestsHandler = async (
-  req: Request,
-  res: Response
-) => {
-  const { page = 1, pageSize = 10 } = req.query;
-  try {
-    const { contests, totalCount, totalPages } = await getPaginatedContests(
-      parseInt(page as string),
-      parseInt(pageSize as string)
-    );
-    res.status(200).json({ contests, totalCount, totalPages });
-  } catch (error) {
-    if (error instanceof Error) {
-      res.status(500).json({ message: error.message });
-    } else {
-      res.status(500).json({ message: "An unknown error occurred." });
-    }
-  }
-};
+// export const getPaginatedContestsHandler = async (
+//   req: Request,
+//   res: Response
+// ) => {
+//   const { page = 1, pageSize = 10 } = req.query;
+//   try {
+//     const { contests, totalCount, totalPages } = await getPaginatedContests(
+//       parseInt(page as string),
+//       parseInt(pageSize as string)
+//     );
+//     res.status(200).json({ contests, totalCount, totalPages });
+//   } catch (error) {
+//     if (error instanceof Error) {
+//       res.status(500).json({ message: error.message });
+//     } else {
+//       res.status(500).json({ message: "An unknown error occurred." });
+//     }
+//   }
+// };
 
 /**
  * Get all upcoming contests
  */
-export const getUpcomingContestsHandler = async (
-  _req: Request,
-  res: Response
-) => {
-  try {
-    const contests = await getAllUpcomingContests();
-    res.status(200).json(contests);
-  } catch (error) {
-    if (error instanceof Error) {
-      res.status(500).json({ message: error.message });
-    } else {
-      res.status(500).json({ message: "An unknown error occurred." });
-    }
-  }
-};
+// export const getUpcomingContestsHandler = async (
+//   _req: Request,
+//   res: Response
+// ) => {
+//   try {
+//     const contests = await getAllUpcomingContests();
+//     res.status(200).json(contests);
+//   } catch (error) {
+//     if (error instanceof Error) {
+//       res.status(500).json({ message: error.message });
+//     } else {
+//       res.status(500).json({ message: "An unknown error occurred." });
+//     }
+//   }
+// };
 
 /**
  * Get contests by date range
  */
-export const getContestsByDateRangeHandler = async (
-  req: Request,
-  res: Response
-) => {
-  const { start, end } = req.query as { start: string; end: string };
-  try {
-    const contests = await getContestsByDateRange(
-      new Date(start),
-      new Date(end)
-    );
-    res.status(200).json(contests);
-  } catch (error) {
-    if (error instanceof Error) {
-      res.status(500).json({ message: error.message });
-    } else {
-      res.status(500).json({ message: "An unknown error occurred." });
-    }
-  }
-};
+// export const getContestsByDateRangeHandler = async (
+//   req: Request,
+//   res: Response
+// ) => {
+//   const { start, end } = req.query as { start: string; end: string };
+//   try {
+//     const contests = await getContestsByDateRange(
+//       new Date(start),
+//       new Date(end)
+//     );
+//     res.status(200).json(contests);
+//   } catch (error) {
+//     if (error instanceof Error) {
+//       res.status(500).json({ message: error.message });
+//     } else {
+//       res.status(500).json({ message: "An unknown error occurred." });
+//     }
+//   }
+// };
 
 /**
  * Get a contest by ID
@@ -155,15 +158,36 @@ export const getContestByIdHandler = async (req: Request, res: Response) => {
 };
 
 /**
+ * Get problems by contest Id
+ */
+export const getContestProblemDetailsHandler = async (
+  req: Request,
+  res: Response
+) => {
+  const { id } = req.params;
+  const user = req.user;
+  try {
+    const problems = await getContestProblemDetails(id, user?.id);
+    res.status(200).json(problems);
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(500).json({ message: error.message });
+    } else {
+      res.status(500).json({ message: "An unknown error occurred." });
+    }
+  }
+};
+
+/**
  * Add a problem to a contest
  */
 export const addProblemToContestHandler = async (
   req: Request,
   res: Response
 ) => {
-  const { contestId, problemId } = req.body;
+  const { contestId, problemId, points } = req.body;
   try {
-    await addProblemToContest(contestId, problemId);
+    await addProblemToContest(contestId, problemId, points);
     res.status(200).json({ message: "Problem added to contest successfully." });
   } catch (error) {
     if (error instanceof Error) {
@@ -203,9 +227,14 @@ export const registerUserForContestHandler = async (
   req: Request,
   res: Response
 ) => {
-  const { contestId, userId } = req.body;
+  const { contestId } = req.body;
+  const user = req.user;
+  if (!user) {
+    res.sendStatus(400);
+    return;
+  }
   try {
-    await registerUserForContest(contestId, userId);
+    await registerUserForContest(contestId, user.id);
     res
       .status(200)
       .json({ message: "User registered for contest successfully." });
@@ -221,42 +250,42 @@ export const registerUserForContestHandler = async (
 /**
  * Get contests created by a user
  */
-export const getContestsCreatedByUserHandler = async (
-  req: Request,
-  res: Response
-) => {
-  const { creatorId } = req.params;
-  try {
-    const contests = await getContestsCreatedByUser(creatorId);
-    res.status(200).json(contests);
-  } catch (error) {
-    if (error instanceof Error) {
-      res.status(500).json({ message: error.message });
-    } else {
-      res.status(500).json({ message: "An unknown error occurred." });
-    }
-  }
-};
+// export const getContestsCreatedByUserHandler = async (
+//   req: Request,
+//   res: Response
+// ) => {
+//   const { creatorId } = req.params;
+//   try {
+//     const contests = await getContestsCreatedByUser(creatorId);
+//     res.status(200).json(contests);
+//   } catch (error) {
+//     if (error instanceof Error) {
+//       res.status(500).json({ message: error.message });
+//     } else {
+//       res.status(500).json({ message: "An unknown error occurred." });
+//     }
+//   }
+// };
 
 /**
  * Get contests a user is participating in
  */
-export const getContestsUserParticipatingHandler = async (
-  req: Request,
-  res: Response
-) => {
-  const { userId } = req.params;
-  try {
-    const contests = await getContestsUserParticipating(userId);
-    res.status(200).json(contests);
-  } catch (error) {
-    if (error instanceof Error) {
-      res.status(500).json({ message: error.message });
-    } else {
-      res.status(500).json({ message: "An unknown error occurred." });
-    }
-  }
-};
+// export const getContestsUserParticipatingHandler = async (
+//   req: Request,
+//   res: Response
+// ) => {
+//   const { userId } = req.params;
+//   try {
+//     const contests = await getContestsUserParticipating(userId);
+//     res.status(200).json(contests);
+//   } catch (error) {
+//     if (error instanceof Error) {
+//       res.status(500).json({ message: error.message });
+//     } else {
+//       res.status(500).json({ message: "An unknown error occurred." });
+//     }
+//   }
+// };
 
 /**
  * Update a contest
@@ -283,6 +312,27 @@ export const deleteContestHandler = async (req: Request, res: Response) => {
   try {
     await deleteContest(id);
     res.status(200).json({ message: "Contest deleted successfully." });
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(500).json({ message: error.message });
+    } else {
+      res.status(500).json({ message: "An unknown error occurred." });
+    }
+  }
+};
+
+/**
+ * Get all contests for user
+ */
+export const getAllContestsForUserHandler = async (
+  req: Request,
+  res: Response
+) => {
+  const user = req.user;
+  console.log({ user });
+  try {
+    const contests = await getAllContestsForUser(user?.id);
+    res.json(contests);
   } catch (error) {
     if (error instanceof Error) {
       res.status(500).json({ message: error.message });

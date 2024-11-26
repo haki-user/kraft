@@ -1,4 +1,5 @@
-// "use client"
+"use client";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   // cn,
@@ -14,87 +15,11 @@ import {
   // Button,
   // Skeleton,
 } from "@kraft/ui";
-
-const tasksList1: Task[] = [
-  {
-    id: "1",
-    name: "Two Sum",
-    points: 100,
-    status: "pending",
-  },
-  {
-    id: "2",
-    name: "Valid Parentheses",
-    points: 200,
-    status: "pass",
-  },
-  {
-    id: "3",
-    name: "Merge Sorted Lists",
-    points: 300,
-    status: "pending",
-  },
-  {
-    id: "4",
-    name: "Binary Search",
-    points: 400,
-    status: "pending",
-  },
-  {
-    id: "5",
-    name: "Maximum Subarray",
-    points: 500,
-    status: "pending",
-  },
-  {
-    id: "6",
-    name: "Longest Palindrome",
-    points: 600,
-    status: "pending",
-  },
-  {
-    id: "7",
-    name: "Course Schedule",
-    points: 700,
-    status: "pending",
-  },
-  {
-    id: "8",
-    name: "Word Break",
-    points: 800,
-    status: "pending",
-  },
-  {
-    id: "9",
-    name: "Trapping Rain Water",
-    points: 900,
-    status: "fail",
-  },
-  {
-    id: "10",
-    name: "Median of Arrays",
-    points: 1000,
-    status: "pending",
-  },
-  // {
-  //   id: "11",
-  //   name: "Median of Arrays",
-  //   points: 1000,
-  //   status: "pending",
-  // },
-  // {
-  //   id: "12",
-  //   name: "Median of Arrays",
-  //   points: 1000,
-  //   status: "fail",
-  // },
-  // {
-  //   id: "13",
-  //   name: "Median of Arrays",
-  //   points: 1000,
-  //   status: "pending",
-  // },
-];
+import { fetchContestProblemDetails } from "@/services/contests-service";
+import { ContestProblem } from "@kraft/types";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
+import { AxiosError } from "axios";
 
 export default function Contest({
   params,
@@ -102,6 +27,40 @@ export default function Contest({
   params: { contestId: string };
 }): JSX.Element {
   const { contestId } = params;
+  const [contestProblems, setContestProblems] = useState<
+    (ContestProblem & { status: "pass" | "fail" | "pending" })[]
+  >([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+  const { toast } = useToast();
+
+  const fetchTaskList = async () => {
+    setIsLoading(true);
+    try {
+      const response = (await fetchContestProblemDetails(
+        contestId
+      )) as (ContestProblem & { status: "pass" | "fail" | "pending" })[];
+      response.forEach((task) => (task.status = "pending"));
+      setContestProblems(response);
+    } catch (error) {
+      console.error("Error fetching task list:", error);
+      if (error instanceof AxiosError) {
+        toast({
+          title: "Failed to fetch the contest.",
+          description: `Failed to fetch contest: ${error?.response?.data.message}`,
+          variant: "destructive",
+        });
+        router.replace("/contest");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void fetchTaskList();
+  }, []);
+
   return (
     <div>
       <div>
@@ -112,7 +71,7 @@ export default function Contest({
             <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
           </TabsList>
           <TabsContent value="tasks">
-            <Tasks contestId={contestId} tasksList={tasksList1} />
+            <Tasks contestId={contestId} tasksList={contestProblems} />
           </TabsContent>
         </Tabs>
       </div>
@@ -120,20 +79,11 @@ export default function Contest({
   );
 }
 
-// Define Task interface with descriptive comments
-interface Task {
-  id: string; // Unique identifier for the task
-  name: string; // Display name of the task
-  points: number; // Points awarded for completing the task
-  status: "pass" | "fail" | "pending"; // Current completion status
-}
-
-// Component to display a list of tasks with scrolling
 function Tasks({
   tasksList = [],
   contestId,
 }: {
-  tasksList: Task[];
+  tasksList: (ContestProblem & { status: "pass" | "fail" | "pending" })[];
   contestId: string;
 }): JSX.Element {
   return (
@@ -157,7 +107,7 @@ function Tasks({
 }
 
 interface TaskItemProps {
-  task: Task;
+  task: ContestProblem & { status: "pass" | "fail" | "pending" };
   contestId: string;
   index: number;
   isLast: boolean;
@@ -202,7 +152,7 @@ function TaskItem({
               <h3
                 className={`font-semibold leading-none tracking-tight ${task.status === "pending" ? "group-hover:text-primary" : ""} ${task.status === "fail" ? "text-destructive" : task.status === "pass" && "text-green-500 dark:text-green-500/50"}`}
               >
-                {task.name}
+                {task.title}
               </h3>
               {/* <p className="text-sm text-muted-foreground">
                 Problem {task.id}

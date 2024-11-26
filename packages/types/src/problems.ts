@@ -6,14 +6,22 @@ export interface Problem {
   titleSlug: string;
   description: string;
   difficulty: ProblemDifficulty;
-  isPublic: boolean;
   testCases: TestCase[]; // Test cases for this problem
+}
+
+export interface ContestProblem {
+  id: string;
+  title: string;
+  titleSlug: string;
+  difficulty: ProblemDifficulty;
+  points: number;
+  isSolved: boolean;
 }
 
 export interface TestCase {
   id: string;
   isPublic: boolean;
-  input: string;
+  input: Record<string, string>[];
   problemId: string;
   expectedOutput: string;
 }

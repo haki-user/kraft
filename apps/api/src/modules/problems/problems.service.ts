@@ -1,4 +1,5 @@
 // import { promise } from "zod";
+import { ProblemDifficulty } from "@prisma/client";
 import prisma from "../../lib/prisma";
 import type {
   Problem,
@@ -8,6 +9,26 @@ import type {
   ProblemUpdateDTO,
   UpdateTestCaseDTO,
 } from "@kraft/types";
+import test from "node:test";
+
+const getParsedTestCaseInputProblems = (
+  problems: (Omit<Problem, "testCases"> & {
+    testCases: (Omit<TestCase, "input"> & { input: string })[];
+  })[]
+): Problem[] => {
+  const parsed = problems.map((problem) => {
+    return {
+      ...problem,
+      testCases: problem.testCases.map((testCase) => {
+        return {
+          ...testCase,
+          input: JSON.parse(testCase.input as unknown as string),
+        };
+      }),
+    };
+  });
+  return parsed;
+};
 
 export const getAllProblemsData = async () => {
   const problems = await prisma.problem.findMany({
@@ -70,7 +91,7 @@ export const getAllProblems = async (): Promise<Problem[]> => {
       },
     },
   }); // prisma and typescript enums mismatch issue
-  return problems;
+  return getParsedTestCaseInputProblems(problems);
 };
 
 export const getProblemById = async (id: string): Promise<Problem | null> => {
@@ -86,7 +107,8 @@ export const getProblemById = async (id: string): Promise<Problem | null> => {
       },
     },
   });
-  return problem;
+  if (!problem) return null;
+  return getParsedTestCaseInputProblems([problem])[0];
 };
 
 export const createProblem = async (problem: CreateProblemDTO) => {
@@ -95,7 +117,12 @@ export const createProblem = async (problem: CreateProblemDTO) => {
     data: {
       ...problem,
       testCases: {
-        create: problem.testCases,
+        create: problem.testCases.map((testCase) => {
+          return {
+            ...testCase,
+            input: JSON.stringify(testCase.input),
+          };
+        }),
       },
     },
     include: {
@@ -135,7 +162,13 @@ export const getAllTestCasesByProblemId = async (
       problemId,
     },
   });
-  return testCases;
+  if (!testCases) return [];
+  return testCases.map((testCase) => {
+    return {
+      ...testCase,
+      input: JSON.parse(testCase.input as unknown as string),
+    };
+  });
 };
 
 export const getAllPublicTestCasesByProblemId = async (
@@ -147,7 +180,12 @@ export const getAllPublicTestCasesByProblemId = async (
       isPublic: true,
     },
   });
-  return testCases;
+  return testCases.map((testCase) => {
+    return {
+      ...testCase,
+      input: JSON.parse(testCase.input as unknown as string),
+    };
+  });
 };
 
 export const createTestCases = async ({
@@ -157,6 +195,7 @@ export const createTestCases = async ({
   const data = testCases.map((testCase) => ({
     ...testCase,
     problemId,
+    input: JSON.stringify(testCase.input),
   }));
   const newTestCases = await prisma.testCase.createMany({
     data: data,

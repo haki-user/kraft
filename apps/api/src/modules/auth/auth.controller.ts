@@ -71,3 +71,30 @@ export const logout = async (req: Request, res: Response) => {
 
   res.status(200).json({ message: "Logged out successfully" });
 };
+
+export const getUserDetails = async (req: Request, res: Response) => {
+  try {
+    const userId = req?.user?.id;
+    if (!userId) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+    const userDetails = await AuthService.getUserDetails(userId);
+    res.status(200).json(userDetails);
+  } catch (error) {
+    res.status(404).json({ message: "User not found" });
+  }
+};
+
+export const verifyToken = async (req: Request, res: Response) => {
+  try {
+    const user = req.user;
+    if (!user) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(401).json({ message: "Invalid token" });
+  }
+};
