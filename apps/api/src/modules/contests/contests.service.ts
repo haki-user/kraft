@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import prisma from "../../lib/prisma";
 import type {
   ContestUpdateDTO,
   CreateContestDTO,
@@ -6,8 +6,6 @@ import type {
   Problem,
   ContestProblem,
 } from "@kraft/types";
-
-const prisma = new PrismaClient();
 
 /**
  * Create a new contest

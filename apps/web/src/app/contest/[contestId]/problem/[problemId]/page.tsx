@@ -21,7 +21,20 @@ import {
 import Editor from "@/components/editor";
 import { ExecutionPanel } from "@/components/execution-panel";
 import { fetchProblemById } from "@/services/problems-service";
-import type { Problem } from "@kraft/types";
+import {
+  createSubmission,
+  executeTestRun,
+  getSubmissionsForProblem,
+} from "@/services/submissions-service";
+import type {
+  CreateSubmissionDTO,
+  ExecutorResult,
+  Problem,
+  SubmissionResult,
+  TestRunResult,
+  Submission,
+  Submissions,
+} from "@kraft/types";
 import type { TestCase } from "@kraft/types";
 
 import "./styles.css";
@@ -44,56 +57,56 @@ import "./styles.css";
 //   // readonly constraints: string;
 // }
 
-interface Submission {
-  id: number;
-  problemId: number;
-  userId: string;
-  code: string;
-  language: string;
-  status: "accepted" | "wrong_answer" | "runtime_error" | "time_limit_exceeded";
-  runtime: number;
-  memory: number;
-  timestamp: number; // Unix timestamp for better performance
-}
+// interface Submission {
+//   id: number;
+//   problemId: number;
+//   userId: string;
+//   code: string;
+//   language: string;
+//   status: "ACCEPTED" | "WRONG_ANSWER" | "RUNTIME_ERROR" | "time_limit_exceeded";
+//   runtime: number;
+//   memory: number;
+//   timestamp: number; // Unix timestamp for better performance
+// }
 
-interface Submissions {
-  // readonly solved: boolean;
-  readonly submissions: readonly Submission[];
-  readonly totalCount: number;
-  readonly acceptedCount: number;
-}
+// interface Submissions {
+//   // readonly solved: boolean;
+//   readonly submissions: readonly Submission[];
+//   readonly totalCount: number;
+//   readonly acceptedCount: number;
+// }
 
 const submissions1: Submissions = {
   submissions: [
     {
-      id: 1,
-      problemId: 1,
+      id: "1",
+      problemId: "1",
       userId: "user123",
       code: "function twoSum(nums: number[], target: number): number[] {...}",
       language: "typescript",
-      status: "accepted",
+      status: "ACCEPTED",
       runtime: 76,
       memory: 42.3,
       timestamp: 1703116800000,
     },
     {
-      id: 2,
-      problemId: 1,
+      id: "2",
+      problemId: "1",
       userId: "user123",
       code: "function twoSum(nums: number[], target: number): number[] {...}",
       language: "typescript",
-      status: "wrong_answer",
+      status: "WRONG_ANSWER",
       runtime: 82,
       memory: 43.1,
       timestamp: 1703116700000,
     },
     {
-      id: 3,
-      problemId: 1,
+      id: "3",
+      problemId: "1",
       userId: "user123",
       code: "function twoSum(nums: number[], target: number): number[] {...}",
       language: "typescript",
-      status: "runtime_error",
+      status: "RUNTIME_ERROR",
       runtime: 0,
       memory: 0,
       timestamp: 1703116600000,
@@ -168,10 +181,15 @@ export default function ProblemPage({
 }: {
   params: { contestId: string; problemId: string };
 }): JSX.Element {
-  const { problemId } = params;
+  const { problemId, contestId } = params;
   const [problem, setProblem] = useState<Problem>();
   const [testCases, setTestCases] = useState<TestCase[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const languages = ["C++", "JavaScript", "TypeScript", "Go", "Python"];
+  const [activeLanguage, setActiveLanguage] = useState("JavaScript");
+  const [code, setCode] = useState<string>("");
+  const [submissions, setSubmissions] = useState<Submissions>(submissions1);
+  const [activeTab, setActiveTab] = useState("problem");
 
   const fetchProblem = async () => {
     setIsLoading(true);
@@ -193,6 +211,56 @@ export default function ProblemPage({
     }
   };
 
+  const handleTestRun = async (
+    testCases: TestCase[]
+  ): Promise<ExecutorResult | null> => {
+    try {
+      const res = await executeTestRun({
+        code,
+        language: activeLanguage,
+        problemId,
+        testCases,
+      });
+      console.log({ res });
+
+      return res;
+    } catch (err) {
+      console.error(err);
+      return null;
+    }
+  };
+  const handleSubmission = async () // data: Omit<CreateSubmissionDTO, "userId">
+  : Promise<SubmissionResult | null> => {
+    try {
+      const res = await createSubmission({
+        problemId,
+        contestId,
+        code,
+        language: activeLanguage,
+      });
+      console.log({ res }, "submission...");
+      await handleFetchSubmissoins();
+      return res;
+    } catch (e) {
+      console.log(e);
+      return null;
+    }
+  };
+
+  const handleFetchSubmissoins = async () => {
+    try {
+      const res = await getSubmissionsForProblem(problemId, contestId);
+      // const cleaned = res.map((submission) => ({
+      //   status: submission.status,
+      //   runtime: submission.runtime,
+      // }));
+      setSubmissions(res);
+      setActiveTab("submissions");
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   useEffect(() => {
     void fetchProblem();
   }, []);
@@ -211,13 +279,27 @@ export default function ProblemPage({
           >
             <ResizablePanel className="w-full h-full" defaultSize={50}>
               <div className="p-5 pr-0 pb-0 w-full h-full">
-                <Tabs className="w-full h-full" defaultValue="problem">
+                <Tabs
+                  className="w-full h-full"
+                  defaultValue="problem"
+                  value={activeTab}
+                >
                   <div className="flex justify-between items-center w-full pr-5">
                     <TabsList>
-                      <TabsTrigger value="problem">Problem</TabsTrigger>
-                      <TabsTrigger value="submissions">Submissions</TabsTrigger>
+                      <TabsTrigger
+                        value="problem"
+                        onClick={() => setActiveTab("problem")}
+                      >
+                        Problem
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="submissions"
+                        onClick={() => setActiveTab("submissions")}
+                      >
+                        Submissions
+                      </TabsTrigger>
                     </TabsList>
-                    {submissions1.acceptedCount > 0 ? (
+                    {submissions.acceptedCount > 0 ? (
                       // <div className="text-primary-foreground bg-primary shadow-md shadow-secondary px-2.5 rounded-md text-sm">
                       <Badge className="bg-primary dark:bg-primary dark:text-opacity-[87%]">
                         Solved
@@ -225,7 +307,7 @@ export default function ProblemPage({
                     ) : (
                       // Solved
                       // </div>
-                      submissions1.totalCount > 0 && (
+                      submissions.totalCount > 0 && (
                         // <div className="text-primary-foreground bg-orange-500 dark:text-opacity-[87%] shadow-md shadow-secondary px-2.5 rounded-md">
                         <Badge className="text-primary-foreground bg-orange-500 dark:text-opacity-[87%] shadow-md shadow-secondary">
                           Attempted
@@ -240,7 +322,7 @@ export default function ProblemPage({
                         <ProblemSection problemData={problem} />
                       </TabsContent>
                       <TabsContent value="submissions">
-                        <SubmissionSection />
+                        <SubmissionSection allSubmissions={submissions} />
                       </TabsContent>
                       <ScrollBar orientation="vertical" />
                     </ScrollArea>
@@ -260,7 +342,13 @@ export default function ProblemPage({
               >
                 <ResizablePanel defaultSize={55}>
                   <div className="w-full h-full">
-                    <Editor />
+                    <Editor
+                      code={code}
+                      setCode={setCode}
+                      languages={languages}
+                      activeLanguage={activeLanguage}
+                      setActiveLanguage={setActiveLanguage}
+                    />
                   </div>
                 </ResizablePanel>
                 <ResizableHandle
@@ -269,7 +357,11 @@ export default function ProblemPage({
                 />
                 <ResizablePanel defaultSize={45}>
                   <div className="w-full h-full p-4 pb-0">
-                    <ExecutionPanel initialTestCases={problem.testCases} />
+                    <ExecutionPanel
+                      initialTestCases={problem.testCases}
+                      handleTestRun={handleTestRun}
+                      handleSubmission={handleSubmission}
+                    />
                   </div>
                 </ResizablePanel>
               </ResizablePanelGroup>
@@ -303,20 +395,24 @@ function ProblemSection({
   );
 }
 
-function SubmissionSection(): JSX.Element {
+function SubmissionSection({
+  allSubmissions,
+}: {
+  allSubmissions: Submissions;
+}): JSX.Element {
   const formatDate = (timestamp: number) => {
     return new Date(timestamp).toLocaleString();
   };
 
   const getStatusBadgeClass = (status: Submission["status"]) => {
     switch (status) {
-      case "accepted":
+      case "ACCEPTED":
         return "bg-green-500/20 text-green-500 dark:bg-green-500/10";
-      case "wrong_answer":
+      case "WRONG_ANSWER":
         return "bg-red-500/20 text-red-500 dark:bg-red-500/10";
-      case "runtime_error":
+      case "RUNTIME_ERROR":
         return "bg-orange-500/20 text-orange-500 dark:bg-orange-500/10";
-      case "time_limit_exceeded":
+      case "TIME_LIMIT_EXCEEDED":
         return "bg-yellow-500/20 text-yellow-500 dark:bg-yellow-500/10";
       default:
         return "bg-gray-500/20 text-gray-500 dark:bg-gray-500/10";
@@ -344,11 +440,11 @@ function SubmissionSection(): JSX.Element {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {submissions1.submissions.map((submission) => (
+            {allSubmissions.submissions.map((submission) => (
               <TableRow key={submission.id}>
                 <TableCell>
                   <span
-                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClass(
+                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-nowrap ${getStatusBadgeClass(
                       submission.status
                     )}`}
                   >
@@ -373,8 +469,8 @@ function SubmissionSection(): JSX.Element {
         </Table>
       </div>
       <div className="text-sm text-muted-foreground">
-        Total Submissions: {submissions1.totalCount} | Accepted:{" "}
-        {submissions1.acceptedCount}
+        Total Submissions: {allSubmissions.totalCount} | Accepted:{" "}
+        {allSubmissions.acceptedCount}
       </div>
     </div>
   );

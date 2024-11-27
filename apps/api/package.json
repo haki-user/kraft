@@ -17,6 +17,7 @@
   "dependencies": {
     "@kraft/logger": "workspace:*",
     "@prisma/client": "^5.22.0",
+    "@types/cookie-parser": "^1.4.8",
     "@types/cors": "^2.8.17",
     "@types/morgan": "^1.9.9",
     "bcryptjs": "^2.4.3",

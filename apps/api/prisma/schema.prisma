@@ -73,7 +73,7 @@ model ContestProblem {
   problemId String
   problem   Problem @relation(fields: [problemId], references: [id])
 
-  points    Int
+  points Int
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -97,6 +97,7 @@ model Contest {
 
   contestProblems ContestProblem[] // Many-to-many relationship
   participants    ContestParticipation[]
+  Submission      Submission[]
 }
 
 model Problem {
@@ -147,9 +148,14 @@ model Submission {
   id       String @id @default(uuid())
   code     String
   language String
+  runtime  Float  @default(0)
+  memory   Float  @default(0)
 
   userId String
   user   User   @relation(fields: [userId], references: [id])
+
+  contestId String?
+  contest   Contest? @relation(fields: [contestId], references: [id])
 
   problemId String
   problem   Problem @relation(fields: [problemId], references: [id])

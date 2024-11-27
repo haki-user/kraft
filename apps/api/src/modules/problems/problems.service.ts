@@ -9,7 +9,6 @@ import type {
   ProblemUpdateDTO,
   UpdateTestCaseDTO,
 } from "@kraft/types";
-import test from "node:test";
 
 const getParsedTestCaseInputProblems = (
   problems: (Omit<Problem, "testCases"> & {

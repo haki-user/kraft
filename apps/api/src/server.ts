@@ -8,6 +8,7 @@ import { errorHandler } from "./middlewares/errorHandler";
 import authRoutes from "./modules/auth/auth.routes";
 import problemsRoutes from "./modules/problems/problems.routes";
 import contestsRoutes from "./modules/contests/contests.routes";
+import submissionRoutes from "./modules/submissions/submissions.routes";
 
 export const createServer = (): Express => {
   const app = express();
@@ -28,6 +29,7 @@ export const createServer = (): Express => {
     .use("/api/auth", authRoutes)
     .use("/api/problems/", problemsRoutes)
     .use("/api/contests", contestsRoutes)
+    .use("/api/submissions", submissionRoutes)
     .get("/status", (_, res) => {
       res.json({ ok: true });
     })

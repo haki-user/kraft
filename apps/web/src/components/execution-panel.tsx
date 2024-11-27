@@ -14,39 +14,48 @@ import {
   Skeleton,
 } from "@kraft/ui";
 import { useToast } from "@/hooks/use-toast";
+import type {
+  CreateSubmissionDTO,
+  ExecutorResult,
+  SubmissionResult,
+  SubmissionStatus,
+  TestCase,
+  TestRunResult,
+} from "@kraft/types";
 
 type TestCaseInput = Record<string, string>;
 
-interface TestCase {
-  readonly id: string;
-  input: TestCaseInput[];
-  outpt?: string;
-}
+// interface TestCase {
+//   readonly id: string;
+//   input: TestCaseInput[];
+//   outpt?: string;
+// }
 
 interface ExecutionPanelProps {
+  handleTestRun: (testCases: TestCase[]) => Promise<ExecutorResult | null>;
+  handleSubmission: (
+    // data: Omit<CreateSubmissionDTO, "userId">
+  ) => Promise<SubmissionResult | null>;
   initialTestCases: TestCase[];
 }
 
-enum TestStatus {
-  Pass = "pass",
-  Fail = "fail",
-  Error = "error",
-}
+type TestStatus = SubmissionStatus;
 
-interface TestResult {
-  readonly id: number;
-  readonly message?: string;
-  readonly status: TestStatus;
-  readonly output?: string;
-  readonly stderr?: string;
-  readonly input: TestCaseInput[];
-  // readonly stdout?: string;
-}
+// interface TestResult {
+//   readonly id: number;
+//   readonly message?: string;
+//   readonly status: TestStatus;
+//   readonly output?: string;
+//   readonly stderr?: string;
+//   readonly input: TestCaseInput[];
+//   // readonly stdout?: string;
+// }
 
 interface ExecutionResult {
   status: TestStatus;
   message: string;
   output: string;
+  stderr?: string;
 }
 
 // type ExecutionState = {
@@ -56,31 +65,34 @@ interface ExecutionResult {
 // };
 
 export function ExecutionPanel({
+  handleTestRun,
+  handleSubmission,
   initialTestCases,
 }: ExecutionPanelProps): JSX.Element {
   const [testCases, setTestCases] = useState<TestCase[]>(initialTestCases);
-  const [testResults, setTestResults] = useState<TestResult[]>([
-    {
-      id: 1,
-      status: TestStatus.Pass,
-      output: `Hello World
-      HHello Worldello World
-      HHello Worldello World \n
-      HHello Worldello World
-      HHello Worldello World \n
-      HHello Worldello World
-      HHello Worldello World
-      HHello Worldello World
-      `,
-      input: [
-        {
-          nums: "Hello World",
-        },
-        { n: "5" },
-      ],
-    },
+  const [testResults, setTestResults] = useState<TestRunResult[]>([
+    // {
+    //   id: 1,
+    //   status: TestStatus.Pass,
+    //   output: `Hello World
+    //   HHello Worldello World
+    //   HHello Worldello World \n
+    //   HHello Worldello World
+    //   HHello Worldello World \n
+    //   HHello Worldello World
+    //   HHello Worldello World
+    //   HHello Worldello World
+    //   `,
+    //   input: [
+    //     {
+    //       nums: "Hello World",
+    //     },
+    //     { n: "5" },
+    //   ],
+    // },
   ]);
   const { toast } = useToast();
+  // const handleRun = ()
   useEffect(() => {
     setTestResults([]);
   }, []);
@@ -111,47 +123,41 @@ export function ExecutionPanel({
     []
   );
 
-  const handleRun = (): void => {
-    setActiveTab("skeleton");
+  const handleRun = async (): Promise<void> => {
     setIsExecuting(true);
-    // Simulate running test cases
-    setTimeout(() => {
-      setIsExecuting(false);
-      setActiveTab("test-results");
-      setExecutionResult({
-        status: TestStatus.Error,
-        message: "Runtime Error",
-        output: "Hello World \n worl \n world \n",
-      });
-      if (testResults.length > 5) return;
-      setTestResults((prevTestResults) => [
-        ...prevTestResults,
-        {
-          id: prevTestResults.length + 1,
-          status: TestStatus.Pass,
-          input: [
-            {
-              nums: "Hello World",
-            },
-            { n: "5" },
-          ],
-          output: `Hello`,
-          stderr: "World",
-        },
-      ]);
-      toast({
-        title: "Error",
-        description: "Failed to run",
-        variant: "destructive",
-      });
-    }, 5000);
+    setActiveTab("skeleton");
+    // const res = await handleTestRun(testCases);
+    // console.log({ res }, "zzz");
+    // setTestResults(res);
+    // setExecutionResult({
+    //   status: res.status,
+    //   message: "",
+    //   output: "",
+    // });
+    const res: ExecutorResult | null = await handleTestRun(testCases);
+    if (!res) return;
+
+    console.log({ res }, "zzz");
+
+    if (res.results) {
+      setTestResults(res.results);
+    }
+
+    setExecutionResult({
+      status: res.status,
+      message: "",
+      output: "",
+    });
+
+    setIsExecuting(false);
+    setActiveTab("test-results");
   };
 
-  const handleSubmit = (): void => {
+  const handleSubmit = async () => {
     setIsExecuting(true);
-    setTimeout(() => {
-      setIsExecuting(false);
-    }, 5000);
+    const res = await handleSubmission();
+    console.log(res);
+    setIsExecuting(false);
   };
 
   return (
@@ -264,7 +270,10 @@ export function ExecutionPanel({
             </div>
           ) : (
             <div className="w-full h-full">
-              {executionResult.status === TestStatus.Error ? (
+              {executionResult.status === "COMPILATION_ERROR" ||
+              executionResult.status === "RUNTIME_ERROR" ||
+              executionResult.status === "MEMORY_LIMIT_EXCEEDED" ||
+              executionResult.status === "TIME_LIMIT_EXCEEDED" ? (
                 <div>
                   <div className="p-1">
                     <div className="w-full bg-destructive p-5 rounded-md bg-opacity-0 text-destructive-foreground">
@@ -292,18 +301,21 @@ export function ExecutionPanel({
                 </div>
               ) : null}
 
-              {executionResult.status !== TestStatus.Error ? (
+              {executionResult.status !== "COMPILATION_ERROR" &&
+              executionResult.status !== "RUNTIME_ERROR" &&
+              executionResult.status !== "MEMORY_LIMIT_EXCEEDED" &&
+              executionResult.status !== "TIME_LIMIT_EXCEEDED" ? (
                 <Tabs
                   className="w-full h-full p-1"
-                  defaultValue={`test-case-${testCases[0].id}`}
+                  defaultValue={`test-result-${1}`}
                 >
                   <TabsList>
-                    {testResults.map((testResult) => (
+                    {testResults.map((testResult, idx) => (
                       <TabsTrigger
-                        key={testResult.id}
-                        value={`test-result-${testResult.id}`}
+                        key={testResult.testCase.id}
+                        value={`test-result-${idx + 1}`}
                       >
-                        Case {testResult.id}
+                        Case {idx + 1}
                       </TabsTrigger>
                     ))}
                   </TabsList>
@@ -311,20 +323,20 @@ export function ExecutionPanel({
                   <ScrollArea className="w-full h-[calc(100%-5.2rem)]">
                     <ScrollBar orientation="vertical" />
                     <div>
-                      {testResults.map((testResult) => (
+                      {testResults.map((testResult, idx) => (
                         <TabsContent
                           className="pb-2 px-2"
-                          key={testResult.id}
-                          value={`test-result-${testResult.id}`}
+                          key={testResult.testCase.id}
+                          value={`test-result-${idx + 1}`}
                         >
                           <div>
-                            {testResult.input.map((item) => {
+                            {testResult.testCase.input.map((item) => {
                               const key = Object.keys(item)[0];
                               const value = item[key];
                               return (
                                 <div className="mt-5" key={key}>
                                   <Label
-                                    htmlFor={`test-result-${testResult.id}-input-${key}`}
+                                    htmlFor={`test-result-${idx}-input-${key}`}
                                   >
                                     <span className="text-nowrap text-base">
                                       {key}
@@ -332,7 +344,7 @@ export function ExecutionPanel({
                                   </Label>
                                   <Input
                                     className="mt-1"
-                                    id={`test-result-${testResult.id}-input-${key}`}
+                                    id={`test-result-${idx}-input-${key}`}
                                     readOnly
                                     value={value}
                                   />
@@ -342,16 +354,14 @@ export function ExecutionPanel({
                           </div>
                           <div>
                             <div className="mt-5">
-                              <Label
-                                htmlFor={`test-result-${testResult.id}-output`}
-                              >
+                              <Label htmlFor={`test-result-${idx}-output`}>
                                 <span className="text-nowrap text-base">
                                   Output
                                 </span>
                               </Label>
                               <div
                                 className="mt-1 flex items-center whitespace-pre-wrap min-h-9 h-content w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                                id={`test-result-${testResult.id}-output`}
+                                id={`test-result-${idx}-output`}
                               >
                                 {testResult.output}
                               </div>
@@ -360,15 +370,30 @@ export function ExecutionPanel({
                           <div>
                             <div className="mt-5">
                               <Label
-                                htmlFor={`test-result-${testResult.id}-stderr`}
+                                htmlFor={`test-result-${idx}-expected-output`}
                               >
+                                <span className="text-nowrap text-base">
+                                  Expected Output
+                                </span>
+                              </Label>
+                              <div
+                                className="mt-1 flex items-center whitespace-pre-wrap h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                id={`test-result-${idx}-expected-output`}
+                              >
+                                {testResult.testCase.expectedOutput}
+                              </div>
+                            </div>
+                          </div>
+                          <div>
+                            <div className="mt-5">
+                              <Label htmlFor={`test-result-${idx}-stderr`}>
                                 <span className="text-nowrap text-base">
                                   stderr
                                 </span>
                               </Label>
                               <div
                                 className="mt-1 flex items-center whitespace-pre-wrap h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                                id={`test-result-${testResult.id}-stderr`}
+                                id={`test-result-${idx}-stderr`}
                               >
                                 {testResult.stderr}
                               </div>

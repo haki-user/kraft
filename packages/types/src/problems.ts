@@ -21,7 +21,7 @@ export interface ContestProblem {
 export interface TestCase {
   id: string;
   isPublic: boolean;
-  input: Record<string, string>[];
+  input: Record<string, any>[];
   problemId: string;
   expectedOutput: string;
 }
