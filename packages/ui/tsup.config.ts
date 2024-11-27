@@ -8,7 +8,8 @@ export default defineConfig((options: Options) => ({
   clean: true,
   // splitting: true,
   // minify: true,
-  dts: false,
+  // dts: false,
+  dts: true,
   // banner: {
   //  js: "'use client'", // Remove the 'use client' banner if not using React
   // },

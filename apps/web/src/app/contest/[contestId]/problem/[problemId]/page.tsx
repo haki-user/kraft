@@ -185,8 +185,9 @@ export default function ProblemPage({
   const [problem, setProblem] = useState<Problem>();
   const [testCases, setTestCases] = useState<TestCase[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const languages = ["C++", "JavaScript", "TypeScript", "Go", "Python"];
-  const [activeLanguage, setActiveLanguage] = useState("JavaScript");
+  // const languages = ["C++", "JavaScript", "TypeScript", "Go", "Python"];
+  const languages = ["Python"];
+  const [activeLanguage, setActiveLanguage] = useState("Python");
   const [code, setCode] = useState<string>("");
   const [submissions, setSubmissions] = useState<Submissions>(submissions1);
   const [activeTab, setActiveTab] = useState("problem");
