@@ -1,0 +1,79 @@
+/* Light Mode (Default) */
+
+.problem-description {
+  color: rgba(0, 0, 0, 0.9);
+}
+
+.problem-description p {
+  margin-bottom: 1rem;
+  line-height: 1.6;
+  color: rgba(0, 0, 0, 0.8);
+}
+
+.problem-description code {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: rgba(0, 0, 0, 0.9);
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  font-family: monospace;
+}
+
+.problem-description pre {
+  background-color: rgba(0, 0, 0, 0.03);
+  color: rgba(0, 0, 0, 0.9);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+  overflow-x: auto;
+}
+
+.problem-description ul {
+  list-style-type: disc;
+  margin-left: 2rem;
+  margin-bottom: 1rem;
+}
+
+.problem-description li {
+  margin-bottom: 0.5rem;
+}
+
+.problem-description strong {
+  color: rgba(0, 0, 0, 0.9);
+}
+
+.problem-description .example {
+  color: rgba(0, 0, 0, 0.9);
+}
+
+.problem-description sup {
+  font-size: 0.75em;
+  vertical-align: super;
+}
+
+/* Dark Mode Styles */
+
+html.dark .problem-description {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+html.dark .problem-description p {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+html.dark .problem-description code {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+html.dark .problem-description pre {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+html.dark .problem-description strong {
+  color: rgba(255, 255, 255, 0.87);
+}
+
+/* [dat-theme="dark"] .problem-description strong {
+  color: rgba(255, 255, 255, 0.87) !important;
+} */

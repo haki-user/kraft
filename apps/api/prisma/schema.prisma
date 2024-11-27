@@ -1,0 +1,175 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  ORGANIZER
+  PARTICIPANT
+}
+
+enum ContestStatus {
+  DRAFT
+  SCHEDULED
+  ONGOING
+  COMPLETED
+}
+
+enum ProblemDifficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum SubmissionStatus {
+  PENDING
+  ACCEPTED
+  WRONG_ANSWER
+  TIME_LIMIT_EXCEEDED
+  MEMORY_LIMIT_EXCEEDED
+  RUNTIME_ERROR
+  COMPILATION_ERROR
+}
+
+enum ParticipationStatus {
+  REGISTERED
+  PARTICIPATING
+  COMPLETED
+  DISQUALIFIED
+}
+
+model User {
+  id       String   @id @default(uuid())
+  username String   @unique
+  email    String   @unique
+  name     String
+  password String
+  role     UserRole @default(PARTICIPANT)
+
+  organizationName   String?
+  organizationDomain String?
+
+  contestsCreated       Contest[]              @relation("ContestCreator")
+  contestParticipations ContestParticipation[]
+  submissions           Submission[]
+  AuditLog              AuditLog[]
+}
+
+model ContestProblem {
+  id        String  @id @default(uuid())
+  contestId String
+  contest   Contest @relation(fields: [contestId], references: [id])
+  problemId String
+  problem   Problem @relation(fields: [problemId], references: [id])
+
+  points Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Contest {
+  id          String @id @default(uuid())
+  titleSlug   String @unique
+  title       String
+  description String
+
+  creatorId String
+  creator   User   @relation("ContestCreator", fields: [creatorId], references: [id])
+
+  startTime DateTime
+  endTime   DateTime
+  status    ContestStatus @default(DRAFT)
+
+  allowedDomains  String[]
+  maxParticipants Int?
+
+  contestProblems ContestProblem[] // Many-to-many relationship
+  participants    ContestParticipation[]
+  Submission      Submission[]
+}
+
+model Problem {
+  id          String            @id @default(uuid())
+  titleSlug   String            @unique
+  title       String
+  description String
+  difficulty  ProblemDifficulty
+
+  isPublic Boolean @default(false)
+
+  contestProblems ContestProblem[] // Many-to-many relationship
+  testCases       TestCase[]
+  submissions     Submission[]
+}
+
+model TestCase {
+  id             String  @id @default(uuid())
+  isPublic       Boolean
+  input          String
+  expectedOutput String
+
+  problemId String
+  problem   Problem @relation(fields: [problemId], references: [id])
+}
+
+model ContestParticipation {
+  id String @id @default(uuid())
+
+  userId    String
+  user      User    @relation(fields: [userId], references: [id])
+  contestId String
+  contest   Contest @relation(fields: [contestId], references: [id])
+
+  status    ParticipationStatus @default(REGISTERED)
+  startTime DateTime?
+  endTime   DateTime?
+
+  score   Float @default(0)
+  penalty Float @default(0)
+  rank    Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Submission {
+  id       String @id @default(uuid())
+  code     String
+  language String
+  runtime  Float  @default(0)
+  memory   Float  @default(0)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  contestId String?
+  contest   Contest? @relation(fields: [contestId], references: [id])
+
+  problemId String
+  problem   Problem @relation(fields: [problemId], references: [id])
+
+  status    SubmissionStatus @default(PENDING)
+  score     Float            @default(0)
+  createdAt DateTime         @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  action    String
+  details   String?
+  createdAt DateTime @default(now())
+}

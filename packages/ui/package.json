@@ -13,6 +13,31 @@
   "exports": {
     "./globals.css": "./dist/index.css",
     "./tailwind.config": "./tailwind.config.js",
+    "./icons": {
+      "types": "./dist/components/icons/index.d.ts",
+      "import": "./dist/components/icons/index.js",
+      "require": "./dist/components/icons/index.cjs"
+    },
+    "./card": {
+      "types": "./dist/components/card/index.d.ts",
+      "import": "./dist/components/card/index.js",
+      "require": "./dist/components/card/index.cjs"
+    },
+    "./tabs": {
+      "types": "./dist/components/tabs/index.d.ts",
+      "import": "./dist/components/tabs/index.js",
+      "require": "./dist/components/tabs/index.cjs"
+    },
+    "./badge": {
+      "types": "./dist/components/badge/index.d.ts",
+      "import": "./dist/components/badge/index.js",
+      "require": "./dist/components/badge/index.cjs"
+    },
+    "./button": {
+      "types": "./dist/components/button/index.d.ts",
+      "import": "./dist/components/button/index.js",
+      "require": "./dist/components/button/index.cjs"
+    },
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
@@ -22,8 +47,8 @@
   "scripts": {
     "build": "tsup",
     "clean": "rm -rf dist",
-    "dev": "tsup --watch",
-    "typecheck": "tsc --noEmit",
+    "dev": "NODE_OPTIONS='--max-old-space-size=4096' tsup --watch",
+    "typecheck": "NODE_OPTIONS='--max-old-space-size=1024' tsc --noEmit",
     "lint": "eslint src/",
     "test": "jest"
   },
@@ -46,11 +71,16 @@
     "typescript": "5.5.4"
   },
   "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.2",
     "@radix-ui/react-dropdown-menu": "^2.1.2",
     "@radix-ui/react-icons": "^1.3.1",
+    "@radix-ui/react-label": "^2.1.0",
     "@radix-ui/react-navigation-menu": "^1.2.1",
+    "@radix-ui/react-scroll-area": "^1.2.0",
+    "@radix-ui/react-select": "^2.1.2",
     "@radix-ui/react-separator": "^1.1.0",
     "@radix-ui/react-slot": "^1.1.0",
+    "@radix-ui/react-tabs": "^1.1.1",
     "@radix-ui/react-toast": "^1.2.2",
     "autoprefixer": "^10.4.20",
     "class-variance-authority": "^0.7.0",

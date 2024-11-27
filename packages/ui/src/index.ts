@@ -30,7 +30,7 @@ export {
 } from "./components/dropdown-menu";
 export { Button, buttonVariants } from "./components/button";
 export { Test } from "./components/test";
-export { ThemeProvider } from "./components/theme-provider";
+export { ThemeProvider, useTheme } from "./components/theme-provider";
 export {
   navigationMenuTriggerStyle,
   NavigationMenu,
@@ -55,5 +55,53 @@ export {
   ToastClose,
   ToastAction,
 } from "./components/toast";
+export { Tabs, TabsList, TabsTrigger, TabsContent } from "./components/tabs";
+export { Input } from "./components/input";
+export { Label } from "./components/label";
+export { ScrollArea, ScrollBar } from "./components/scroll-area";
+export { Skeleton } from "./components/skeleton";
+export {
+  Select,
+  SelectGroup,
+  SelectValue,
+  SelectTrigger,
+  SelectContent,
+  SelectLabel,
+  SelectItem,
+  SelectSeparator,
+  SelectScrollUpButton,
+  SelectScrollDownButton,
+} from "components/select";
+export {
+  Dialog,
+  DialogPortal,
+  DialogOverlay,
+  DialogTrigger,
+  DialogClose,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+} from "components/dialog";
+export {
+  Table,
+  TableHeader,
+  TableBody,
+  TableFooter,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableCaption,
+} from "components/table";
+export {
+  Card,
+  CardHeader,
+  CardFooter,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "./components/card";
+export { Badge, badgeVariants } from "./components/badge";
 
 // export * from "./theme/tailwind-theme";
