@@ -1,21 +1,18 @@
 import { defineConfig, type Options } from "tsup";
 
 export default defineConfig((options: Options) => ({
-  entry: ["src/**/*.@(ts|tsx)", "!src/**/*.test.@(ts|js)"],
-  external: ["react"],
+  entry: ["src/**/*.@(ts|tsx)", "!src/**/*.test.@(ts|js)"], // Only entry points for components or packages
+  format: ["cjs", "esm"], // Good for compatibility
+  external: ["react"], // Externalize React if it's not used inside the package
+  // treeshake: true, // Disabled because it strips 'use client'
   clean: true,
-  dts: {
-    sequential: true,
-    resolve: true,
-    // // Only generate .d.ts files for the entry points
-    // entry: {
-    //   index: "src/index.ts"
-    // }
-  },
-  format: ["cjs", "esm"],
-  splitting: false, // Disable code splitting to reduce complexity
-  outDir: "dist",
-  sourcemap: false, // Disable sourcemaps if not needed
+  // splitting: true,
+  // minify: true,
+  // dts: false,
+  dts: true,
+  // banner: {
+  //  js: "'use client'", // Remove the 'use client' banner if not using React
+  // },
   ...options,
 }));
 
