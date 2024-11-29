@@ -47,6 +47,15 @@ export const getSubmissionsForProblem = async (
   return response.data;
 };
 
+export const getAllUserContestSubmissions = async (
+  contestId: string
+): Promise<Submissions> => {
+  const response = await api.get<Submissions>(
+    `/submissions/contest/${contestId}`
+  );
+  return response.data;
+};
+
 export const executeTestRun = async (
   data: TestRunDTO
 ): Promise<ExecutorResult> => {

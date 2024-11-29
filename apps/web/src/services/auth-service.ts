@@ -24,10 +24,10 @@ export const loginUser = async (data: LoginDTO): Promise<AuthResponse> => {
 };
 
 export const verifyToken = async (): Promise<void> => {
-  console.log("verifying...", ct++)
+  console.log("verifying...", ct++);
   try {
     const response = await api.post(
-      `${API_BASE_URL}/auth/verify-token`,
+      `${API_BASE_URL}/auth/verify-token`
 
       // {},
       // {
@@ -38,18 +38,18 @@ export const verifyToken = async (): Promise<void> => {
       // }
     );
     const authData = response.data;
-    console.log("new data", authData)
+    console.log("new data", authData);
     useAuthStore.getState().login(authData);
   } catch (err) {
-  console.log("error verifying...", ct++)
+    console.log("error verifying...", ct++);
     await logoutUser();
     console.log(err);
   }
 };
 
 export const logoutUser = async () => {
-  console.log("logging out...", ct++)
-  await api.post(`${API_BASE_URL}/auth/logout`, {}, { withCredentials: true });
+  console.log("logging out...", ct++);
+  // await api.post(`${API_BASE_URL}/auth/logout`, {}, { withCredentials: true });
   useAuthStore.getState().logout();
   localStorage.removeItem("accessToken");
 };

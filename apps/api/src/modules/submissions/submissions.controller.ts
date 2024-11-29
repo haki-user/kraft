@@ -79,6 +79,59 @@ export const getSubmissionsForProblemHandler = async (
 };
 
 /**
+ * Get all submissions for a user in a specific contest.
+ */
+export const getAllUserContestSubmissionsHandler = async (
+  req: Request,
+  res: Response
+) => {
+  const { contestId } = req.params; // Contest ID from route params
+  const userId = req.user?.id; // Assuming `req.user` is populated by an authentication middleware
+  console.log({userId, contestId})
+
+  if (!userId) {
+    res.status(401).json({ error: "Unauthorized. User not logged in." });
+    return;
+  }
+
+  if (!contestId) {
+    res.status(400).json({ error: "Contest ID is required." });
+    return;
+  }
+
+  try {
+    // Fetch all submissions for the user in the specified contest
+    const submissions = await submissionsService.getAllUserContestSubmissions({
+      contestId,
+      userId,
+    });
+
+    if (!submissions || submissions.length === 0) {
+      res.status(404).json({
+        message: "No submissions found for the user in this contest.",
+      });
+      return;
+    }
+
+    res.status(200).json({
+      message: "Submissions retrieved successfully.",
+      submissions,
+    });
+  } catch (error) {
+    console.error("Error retrieving submissions:", error);
+
+    if (error instanceof Error) {
+      res.status(400).json({ error: error.message });
+      return;
+    }
+
+    res
+      .status(500)
+      .json({ error: "Internal server error. Please try again later." });
+  }
+};
+
+/**
  * Execute a test run with custom inputs.
  */
 export const executeTestRunHandler = async (req: Request, res: Response) => {

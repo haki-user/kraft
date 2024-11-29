@@ -15,6 +15,11 @@ router.get(
   authMiddleware,
   submissionsController.getSubmissionsForProblemHandler
 );
+router.get(
+  "/contest/:contestId",
+  authMiddleware,
+  submissionsController.getAllUserContestSubmissionsHandler
+);
 router.post(
   "/test-run",
   authMiddleware,

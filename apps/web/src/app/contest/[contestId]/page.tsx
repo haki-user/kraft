@@ -20,6 +20,8 @@ import { ContestProblem } from "@kraft/types";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { AxiosError } from "axios";
+import Leaderboard from "@/components/leaderboard";
+import Submissions from "@/components/submissions";
 
 export default function Contest({
   params,
@@ -72,6 +74,12 @@ export default function Contest({
           </TabsList>
           <TabsContent value="tasks">
             <Tasks contestId={contestId} tasksList={contestProblems} />
+          </TabsContent>
+          <TabsContent value="submissions">
+            <Submissions contestId={contestId} />
+          </TabsContent>
+          <TabsContent value="leaderboard">
+            <Leaderboard contestId={contestId} />
           </TabsContent>
         </Tabs>
       </div>

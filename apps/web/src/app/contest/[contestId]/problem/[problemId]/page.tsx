@@ -302,7 +302,10 @@ export default function ProblemPage({
                     </TabsList>
                     {submissions.acceptedCount > 0 ? (
                       // <div className="text-primary-foreground bg-primary shadow-md shadow-secondary px-2.5 rounded-md text-sm">
-                      <Badge className="bg-primary dark:bg-primary dark:text-opacity-[87%]">
+                      <Badge
+                        className="bg-primary dark:bg-primary dark:text-opacity-[87%]"
+                        variant="default"
+                      >
                         Solved
                       </Badge>
                     ) : (
@@ -310,7 +313,10 @@ export default function ProblemPage({
                       // </div>
                       submissions.totalCount > 0 && (
                         // <div className="text-primary-foreground bg-orange-500 dark:text-opacity-[87%] shadow-md shadow-secondary px-2.5 rounded-md">
-                        <Badge className="text-primary-foreground bg-orange-500 dark:text-opacity-[87%] shadow-md shadow-secondary">
+                        <Badge
+                          className="text-primary-foreground bg-orange-500 dark:text-opacity-[87%] shadow-md shadow-secondary"
+                          variant="default"
+                        >
                           Attempted
                         </Badge>
                         //  </div>

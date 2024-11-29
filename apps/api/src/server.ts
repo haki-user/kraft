@@ -9,6 +9,7 @@ import authRoutes from "./modules/auth/auth.routes";
 import problemsRoutes from "./modules/problems/problems.routes";
 import contestsRoutes from "./modules/contests/contests.routes";
 import submissionRoutes from "./modules/submissions/submissions.routes";
+import leaderBoardRoutes from "./modules/leaderboard/leaderboard.routes";
 
 export const createServer = (): Express => {
   const app = express();
@@ -30,6 +31,7 @@ export const createServer = (): Express => {
     .use("/api/problems/", problemsRoutes)
     .use("/api/contests", contestsRoutes)
     .use("/api/submissions", submissionRoutes)
+    .use("/api/leaderboard", leaderBoardRoutes)
     .get("/status", (_, res) => {
       res.json({ ok: true });
     })

@@ -10,7 +10,7 @@ export default function Home(): JSX.Element {
 
   return (
     <div className="container">
-      <Link href="/contest"  id="gotocontestlikid">
+      <Link newTab={false} href="/contest" id="gotocontestlikid">
         Go to contest
       </Link>
     </div>

@@ -138,7 +138,7 @@ export default function Editor({
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
+            <DialogHeader className="">
               <DialogTitle>Editor settings</DialogTitle>
               <DialogDescription>
                 Make changes to editor here.
@@ -261,7 +261,7 @@ export default function Editor({
                 </Select>
               </div>
             </div>
-            <DialogFooter>
+            <DialogFooter className="">
               <Button
                 onClick={() => {
                   setSettings(tempSettings);

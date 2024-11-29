@@ -1,5 +1,4 @@
 import prisma from "../../lib/prisma"; // Prisma client instance
-// import axios from "axios"; // To interact with the code execution microservice
 import {
   CreateSubmissionDTO,
   ExecuteTestRunDTO,
@@ -11,6 +10,7 @@ import {
 } from "@kraft/types";
 import executor from "./code-execution.service";
 import test from "node:test";
+import { timeStamp } from "console";
 
 /**
  * Create a new submission for a problem.
@@ -129,6 +129,39 @@ export const getSubmissionsForProblem = async ({
       (submission) => submission.status === "ACCEPTED"
     ).length,
   };
+};
+
+/**
+ * Get all submissions for a user in a specific contest.
+ */
+export const getAllUserContestSubmissions = async ({
+  contestId,
+  userId,
+}: {
+  contestId: string;
+  userId: string;
+}) => {
+  const submissions = await prisma.submission.findMany({
+    where: {
+      contestId,
+      userId,
+    },
+    include: {
+      problem: true,
+    },
+  });
+
+  const tmp = submissions.map((submission) => ({
+    id: submission.id,
+    problemTitle: submission.problem.title,
+    code: submission.code,
+    language: submission.language,
+    status: submission.status,
+    runtime: submission.runtime,
+    memory: submission.memory,
+    timestamp: submission.createdAt,
+  }));
+  return tmp;
 };
 
 /**
