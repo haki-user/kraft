@@ -37,9 +37,9 @@ export const verifyToken = async (): Promise<void> => {
       //   },
       // }
     );
-    const authData = response.data;
-    console.log("new data", authData);
-    useAuthStore.getState().login(authData);
+    const user = response.data;
+    console.log("new data", user);
+    useAuthStore.getState().setUser(user);
   } catch (err) {
     console.log("error verifying...", ct++);
     await logoutUser();

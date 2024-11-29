@@ -32,9 +32,13 @@ const navLinkClass = `${navigationMenuTriggerStyle()} rounded-none`;
 export function Navbar(): JSX.Element {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
-  const { user, logout } = useAuthStore();
+  const { user, logout, setAccessToken} = useAuthStore();
   console.log({ user });
   React.useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      setAccessToken(token);
+    }
     void verifyToken();
     setMounted(true);
   }, []);
@@ -59,6 +63,7 @@ export function Navbar(): JSX.Element {
       )),
     []
   );
+  console.log({ user });
 
   return (
     <NavigationMenu className="rounded-none flex justify-between items-center min-w-full h-[2.25rem]">

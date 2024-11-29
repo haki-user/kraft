@@ -251,10 +251,6 @@ export default function ProblemPage({
   const handleFetchSubmissoins = async () => {
     try {
       const res = await getSubmissionsForProblem(problemId, contestId);
-      // const cleaned = res.map((submission) => ({
-      //   status: submission.status,
-      //   runtime: submission.runtime,
-      // }));
       setSubmissions(res);
       setActiveTab("submissions");
     } catch (e) {
