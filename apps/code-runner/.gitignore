@@ -1,0 +1,30 @@
+# Node modules
+node_modules/
+
+# Build output
+dist/
+out/
+
+# Environment variables
+.env
+.env.*.local
+
+# Prisma artifacts
+prisma/*.db
+prisma/*.sqlite
+.prisma/
+
+# TypeScript metadata
+*.tsbuildinfo
+
+# Logs
+logs/
+*.log
+
+# IDE-specific files
+.vscode/
+.idea/
+
+# OS-specific files
+.DS_Store
+Thumbs.db

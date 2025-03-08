@@ -1,0 +1,31 @@
+{
+  "name": "code-runner",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "node dist/index.js",
+    "dev": "tsup --watch --onSuccess \"node dist/index.js\"",
+    "build": "tsup",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/",
+    "test": "jest --detectOpenHandles"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@kraft/eslint-config": "workspace:*",
+    "@kraft/types": "workspace:*",
+    "@kraft/typescript-config": "workspace:*",
+    "@types/amqplib": "^0.10.6",
+    "@types/express": "^5.0.0",
+    "@types/node": "^20.11.24",
+    "tsup": "^8.2.4"
+  },
+  "dependencies": {
+    "amqplib": "^0.10.5",
+    "express": "^4.21.0",
+    "node-docker-api": "^1.1.22"
+  }
+}
