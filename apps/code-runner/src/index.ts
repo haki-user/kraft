@@ -61,9 +61,8 @@ const PORT = process.env.PORT || 3001;
     //   language: "javascript",
     //   endpoint: ""
     // };
-
-    await runner.registerExecutor(pythonExecutor);
-    await runner.registerExecutor(jsExecutor);
+    // await runner.registerExecutor(pythonExecutor);
+    // await runner.registerExecutor(jsExecutor);
 
     // Start processing jobs from the queue.
     runner.processJobs();
