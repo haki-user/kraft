@@ -152,6 +152,7 @@ import {
 
 export default function Contests(): JSX.Element {
   // const [contests1, setContests1] = useState(sampleContests);
+  const [isLoading, setIsLoading] = useState(true);
   const { contests, setContests } = useContestStore();
   const { user, accessToken } = useAuthStore();
 
@@ -166,7 +167,9 @@ export default function Contests(): JSX.Element {
 
   useEffect(() => {
     // void fetchContests();
+    setIsLoading(true);
     void fetchContests();
+    setIsLoading(false);
   }, []);
 
   console.log({ contests }, { user, accessToken }, "zzzz");
@@ -204,6 +207,14 @@ export default function Contests(): JSX.Element {
     },
     {} as Record<Contest["status"], Contest[]>
   );
+
+  if (isLoading) {
+    return (
+      <div className="w-full h-[calc(100vh-2.2rem)] flex items-center justify-center">
+          <Icons.spinner className="animate-spin"></Icons.spinner>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-aut py2 px 4 p-0">

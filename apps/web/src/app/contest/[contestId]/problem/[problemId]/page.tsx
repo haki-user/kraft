@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import {
+  Icons,
   Table,
   TableBody,
   TableCell,
@@ -262,8 +263,14 @@ export default function ProblemPage({
     void fetchProblem();
   }, []);
 
+  if (isLoading) {
+    return (
+      <div className="w-full h-[calc(100vh-2.2rem)] flex items-center justify-center">
+        <Icons.spinner className="animate-spin"></Icons.spinner>
+      </div>
+    );
+  }
   if (!problem) return <div>Error problem not found.</div>;
-  if (isLoading) return <div>Loading...</div>;
 
   return (
     <div>
