@@ -26,7 +26,7 @@ jobs:
         uses: pnpm/action-setup@v4
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install
 
       - name: Generate Prisma client
         run: cd apps/api && pnpm dlx prisma generate
