@@ -2,6 +2,7 @@ import { Separator } from "@kraft/ui";
 import { ThemeProvider } from "@kraft/ui";
 import { Navbar } from "@/components/navbar";
 import { Toaster } from "@/components/toaster";
+import AuthProvider from "@/components/auth-provider";
 
 import "./styles.css";
 
@@ -19,15 +20,17 @@ export default function RootLayout({
           disableTransitionOnChange
           enableSystem
         >
-          {/* <nav className="flex justify-start bg-slate-900 color-white">
+          <AuthProvider>
+            {/* <nav className="flex justify-start bg-slate-900 color-white">
             <div>Home</div>
             <div>Contest</div>
             <div>Problems</div>
           </nav> */}
-          <Navbar />
-          <Separator />
-          <main>{children}</main>
-          <Toaster />
+            <Navbar />
+            <Separator />
+            <main>{children}</main>
+            <Toaster />
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

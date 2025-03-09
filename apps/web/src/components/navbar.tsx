@@ -15,7 +15,7 @@ import {
   Button,
 } from "@kraft/ui";
 import { useAuthStore } from "@/store/auth-store";
-import { verifyToken } from "@/services/auth-service";
+import { verifyToken, logoutUser } from "@/services/auth-service";
 
 const navLinks: { href: string; text: string; icon?: JSX.Element }[] = [
   {
@@ -32,16 +32,27 @@ const navLinkClass = `${navigationMenuTriggerStyle()} rounded-none`;
 export function Navbar(): JSX.Element {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
-  const { user, logout, setAccessToken} = useAuthStore();
-  console.log({ user });
+  const { user, logout, setAccessToken } = useAuthStore();
+
+  // Run once on component mount
   React.useEffect(() => {
     const token = localStorage.getItem("accessToken");
     if (token) {
       setAccessToken(token);
     }
-    void verifyToken();
+    
+    // Verify token once on initial load
+    const runVerify = async () => {
+      try {
+        await verifyToken();
+      } catch (error) {
+        console.error("Error verifying token:", error);
+      }
+    };
+    
+    void runVerify();
     setMounted(true);
-  }, []);
+  }, []); // Empty dependency array - only runs once on mount
 
   // Memoize theme toggle handler
   const handleThemeToggle = React.useCallback(() => {
@@ -63,7 +74,40 @@ export function Navbar(): JSX.Element {
       )),
     []
   );
-  console.log({ user });
+
+  // Memoize auth-related menu items to prevent unnecessary re-renders
+  const authMenuItems = React.useMemo(() => {
+    if (user) {
+      return (
+        <NavigationMenuItem className="hover:bg-destructive">
+          <Link href="/auth" legacyBehavior passHref>
+            <NavigationMenuLink 
+              className={navLinkClass} 
+              onClick={(e:any) => {
+                e.preventDefault();
+                logout();
+                logoutUser();
+                // Add redirection after logout if needed
+                window.location.href = "/auth";
+              }}
+            >
+              Logout
+            </NavigationMenuLink>
+          </Link>
+        </NavigationMenuItem>
+      );
+    }
+    
+    return (
+      <NavigationMenuItem>
+        <Link href="/auth" legacyBehavior passHref>
+          <NavigationMenuLink className={navLinkClass}>
+            Login
+          </NavigationMenuLink>
+        </Link>
+      </NavigationMenuItem>
+    );
+  }, [user, logout]); // Only re-render when user or logout changes
 
   return (
     <NavigationMenu className="rounded-none flex justify-between items-center min-w-full h-[2.25rem]">
@@ -71,23 +115,7 @@ export function Navbar(): JSX.Element {
         {navigationItems}
       </NavigationMenuList>
       <NavigationMenuList>
-        {user ? (
-          <NavigationMenuItem className="hover:bg-destructive ">
-            <Link href="/auth" legacyBehavior passHref>
-              <NavigationMenuLink className={navLinkClass} onClick={logout}>
-                Logout
-              </NavigationMenuLink>
-            </Link>
-          </NavigationMenuItem>
-        ) : (
-          <NavigationMenuItem>
-            <Link href="/auth" legacyBehavior passHref>
-              <NavigationMenuLink className={navLinkClass}>
-                Login
-              </NavigationMenuLink>
-            </Link>
-          </NavigationMenuItem>
-        )}
+        {authMenuItems}
         <NavigationMenuItem>
           {mounted ? (
             <Button

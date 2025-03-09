@@ -42,27 +42,27 @@ export interface SubmissionResult {
   results?: TestResult[];
 }
 
-// export interface TestRunResult {
-//   output: string;
-//   testCase: TestCase;
-//   runtime: number;
-//   memoryUsed: number;
-//   stderr: string;
-//   status: SubmissionStatus;
-// }
+export interface TestRunResult {
+  output: string;
+  testCase: TestCase;
+  runtime: number;
+  memoryUsed: number;
+  stderr: string;
+  status: SubmissionStatus;
+}
 
-// export interface ExecutorResult {
-//   input?: string;
-//   output?: string;
-//   expectedOutput?: string;
-//   error?: string;
-//   testCasesPassed?: number;
-//   totalTestCases?: number;
-//   status: SubmissionStatus;
-//   memoryUsed: number;
-//   runtime: number;
-//   results?: TestRunResult[];
-// }
+export interface ExecutorResult {
+  input?: string;
+  output?: string;
+  expectedOutput?: string;
+  error?: string;
+  testCasesPassed?: number;
+  totalTestCases?: number;
+  status: SubmissionStatus;
+  memoryUsed: number;
+  runtime: number;
+  results?: TestRunResult[];
+}
 
 export interface Submissions {
   submissions: readonly Submission[];
