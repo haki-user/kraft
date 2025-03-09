@@ -85,7 +85,7 @@ export function LandingPage() {
                     <ChevronRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
-                <Link target="_blank" href= "https://github.com/haki-user/kraft">
+                <Link target="_blank" href="https://github.com/haki-user/kraft">
                   <Button size="lg" variant="outline">
                     View on GitHub
                   </Button>
@@ -480,7 +480,15 @@ Started server on http://localhost:3000
   );
 }
 
-function FeatureCard({ icon, title, description }) {
+function FeatureCard({
+  icon,
+  title,
+  description,
+}: {
+  icon: any;
+  title: string;
+  description: string;
+}) {
   return (
     <Card className="border border-border bg-card/60 hover:bg-card/80 transition-colors h-full">
       <CardHeader>
