@@ -3,7 +3,11 @@ name: Deploy API to Azure App Service
 on:
   push:
     branches:
-      - main
+      - web
+    paths:
+    - 'apps/api/**'
+    - 'apps/package/**'
+    - '.github/workflows/api-deploy.yaml'
 
 jobs:
   build-and-deploy:
