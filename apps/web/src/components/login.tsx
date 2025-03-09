@@ -10,8 +10,8 @@ import { AxiosError } from "axios";
 
 export function Login(): JSX.Element {
   const [user, setUser] = useState<LoginDTO>({
-    email: "",
-    password: "",
+    email: "test10@gmail.com",
+    password: "test10",
   });
   const router = useRouter();
   const { toast } = useToast();

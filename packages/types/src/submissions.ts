@@ -1,4 +1,5 @@
-import { TestCase } from "./problems";
+import type { TestCase } from "./problems";
+import type { TestResult } from "./code-runner";
 
 export type SubmissionStatus =
   | "PENDING"
@@ -38,7 +39,7 @@ export interface SubmissionResult {
   error?: string;
   runtime?: number;
   memoryUsed?: number;
-  results?: TestRunResult[];
+  results?: TestResult[];
 }
 
 export interface TestRunResult {
