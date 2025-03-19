@@ -18,6 +18,7 @@ import {
   ScrollArea,
   ScrollBar,
   Badge,
+  Button,
 } from "@kraft/ui";
 import Editor from "@/components/editor";
 import { ExecutionPanel } from "@/components/execution-panel";
@@ -28,11 +29,11 @@ import {
   getSubmissionsForProblem,
 } from "@/services/submissions-service";
 import type {
-  CreateSubmissionDTO,
+  // CreateSubmissionDTO,
   ExecutorResult,
   Problem,
   SubmissionResult,
-  TestRunResult,
+  // TestRunResult,
   Submission,
   Submissions,
 } from "@kraft/types";
@@ -117,6 +118,7 @@ export default function ProblemPage({
       });
       console.log({ res }, "submission...");
       await handleFetchSubmissoins();
+      setActiveTab("submissions");
       return res;
     } catch (e) {
       console.log(e);
@@ -128,7 +130,7 @@ export default function ProblemPage({
     try {
       const res = await getSubmissionsForProblem(problemId);
       setSubmissions(res);
-      setActiveTab("submissions");
+      // setActiveTab("submissions");
     } catch (e) {
       console.log(e);
     }
@@ -136,7 +138,16 @@ export default function ProblemPage({
 
   useEffect(() => {
     void fetchProblem();
+    void handleFetchSubmissoins();
+    const locallySavedCode = localStorage.getItem(`${problemId}-code`);
+    if (locallySavedCode) setCode(locallySavedCode);
   }, []);
+
+  // Handle code change: Saving etc...
+  useEffect(() => {
+    localStorage.setItem(`${problemId}-code`, code);
+    console.log("saved", code);
+  }, [code]);
 
   if (isLoading) {
     return (
@@ -325,7 +336,13 @@ function SubmissionSection({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {allSubmissions.submissions.map((submission) => (
+            {[
+              ...allSubmissions.submissions.sort(
+                (a, b) =>
+                  new Date(b.timestamp).getTime() -
+                  new Date(a.timestamp).getTime()
+              ),
+            ].map((submission) => (
               <TableRow key={submission.id}>
                 <TableCell>
                   <span
@@ -337,7 +354,16 @@ function SubmissionSection({
                   </span>
                 </TableCell>
                 <TableCell className="font-medium">
-                  {submission.language}
+                  <Button
+                    variant="link"
+                    className="px-2 hover:text-primary/75 active:text-primary/55"
+                    onClick={() =>
+                      navigator.clipboard.writeText(submission?.code || "")
+                    }
+                    title="Copy code"
+                  >
+                    {submission.language}
+                  </Button>
                 </TableCell>
                 <TableCell>
                   {submission.runtime > 0 ? `${submission.runtime} ms` : "-"}

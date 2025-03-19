@@ -30,7 +30,7 @@ const navLinks: { href: string; text: string; icon?: JSX.Element }[] = [
     // icon: <Icons.logo className="mr-2 h-4 w-4" />,
   },
   { href: "/problem", text: "Problems" },
-  { href: "/docs", text: "Documentation" },
+  { href: "/", text: "Documentation" },
 ] as const;
 
 const navLinkClass = `${navigationMenuTriggerStyle()} rounded-none`;

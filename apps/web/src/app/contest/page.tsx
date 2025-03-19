@@ -158,18 +158,18 @@ export default function Contests(): JSX.Element {
 
   const fetchContests = async () => {
     try {
+      setIsLoading(true);
       const contests = await fetchAllContests();
       setContests(contests);
     } catch (err) {
       console.log(err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    // void fetchContests();
-    setIsLoading(true);
     void fetchContests();
-    setIsLoading(false);
   }, []);
 
   console.log({ contests }, { user, accessToken }, "zzzz");
@@ -211,7 +211,7 @@ export default function Contests(): JSX.Element {
   if (isLoading) {
     return (
       <div className="w-full h-[calc(100vh-2.2rem)] flex items-center justify-center">
-          <Icons.spinner className="animate-spin"></Icons.spinner>
+        <Icons.spinner className="animate-spin"></Icons.spinner>
       </div>
     );
   }

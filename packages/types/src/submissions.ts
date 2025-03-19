@@ -65,7 +65,7 @@ export interface ExecutorResult {
 }
 
 export interface Submissions {
-  submissions: readonly Submission[];
+  submissions: Submission[];
   totalCount: number;
   acceptedCount: number;
 }

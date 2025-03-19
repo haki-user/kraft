@@ -424,7 +424,10 @@ Started server on http://localhost:3000
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 bg-primary/10 border-t border-border">
+      <section
+        id="cta-sectionc"
+        className="py-24 bg-primary/10 border-t border-border"
+      >
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-6">
             Ready to host your own coding platform?

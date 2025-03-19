@@ -41,7 +41,6 @@ export default function Contest({
   const { toast } = useToast();
 
   const fetchTaskList = async () => {
-    setIsLoading(true);
     try {
       const response = (await fetchContestProblemDetails(
         contestId
@@ -59,12 +58,11 @@ export default function Contest({
         router.replace("/contest");
       }
     } finally {
-      setIsLoading(false);
+      // setIsLoading(false);
     }
   };
 
   const fetchContest = async () => {
-    setIsLoading(true);
     try {
       const contest = await fetchContestById(contestId);
       console.log(contest);
@@ -80,21 +78,27 @@ export default function Contest({
         router.replace("/contest");
       }
     } finally {
-      setIsLoading(false);
+      // setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    void fetchTaskList();
-    void fetchContest();
+    (async () => {
+      setIsLoading(true);
+      await fetchTaskList();
+      await fetchContest();
+      setIsLoading(false);
+    })();
   }, []);
 
   if (isLoading) {
-    return <div className="w-full h-full min-h-screen flex justify-center items-center">
-      <Icons.spinner className="animate-spin h-6 w-6" />
-    </div>
+    return (
+      <div className="w-full h-full min-h-screen flex justify-center items-center">
+        <Icons.spinner className="animate-spin h-6 w-6" />
+      </div>
+    );
   }
-  
+
   if (!contestDetails) {
     return <div>Contest not found</div>;
   }

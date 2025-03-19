@@ -80,6 +80,7 @@ export default function SubmissionSection({
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>No.</TableHead>
               <TableHead className="max-w-[150px]">Status</TableHead>
               <TableHead>Language</TableHead>
               <TableHead>Runtime</TableHead>
@@ -94,6 +95,9 @@ export default function SubmissionSection({
           <TableBody>
             {isLoading ? (
               <TableRow>
+                <TableCell>
+                  <Skeleton className="w-1/2 h-4 my-2.5" />
+                </TableCell>
                 <TableCell className="text-center">
                   {/* <div className="flex justify-center items-center space-x-2"> */}
                   <Skeleton className="w-10/12 h-4 my-2.5" />
@@ -113,8 +117,15 @@ export default function SubmissionSection({
                 {/* </div> */}
               </TableRow>
             ) : submissions?.submissions ? (
-              submissions?.submissions.map((submission) => (
+              [
+                ...submissions?.submissions.sort(
+                  (a, b) =>
+                    new Date(b.timestamp).getTime() -
+                    new Date(a.timestamp).getTime()
+                ),
+              ].map((submission, idx) => (
                 <TableRow key={submission.id}>
+                  <TableCell>{submissions.submissions.length - idx}</TableCell>
                   <TableCell>
                     <span
                       className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-nowrap ${getStatusBadgeClass(
