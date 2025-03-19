@@ -28,6 +28,14 @@ export const metadata: Metadata = {
     "code evaluation",
     "coding contests",
   ],
+  icons: [
+    {
+      url: "/code.png",
+    },
+    // {
+    //   url: "favicon.ico",
+    // },
+  ],
   authors: [{ name: "haki-user", url: "https://github.com/haki-user" }],
   creator: "haki-user",
   openGraph: {
@@ -37,12 +45,12 @@ export const metadata: Metadata = {
       "Enterprise-grade platform for coding contests and assessments",
     siteName: "Kraft",
     images: [
-      // {
-      //   url: "/og-image.png",
-      //   width: 1200,
-      //   height: 630,
-      //   alt: "Kraft",
-      // },
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Kraft",
+      },
     ],
   },
   robots: {

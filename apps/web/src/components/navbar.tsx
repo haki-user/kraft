@@ -69,7 +69,7 @@ export function Navbar(): JSX.Element {
   const navigationItems = React.useMemo(
     () =>
       navLinks.map(({ href, text, icon = null }) => (
-        <NavigationMenuItem key={href} style={{ marginLeft: 0 }}>
+        <NavigationMenuItem key={href + text} style={{ marginLeft: 0 }}>
           <Link href={href} legacyBehavior passHref>
             <NavigationMenuLink className={navLinkClass}>
               {icon}
