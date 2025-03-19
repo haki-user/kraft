@@ -8,8 +8,10 @@ import {
   TableBody,
   TableRow,
   TableCell,
+  Skeleton,
 } from "@kraft/ui";
 import { fetchLeaderboard } from "@/services/leaderboard-service";
+import type { Contest } from "@kraft/types";
 
 interface LeaderboardParticipant {
   rank: number;
@@ -19,7 +21,10 @@ interface LeaderboardParticipant {
   submissionTime: string;
 }
 
-const Leaderboard: React.FC<{ contestId: string }> = ({ contestId }) => {
+const Leaderboard: React.FC<{ contestId: string; contestDetails: Contest }> = ({
+  contestId,
+  contestDetails,
+}) => {
   const [leaderboard, setLeaderboard] = useState<LeaderboardParticipant[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -48,30 +53,54 @@ const Leaderboard: React.FC<{ contestId: string }> = ({ contestId }) => {
             <TableHead>Rank</TableHead>
             <TableHead>Username</TableHead>
             <TableHead>Score</TableHead>
-            <TableHead>Penalty</TableHead>{" "}
-            <TableHead>Submission Time</TableHead>{" "}
+            <TableHead>Penalty</TableHead> <TableHead>Time Taken</TableHead>{" "}
           </TableRow>
         </TableHeader>
         <TableBody>
-          {isLoading ? (
-            <div className="w-full text-center">Loading...</div>
-          ) : (
-            leaderboard.map((participant) => (
-              <TableRow key={participant.rank}>
-                <TableCell>{participant.rank}</TableCell>
-                <TableCell>{participant.username}</TableCell>
-                <TableCell>{participant.score}</TableCell>
-                <TableCell>{participant.penalty}</TableCell>{" "}
-                {/* Penalty in Seconds */}
-                <TableCell>
-                  {participant.submissionTime !== "NA"
-                    ? new Date(participant.submissionTime).toLocaleString()
-                    : "NA"}
-                </TableCell>{" "}
-                {/* Format submission time */}
-              </TableRow>
-            ))
-          )}
+          {isLoading
+            ? [1, 2].map((idx) => (
+                <TableRow id={String(idx)}>
+                  <TableCell>
+                    <Skeleton className={`w-${idx}/2 h-4 my-0.5`} />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className={`w-1/${2 * idx} h-4 my-0.5`} />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className={`w-1/${2 * idx} h-4 my-0.5`} />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className={`w-[${40 * idx}%] h-4 my-0.5`} />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className={`w-1/${2 * idx} h-4 my-0.5`} />
+                  </TableCell>
+                </TableRow>
+              ))
+            : leaderboard.map((participant) => (
+                <TableRow key={participant.rank}>
+                  <TableCell>{participant.rank}</TableCell>
+                  <TableCell>{participant.username}</TableCell>
+                  <TableCell>{participant.score}</TableCell>
+                  <TableCell>{participant.penalty}</TableCell>{" "}
+                  {/* Penalty in Seconds */}
+                  <TableCell>
+                    {participant.submissionTime !== "NA"
+                      ? // ? contestDetails.startTime - new Date(participant.submissionTime).toLocaleString()
+                        // time taken in hh:mm:ss format
+                        new Date(
+                          new Date(participant.submissionTime).getTime() -
+                            // new Date(1741949346108).getTime() -
+                            // new Date(1741949286108).getTime()
+                            new Date(contestDetails.startTime).getTime()
+                        )
+                          .toISOString()
+                          .substr(11, 8)
+                      : "NA"}
+                  </TableCell>{" "}
+                  {/* Format submission time */}
+                </TableRow>
+              ))}
         </TableBody>
       </Table>
       <Button className="mt-4" onClick={refresh}>

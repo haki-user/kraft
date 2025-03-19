@@ -1,15 +1,21 @@
 "use client";
+import { useEffect, useState } from "react";
 import {
+  Button,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
+  ScrollArea,
+  ScrollBar,
+  // Icons,
+  Skeleton,
 } from "@kraft/ui";
 import type { Submission, Submissions } from "@kraft/types";
 import { getAllUserContestSubmissions } from "@/services/submissions-service";
-import { useEffect, useState } from "react";
+import { Code } from "lucide-react";
 
 export default function SubmissionSection({
   contestId,
@@ -18,6 +24,8 @@ export default function SubmissionSection({
 }): JSX.Element {
   const [submissions, setSubmissions] = useState<Submissions>();
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedSubmission, setSelectedSubmission] =
+    useState<Submission | null>(null);
   const handleFetchSubmissoins = async () => {
     setIsLoading(true);
     try {
@@ -63,6 +71,11 @@ export default function SubmissionSection({
 
   return (
     <div className="w-full space-y-4">
+      {/* modal to show any submission code */}
+      <SubmissionModal
+        selectedSubmission={selectedSubmission}
+        setSelectedSubmission={setSelectedSubmission}
+      />
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -71,15 +84,36 @@ export default function SubmissionSection({
               <TableHead>Language</TableHead>
               <TableHead>Runtime</TableHead>
               <TableHead>Memory</TableHead>
-              <TableHead className="text-right">Submitted</TableHead>
+              <TableHead
+              // className="text-right"
+              >
+                Submitted
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              <div>Loading...</div>
-            ) : (
-              submissions &&
-              submissions.submissions.map((submission) => (
+              <TableRow>
+                <TableCell className="text-center">
+                  {/* <div className="flex justify-center items-center space-x-2"> */}
+                  <Skeleton className="w-10/12 h-4 my-2.5" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="w-1/2 h-4 my-2.5" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="w-1/2 h-4 my-2.5" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="w-1/2 h-4 my-2.5" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="w-11/12 my-2.5 h-4" />
+                </TableCell>
+                {/* </div> */}
+              </TableRow>
+            ) : submissions?.submissions ? (
+              submissions?.submissions.map((submission) => (
                 <TableRow key={submission.id}>
                   <TableCell>
                     <span
@@ -91,7 +125,14 @@ export default function SubmissionSection({
                     </span>
                   </TableCell>
                   <TableCell className="font-medium">
-                    {submission.language}
+                    <Button
+                      variant="link"
+                      className="px-2"
+                      onClick={() => setSelectedSubmission(submission)}
+                      title="View Submission"
+                    >
+                      {submission.language}
+                    </Button>
                   </TableCell>
                   <TableCell>
                     {submission.runtime > 0 ? `${submission.runtime} ms` : "-"}
@@ -99,11 +140,19 @@ export default function SubmissionSection({
                   <TableCell>
                     {submission.memory > 0 ? `${submission.memory} MB` : "-"}
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell
+                  // className="text-right"
+                  >
                     {formatDate(submission.timestamp)}
                   </TableCell>
                 </TableRow>
               ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center">
+                  No submissions yet.
+                </TableCell>
+              </TableRow>
             )}
           </TableBody>
         </Table>
@@ -114,6 +163,79 @@ export default function SubmissionSection({
           (acc, submission) => acc + (submission.status === "ACCEPTED" ? 1 : 0),
           0
         )}
+      </div>
+    </div>
+  );
+}
+
+function SubmissionModal({
+  selectedSubmission,
+  setSelectedSubmission,
+}: {
+  selectedSubmission: Submission | null;
+  setSelectedSubmission: (submission: Submission | null) => void;
+}): JSX.Element {
+  return (
+    <div
+      className={`fixed z-10 inset-0 overflow-y-auto ${selectedSubmission ? "" : "hidden"}`}
+    >
+      <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+          <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+        </div>
+        <span
+          className="hidden sm:inline-block sm:align-middle sm:h-screen"
+          aria-hidden="true"
+        >
+          &#8203;
+        </span>
+        <div
+          className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-headline"
+        >
+          <div className="bg-background pt-5 pb-4 sm:pb-4 px-2">
+            <div className="mt-3 sm:mt-0  sm:text-left">
+              <h3
+                className="leading-6 font-bold text-gray-900 dark:text-primary-foreground"
+                id="modal-headline"
+              >
+                Submission Code
+              </h3>
+              {/* code snippet */}
+              <ScrollArea className="border-[1px] border-solid border-gray-5 border-secondary rounded-lg  h-[70vh] w-[80vw] min-w-96 p-2 bg-slate-5 bg-secondary mt-3 text-nowrap">
+                <Button
+                  variant="link"
+                  className="absolute top-2 right-2 no-underline hover:no-underline hover:text-primary/75 active:text-primary/55"
+                  onClick={() =>
+                    navigator.clipboard.writeText(
+                      selectedSubmission?.code || ""
+                    )
+                  }
+                >
+                  <Code className="w-5 h-5" />
+                  Copy
+                </Button>
+                <pre className="text-sm p-2 ">{selectedSubmission?.code}</pre>
+
+                <ScrollBar id="submission-code-scb-v" orientation="vertical" />
+                <ScrollBar
+                  id="submission-code-scb-h"
+                  orientation="horizontal"
+                />
+              </ScrollArea>
+            </div>
+          </div>
+          <div className="bg-background px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+            <Button
+              onClick={() => setSelectedSubmission(null)}
+              className="active:bg-primary/45"
+            >
+              Close
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -6,6 +6,11 @@ export const fetchProblemById = async (problemId: string): Promise<Problem> => {
   return response.data;
 };
 
+export const fetchPublicProblemById = async (problemId: string): Promise<Problem> => {
+  const response = await api.get(`/problems/public/${problemId}`);
+  return response.data;
+};
+
 /**
  * Fetch paginated public problems data.
  */

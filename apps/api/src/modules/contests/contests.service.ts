@@ -333,6 +333,7 @@ export const getAllContestsForUser = async (
     },
     orderBy: { startTime: "desc" },
   });
+
   const userParticipations = await prisma.contestParticipation.findMany({
     where: { userId },
     select: { contestId: true },
@@ -429,10 +430,60 @@ export const registerUserForContest = async (
 };
 
 export const getContestById = async (
-  id: string
-): Promise<Omit<Contest, "isRegistered"> | null> => {
-  const contest = await prisma.contest.findUnique({
-    where: { id },
+  id: string,
+  userId?: string
+  // ): Promise<Omit<Contest, "isRegistered"> | null> => {
+): Promise<Contest | null> => {
+  // const contest = await prisma.contest.findUnique({
+  //   where: { id },
+  //   include: {
+  //     _count: {
+  //       select: {
+  //         participants: true,
+  //         contestProblems: true,
+  //       },
+  //     },
+  //   },
+  // });
+
+  // return contest
+  //   ? {
+  //       ...contest,
+  //       participantsCount: contest._count.participants,
+  //       problemsCount: contest._count.contestProblems,
+  //     }
+  //   : null;
+  const userOrgDomain = userId
+    ? await prisma.user.findUnique({
+        select: {
+          organizationDomain: true,
+        },
+        where: {
+          id: userId,
+        },
+      })
+    : null;
+  const contest = await prisma.contest.findFirst({
+    where: {
+      AND: [
+        {
+          OR: [
+            { allowedDomains: { has: "all" } },
+            ...(userOrgDomain?.organizationDomain
+              ? [{ allowedDomains: { has: userOrgDomain.organizationDomain } }]
+              : []),
+          ],
+        },
+        {
+          status: {
+            not: "DRAFT",
+          },
+        },
+        {
+          id,
+        },
+      ],
+    },
     include: {
       _count: {
         select: {
@@ -443,11 +494,30 @@ export const getContestById = async (
     },
   });
 
-  return contest
-    ? {
-        ...contest,
-        participantsCount: contest._count.participants,
-        problemsCount: contest._count.contestProblems,
-      }
-    : null;
+  const userParticipations = await prisma.contestParticipation.findMany({
+    where: { userId },
+    select: { contestId: true },
+  });
+
+  if (!contest) {
+    return null;
+  }
+
+  const finalContests = {
+    id: contest.id,
+    titleSlug: contest.titleSlug,
+    title: contest.title,
+    description: contest.description,
+    creatorId: contest.creatorId,
+    startTime: contest.startTime,
+    endTime: contest.endTime,
+    status: contest.status,
+    maxParticipants: contest.maxParticipants,
+    participantsCount: contest._count.participants,
+    problemsCount: contest._count.contestProblems,
+    isRegistered: userParticipations.some(
+      (participation) => participation.contestId === contest.id
+    ),
+  };
+  return finalContests;
 };

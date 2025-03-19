@@ -26,7 +26,7 @@ export function Signup(): JSX.Element {
       toast({
         title: "Success",
         description: "Account created successfully",
-        variant: "success",
+        // variant: "success",
       });
       if (document.referrer && document.referrer !== window.location.href) {
         router.back();

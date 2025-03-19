@@ -140,9 +140,9 @@ export const getAllContestsHandler = async (req: Request, res: Response) => {
  * Get a contest by ID
  */
 export const getContestByIdHandler = async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const { id, userId } = req.params;
   try {
-    const contest = await getContestById(id);
+    const contest = await getContestById(id, userId);
     if (!contest) {
       res.status(404).json({ message: "Contest not found." });
       return;

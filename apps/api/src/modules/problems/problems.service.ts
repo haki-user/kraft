@@ -55,6 +55,9 @@ export const getAllProblemsDataPaginated = async (
         title: true,
         difficulty: true,
       },
+      where: {
+        isPublic: true,
+      },
       skip,
       take: limit,
     }),
@@ -109,6 +112,25 @@ export const getProblemById = async (id: string): Promise<Problem | null> => {
   if (!problem) return null;
   return getParsedTestCaseInputProblems([problem])[0];
 };
+
+export const getPublicProblemById = async (id: string): Promise<Problem | null> => {
+  const problem = await prisma.problem.findUnique({
+    where: {
+      id,
+      isPublic: true,
+    },
+    include: {
+      testCases: {
+        where: {
+          isPublic: true,
+        },
+      },
+    },
+  });
+  if (!problem) return null;
+  return getParsedTestCaseInputProblems([problem])[0];
+};
+
 
 export const createProblem = async (problem: CreateProblemDTO) => {
   console.log({ problem });

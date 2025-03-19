@@ -57,6 +57,21 @@ export const getProblemById = async (req: Request, res: Response) => {
   }
 };
 
+export const getPublicProblemById = async (req: Request, res: Response) => {
+  const { problemId } = req.params;
+  try {
+    const problem = await ProblemsService.getPublicProblemById(problemId);
+    if (!problem) {
+      res.status(404).json({ error: "Problem not found." });
+      return;
+    }
+    res.json(problem);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch the problem." });
+  }
+};
+
 export const createProblem = async (req: Request, res: Response) => {
   try {
     const problem = await ProblemsService.createProblem(req.body);

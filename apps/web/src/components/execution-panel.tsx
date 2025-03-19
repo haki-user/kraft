@@ -70,27 +70,7 @@ export function ExecutionPanel({
   initialTestCases,
 }: ExecutionPanelProps): JSX.Element {
   const [testCases, setTestCases] = useState<TestCase[]>(initialTestCases);
-  const [testResults, setTestResults] = useState<TestRunResult[]>([
-    // {
-    //   id: 1,
-    //   status: TestStatus.Pass,
-    //   output: `Hello World
-    //   HHello Worldello World
-    //   HHello Worldello World \n
-    //   HHello Worldello World
-    //   HHello Worldello World \n
-    //   HHello Worldello World
-    //   HHello Worldello World
-    //   HHello Worldello World
-    //   `,
-    //   input: [
-    //     {
-    //       nums: "Hello World",
-    //     },
-    //     { n: "5" },
-    //   ],
-    // },
-  ]);
+  const [testResults, setTestResults] = useState<TestRunResult[]>([]);
   const { toast } = useToast();
   // const handleRun = ()
   useEffect(() => {
@@ -134,23 +114,30 @@ export function ExecutionPanel({
     //   message: "",
     //   output: "",
     // });
-    const res: ExecutorResult | null = await handleTestRun(testCases);
-    if (!res) return;
+    try {
 
-    console.log({ res }, "zzz");
+      const res: ExecutorResult | null = await handleTestRun(testCases);
+      if (!res) return;
+      
+      // console.log({ res }, "zzz");
+      
+      if (res.results) {
+        setTestResults(res.results);
+      }
+      
+      setExecutionResult({
+        status: res.status,
+        message: "",
+        output: "",
+      });
+      
+    } catch(e) {
 
-    if (res.results) {
-      setTestResults(res.results);
+    } finally {
+
+      setIsExecuting(false);
+      setActiveTab("test-results");
     }
-
-    setExecutionResult({
-      status: res.status,
-      message: "",
-      output: "",
-    });
-
-    setIsExecuting(false);
-    setActiveTab("test-results");
   };
 
   const handleSubmit = async () => {

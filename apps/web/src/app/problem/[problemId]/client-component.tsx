@@ -18,7 +18,6 @@ import {
   ScrollArea,
   ScrollBar,
   Badge,
-  Button,
 } from "@kraft/ui";
 import Editor from "@/components/editor";
 import { ExecutionPanel } from "@/components/execution-panel";
@@ -41,149 +40,11 @@ import type { TestCase } from "@kraft/types";
 
 import "./styles.css";
 
-// type TestCaseInput = Record<string, string>;
-
-// interface TestCase {
-//   readonly id: number;
-//   input: TestCaseInput[];
-//   output?: string;
-// }
-
-// interface Problem {
-//   readonly id: number;
-//   readonly name: string;
-//   readonly description: string;
-//   // readonly input: string;
-//   // readonly output: string;
-//   // readonly examples: string;
-//   // readonly constraints: string;
-// }
-
-// interface Submission {
-//   id: number;
-//   problemId: number;
-//   userId: string;
-//   code: string;
-//   language: string;
-//   status: "ACCEPTED" | "WRONG_ANSWER" | "RUNTIME_ERROR" | "time_limit_exceeded";
-//   runtime: number;
-//   memory: number;
-//   timestamp: number; // Unix timestamp for better performance
-// }
-
-// interface Submissions {
-//   // readonly solved: boolean;
-//   readonly submissions: readonly Submission[];
-//   readonly totalCount: number;
-//   readonly acceptedCount: number;
-// }
-
-// const submissions1: Submissions = {
-//   submissions: [
-//     {
-//       id: "1",
-//       problemId: "1",
-//       userId: "user123",
-//       code: "function twoSum(nums: number[], target: number): number[] {...}",
-//       language: "typescript",
-//       status: "ACCEPTED",
-//       runtime: 76,
-//       memory: 42.3,
-//       timestamp: 1703116800000,
-//     },
-//     {
-//       id: "2",
-//       problemId: "1",
-//       userId: "user123",
-//       code: "function twoSum(nums: number[], target: number): number[] {...}",
-//       language: "typescript",
-//       status: "WRONG_ANSWER",
-//       runtime: 82,
-//       memory: 43.1,
-//       timestamp: 1703116700000,
-//     },
-//     {
-//       id: "3",
-//       problemId: "1",
-//       userId: "user123",
-//       code: "function twoSum(nums: number[], target: number): number[] {...}",
-//       language: "typescript",
-//       status: "RUNTIME_ERROR",
-//       runtime: 0,
-//       memory: 0,
-//       timestamp: 1703116600000,
-//     },
-//   ],
-//   totalCount: 3,
-//   acceptedCount: 1,
-// };
-
-const problem1: Problem = {
-  difficulty: "EASY",
-  testCases: [],
-  titleSlug: "two-sum",
-  id: "1",
-  title: "Two Sum",
-  description: `<p>Given an array of integers <code>nums</code>&nbsp;and an integer <code>target</code>, return <em>indices of the two numbers such that they add up to <code>target</code></em>.</p>
-
-<p>You may assume that each input would have <strong><em>exactly</em> one solution</strong>, and you may not use the <em>same</em> element twice.</p>
-
-<p>You can return the answer in any order.</p>
-
-<p>&nbsp;</p>
-<p><strong class="example">Example 1:</strong></p>
-
-<pre>
-<strong>Input:</strong> nums = [2,7,11,15], target = 9
-<strong>Output:</strong> [0,1]
-<strong>Explanation:</strong> Because nums[0] + nums[1] == 9, we return [0, 1].
-</pre>
-
-<p><strong class="example">Example 2:</strong></p>
-
-<pre>
-<strong>Input:</strong> nums = [3,2,4], target = 6
-<strong>Output:</strong> [1,2]
-</pre>
-
-<p><strong class="example">Example 3:</strong></p>
-
-<pre>
-<strong>Input:</strong> nums = [3,3], target = 6
-<strong>Output:</strong> [0,1]
-</pre>
-
-<p>&nbsp;</p>
-<p><strong>Constraints:</strong></p>
-
-<ul>
-	<li><code>2 &lt;= nums.length &lt;= 10<sup>4</sup></code></li>
-	<li><code>-10<sup>9</sup> &lt;= nums[i] &lt;= 10<sup>9</sup></code></li>
-	<li><code>-10<sup>9</sup> &lt;= target &lt;= 10<sup>9</sup></code></li>
-	<li><strong>Only one valid answer exists.</strong></li>
-</ul>
-
-<p>&nbsp;</p>
-<strong>Follow-up:&nbsp;</strong>Can you come up with an algorithm that is less than <code>O(n<sup>2</sup>)</code><font face="monospace">&nbsp;</font>time complexity?`,
-};
-
-// const initialTestCases: TestCase[] = [
-//   {
-//     id: 1,
-//     input: [{ nums: "1, 2, 3" }, { k: "2" }],
-//   },
-//   {
-//     id: 2,
-//     input: [{ nums: "3, 4, 5" }, { nums2: "5, 6, 7, 8" }],
-//   },
-// ];
-
 export default function ProblemPage({
-  params,
+  problemId,
 }: {
-  params: { contestId: string; problemId: string };
+  problemId: string;
 }): JSX.Element {
-  const { problemId, contestId } = params;
   const [problem, setProblem] = useState<Problem>();
   const [testCases, setTestCases] = useState<TestCase[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -197,6 +58,15 @@ export default function ProblemPage({
     acceptedCount: 0,
   });
   const [activeTab, setActiveTab] = useState("problem");
+
+  useEffect(() => {
+    if (activeTab === "submissions") {
+      (async () => {
+        const res = await getSubmissionsForProblem(problemId);
+        setSubmissions(res);
+      })();
+    }
+  }, [activeTab]);
 
   const fetchProblem = async () => {
     setIsLoading(true);
@@ -241,13 +111,12 @@ export default function ProblemPage({
     try {
       const res = await createSubmission({
         problemId,
-        contestId,
+        // contestId,
         code,
         language: activeLanguage,
       });
       console.log({ res }, "submission...");
       await handleFetchSubmissoins();
-      setActiveTab("submissions");
       return res;
     } catch (e) {
       console.log(e);
@@ -257,9 +126,9 @@ export default function ProblemPage({
 
   const handleFetchSubmissoins = async () => {
     try {
-      const res = await getSubmissionsForProblem(problemId, contestId);
+      const res = await getSubmissionsForProblem(problemId);
       setSubmissions(res);
-      // setActiveTab("submissions");
+      setActiveTab("submissions");
     } catch (e) {
       console.log(e);
     }
@@ -267,7 +136,6 @@ export default function ProblemPage({
 
   useEffect(() => {
     void fetchProblem();
-    void handleFetchSubmissoins();
   }, []);
 
   if (isLoading) {
@@ -469,17 +337,7 @@ function SubmissionSection({
                   </span>
                 </TableCell>
                 <TableCell className="font-medium">
-                  {/* {submission.language} */}
-                  <Button
-                    variant="link"
-                    className="px-2 hover:text-primary/75 active:text-primary/55"
-                    onClick={() =>
-                      navigator.clipboard.writeText(submission?.code || "")
-                    }
-                    title="Copy code"
-                  >
-                    {submission.language}
-                  </Button>
+                  {submission.language}
                 </TableCell>
                 <TableCell>
                   {submission.runtime > 0 ? `${submission.runtime} ms` : "-"}

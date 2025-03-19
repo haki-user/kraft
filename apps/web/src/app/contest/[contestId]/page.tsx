@@ -12,6 +12,7 @@ import {
   // Input,
   ScrollArea,
   ScrollBar,
+  Icons,
   // Button,
   // Skeleton,
 } from "@kraft/ui";
@@ -22,6 +23,8 @@ import { useToast } from "@/hooks/use-toast";
 import { AxiosError } from "axios";
 import Leaderboard from "@/components/leaderboard";
 import Submissions from "@/components/submissions";
+import { fetchContestById } from "@/services/contests-service";
+import type { Contest } from "@kraft/types";
 
 export default function Contest({
   params,
@@ -32,7 +35,8 @@ export default function Contest({
   const [contestProblems, setContestProblems] = useState<
     (ContestProblem & { status: "pass" | "fail" | "pending" })[]
   >([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [contestDetails, setContestDetails] = useState<Contest>();
   const router = useRouter();
   const { toast } = useToast();
 
@@ -59,9 +63,41 @@ export default function Contest({
     }
   };
 
+  const fetchContest = async () => {
+    setIsLoading(true);
+    try {
+      const contest = await fetchContestById(contestId);
+      console.log(contest);
+      setContestDetails(contest);
+    } catch (error) {
+      console.error("Error fetching contest:", error);
+      if (error instanceof AxiosError) {
+        toast({
+          title: "Failed to fetch the contest.",
+          description: `Failed to fetch contest: ${error?.response?.data.message}`,
+          variant: "destructive",
+        });
+        router.replace("/contest");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     void fetchTaskList();
+    void fetchContest();
   }, []);
+
+  if (isLoading) {
+    return <div className="w-full h-full min-h-screen flex justify-center items-center">
+      <Icons.spinner className="animate-spin h-6 w-6" />
+    </div>
+  }
+  
+  if (!contestDetails) {
+    return <div>Contest not found</div>;
+  }
 
   return (
     <div>
@@ -79,7 +115,10 @@ export default function Contest({
             <Submissions contestId={contestId} />
           </TabsContent>
           <TabsContent value="leaderboard">
-            <Leaderboard contestId={contestId} />
+            <Leaderboard
+              contestId={contestId}
+              contestDetails={contestDetails}
+            />
           </TabsContent>
         </Tabs>
       </div>

@@ -2,6 +2,7 @@ import type { TestCase, SubmissionStatus } from "@kraft/types";
 import { exec } from "child_process";
 import { promisify } from "util";
 import * as fs from "fs/promises";
+// import * as fsSync from "fs";
 import * as path from "path";
 import type { TestRunResult } from "@kraft/types";
 
@@ -40,7 +41,7 @@ const createTempFile = async (
   content: string,
   extension: string
 ): Promise<string> => {
-  const fileName = `temp_${Date.now()}${extension}`;
+  const fileName = `temp_${Date.now()}_${Math.random().toString(36).substring(2, 15)}${extension}`;
   const filePath = path.join("/tmp", fileName);
   await fs.writeFile(filePath, content);
   return filePath;
@@ -62,8 +63,10 @@ const executeCode = async (
         const inputFilePath = await createTempFile(input, ".txt");
 
         const { stdout, stderr } = await execAsync(
-          `python3 ${filePath} < ${inputFilePath}`,
-          { timeout: 5000 }
+          `python ${filePath} < ${inputFilePath}`,
+          {
+            timeout: 5000,
+          }
         );
 
         if (stderr) throw new Error(stderr);
@@ -79,7 +82,7 @@ const executeCode = async (
         );
         const memoryUsed = parseInt(memoryOutput.trim()) / 1024; // Convert KB to MB
 
-        // Cleanup input file
+        // // Cleanup input file
         await fs.unlink(inputFilePath).catch(() => {});
 
         return { output, runtime, memoryUsed };
@@ -91,7 +94,9 @@ const executeCode = async (
   } finally {
     // Cleanup temp file
     if (filePath) {
-      await fs.unlink(filePath).catch(() => {});
+      await fs
+        .unlink(filePath)
+        .catch((e) => console.log(`Failed to delete file: ${filePath}`, e));
     }
   }
 };

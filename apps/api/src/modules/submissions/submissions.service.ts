@@ -9,8 +9,8 @@ import {
   Submissions,
 } from "@kraft/types";
 import executor from "./code-execution.service";
-import test from "node:test";
-import { timeStamp } from "console";
+// import test from "node:test";
+// import { timeStamp } from "console";
 
 /**
  * Create a new submission for a problem.
@@ -172,7 +172,7 @@ export const executeTestRun = async ({
   code,
   language,
   testCases,
-}: ExecuteTestRunDTO): Promise<SubmissionResult> => {
+}: ExecuteTestRunDTO): Promise<ExecutorResult> => {
   // const executionResult = await axios.post(
   //   "http://execution-microservice/test-run",
   //   {

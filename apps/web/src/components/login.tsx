@@ -22,7 +22,7 @@ export function Login(): JSX.Element {
       toast({
         title: "Success",
         description: "Logged in successfully",
-        variant: "success",
+        // variant: "success",
       });
       if (document.referrer && document.referrer !== window.location.href) {
         router.back();

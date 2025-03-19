@@ -1,12 +1,15 @@
 import { defineConfig, type Options } from "tsup";
 
 export default defineConfig((options: Options) => ({
-  entry: ["src/**/*.@(ts|tsx)", "!src/**/*.test.@(ts|js)"], // Only entry points for components or packages
+  entry: [
+    "src/**/*.@(ts|tsx)",
+    "!src/**/*.test.*", // Excludes all test file extensions
+  ], // Only entry points for components or packages
   format: ["cjs", "esm"], // Good for compatibility
   external: ["react"], // Externalize React if it's not used inside the package
   // treeshake: true, // Disabled because it strips 'use client'
   clean: true,
-  // splitting: true,
+  splitting: true,
   // minify: true,
   // dts: false,
   dts: true,

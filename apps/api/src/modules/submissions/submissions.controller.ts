@@ -14,6 +14,7 @@ export const createSubmissionHandler = async (req: Request, res: Response) => {
   }
 
   try {
+    console.log({userId, problemId, contestId, code, language})
     const submission = await submissionsService.createSubmission({
       userId,
       problemId,

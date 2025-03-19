@@ -3,7 +3,7 @@ import { ReactNode, useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthSync, useAuthStore } from '@/store/auth-store';
 import { verifyToken } from '@/services/auth-service';
-import { INTERCEPTION_ROUTE_REWRITE_MANIFEST } from 'next/dist/shared/lib/constants';
+// import { INTERCEPTION_ROUTE_REWRITE_MANIFEST } from 'next/dist/shared/lib/constants';
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -12,7 +12,7 @@ interface AuthProviderProps {
 
 export default function AuthProvider({ 
   children, 
-  publicPaths = ['/auth', '/register', '/reset-password', '/'] 
+  publicPaths = ['/auth', '/register', '/reset-password', '/', '/problem'] 
 }: AuthProviderProps) {
   const router = useRouter();
   const pathname = usePathname();

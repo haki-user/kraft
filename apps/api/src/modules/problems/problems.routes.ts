@@ -3,6 +3,7 @@ import {
   getAllProblemsDataPaginated,
   // GetProblemDataById,
   getProblemById,
+  getPublicProblemById,
   createProblem,
   updateProblem,
   deleteProblem,
@@ -17,11 +18,14 @@ import { authMiddleware, roleGuard } from "../auth/auth.middleware";
 
 const router: Router = Router();
 
-router.use(authMiddleware);
-
 // Todo: Add zod validation
 
 router.get("/", getAllProblemsDataPaginated);
+router.get("/public/:problemId", getPublicProblemById);
+
+// ***** Add auth middleware to the following routes *****
+router.use(authMiddleware);
+
 router.get("/:problemId", getProblemById);
 router.post("/", roleGuard("ADMIN", "ORGANIZER"), createProblem);
 router.put("/:problemId", roleGuard("ADMIN"), updateProblem);
