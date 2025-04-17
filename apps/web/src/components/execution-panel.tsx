@@ -22,6 +22,7 @@ import type {
   TestCase,
   TestRunResult,
 } from "@kraft/types";
+// import { error } from "console";
 
 type TestCaseInput = Record<string, string>;
 
@@ -33,9 +34,8 @@ type TestCaseInput = Record<string, string>;
 
 interface ExecutionPanelProps {
   handleTestRun: (testCases: TestCase[]) => Promise<ExecutorResult | null>;
-  handleSubmission: (
-    // data: Omit<CreateSubmissionDTO, "userId">
-  ) => Promise<SubmissionResult | null>;
+  handleSubmission: () // data: Omit<CreateSubmissionDTO, "userId">
+  => Promise<SubmissionResult | null>;
   initialTestCases: TestCase[];
 }
 
@@ -77,7 +77,7 @@ export function ExecutionPanel({
     setTestResults([]);
   }, []);
   const [executionResult, setExecutionResult] =
-    useState<ExecutionResult | null>();
+    useState<ExecutorResult | null>();
   const [isExecuting, setIsExecuting] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<
     "test-cases" | "test-results" | "skeleton"
@@ -115,26 +115,24 @@ export function ExecutionPanel({
     //   output: "",
     // });
     try {
-
       const res: ExecutorResult | null = await handleTestRun(testCases);
       if (!res) return;
-      
+
       // console.log({ res }, "zzz");
-      
+
       if (res.results) {
         setTestResults(res.results);
       }
-      
+
       setExecutionResult({
         status: res.status,
-        message: "",
-        output: "",
+        output: res.output,
+        error: res.error,
+        memoryUsed: res.memoryUsed,
+        runtime: res.runtime,
       });
-      
-    } catch(e) {
-
+    } catch (e) {
     } finally {
-
       setIsExecuting(false);
       setActiveTab("test-results");
     }
@@ -193,209 +191,251 @@ export function ExecutionPanel({
         </div>
       </div>
       {/* <Separator className="mt-1" /> */}
-      <TabsContent className="w-full h-full" value="skeleton">
-        <SkeletonCard />
-      </TabsContent>
-      <TabsContent className="w-full h-full" value="test-cases">
-        <Tabs
-          className="w-full h-full p-1"
-          defaultValue={`test-case-${testCases[0].id}`}
-        >
-          <TabsList>
-            {testCases.map((testCase, idx) => (
-              <TabsTrigger key={testCase.id} value={`test-case-${testCase.id}`}>
-                Case {idx + 1}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-          {/* <Separator className="mt-1" /> */}
-          <ScrollArea className="w-full h-[calc(100%-5.2rem)] pt-2">
-            {testCases.map(({ id: testCaseId, input }) => (
-              <TabsContent
-                className="pb-2 px-2"
-                key={testCaseId}
-                value={`test-case-${testCaseId}`}
-              >
-                {input.map((item) => {
-                  const key = Object.keys(item)[0];
-                  const value = item[key];
-
-                  return (
-                    <div className="mt-5" key={key}>
-                      <Label htmlFor={`test-case-${testCaseId}-input-${key}`}>
-                        <span className="text-nowrap text-base">{key}</span>
-                      </Label>
-                      <Input
-                        className="mt-1"
-                        id={`test-case-${testCaseId}-input-${key}`}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                          handleTestCaseInputChange(
-                            testCaseId,
-                            key,
-                            e.target.value
-                          );
-                        }}
-                        value={value}
-                      />
-                    </div>
-                  );
-                })}
-              </TabsContent>
-            ))}
-          </ScrollArea>
-        </Tabs>
-      </TabsContent>
-      {/* Results */}
-      <TabsContent className="w-full h-full" value="test-results">
-        {
-          // If there are no test results, show a message
-          testResults.length === 0 || !executionResult ? (
-            <div className="flex items-center justify-center h-full">
-              <div className="text-2xl text-gray-500">
-                No test results available
-              </div>
+      {/* Accepted + show runtime */}
+      <ScrollArea className="w-full h-full">
+        {executionResult?.status === "ACCEPTED" &&
+          activeTab === "test-results" && (
+            <div className="bg-background my-4">
+              <span className="text-green-700 text-xl">Accepted</span>
+              <span className="ml-2 text-sm">
+                Runtime: {Math.round(executionResult.runtime)}ms
+              </span>
             </div>
-          ) : (
-            <div className="w-full h-full">
-              {executionResult.status === "COMPILATION_ERROR" ||
-              executionResult.status === "RUNTIME_ERROR" ||
-              executionResult.status === "MEMORY_LIMIT_EXCEEDED" ||
-              executionResult.status === "TIME_LIMIT_EXCEEDED" ? (
-                <div>
-                  <div className="p-1">
-                    <div className="w-full bg-destructive p-5 rounded-md bg-opacity-0 text-destructive-foreground">
-                      <Label htmlFor="execution-result-message">
-                        <span className="text-nowrap text-base">Error</span>
-                      </Label>
-                      <div className="text-xs" id="execution-result-message">
-                        {executionResult.message}
+          )}
+        <TabsContent className="w-full h-full" value="skeleton">
+          <SkeletonCard />
+        </TabsContent>
+        <TabsContent className="w-full h-full" value="test-cases">
+          <Tabs
+            className="w-full h-full p-1"
+            defaultValue={`test-case-${testCases[0].id}`}
+          >
+            <TabsList>
+              {testCases.map((testCase, idx) => (
+                <TabsTrigger
+                  key={testCase.id}
+                  value={`test-case-${testCase.id}`}
+                >
+                  Case {idx + 1}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+            {/* <Separator className="mt-1" /> */}
+            {/* <ScrollArea className="w-full h-[calc(100%-5.2rem)] pt-2"> */}
+              {testCases.map(({ id: testCaseId, input }) => (
+                <TabsContent
+                  className="pb-2 px-2"
+                  key={testCaseId}
+                  value={`test-case-${testCaseId}`}
+                >
+                  {input.map((item) => {
+                    const key = Object.keys(item)[0];
+                    const value = item[key];
+
+                    return (
+                      <div className="mt-5" key={key}>
+                        <Label htmlFor={`test-case-${testCaseId}-input-${key}`}>
+                          <span className="text-nowrap text-base">{key}</span>
+                        </Label>
+                        <Input
+                          className="mt-1"
+                          id={`test-case-${testCaseId}-input-${key}`}
+                          onChange={(
+                            e: React.ChangeEvent<HTMLInputElement>
+                          ) => {
+                            handleTestCaseInputChange(
+                              testCaseId,
+                              key,
+                              e.target.value
+                            );
+                          }}
+                          value={value}
+                        />
                       </div>
-                    </div>
-                    <div className="mt-5">
-                      <Label htmlFor="execution-result-output">
-                        <span className="text-nowrap text-base">
-                          Last Execution Output
-                        </span>
-                      </Label>
-                      <div
-                        className="mt-1 flex items-center whitespace-pre-wrap min-h-9 h-content w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                        id="execution-result-output"
-                      >
-                        {executionResult.output}
+                    );
+                  })}
+                </TabsContent>
+              ))}
+            {/* </ScrollArea> */}
+          </Tabs>
+        </TabsContent>
+        {/* Results */}
+        <TabsContent className="w-full h-full" value="test-results">
+          {
+            // If there are no test results, show a message
+            (testResults.length === 0 || !executionResult) &&
+            (!executionResult ||
+              (executionResult.status !== "COMPILATION_ERROR" &&
+                executionResult.status !== "RUNTIME_ERROR" &&
+                executionResult.status !== "MEMORY_LIMIT_EXCEEDED" &&
+                executionResult.status !== "TIME_LIMIT_EXCEEDED")) ? (
+              <div className="flex items-center justify-center h-full">
+                <div className="text-2xl text-gray-500">
+                  No test results available
+                </div>
+              </div>
+            ) : (
+              <div className="w-full h-full">
+                {executionResult.status === "COMPILATION_ERROR" ||
+                executionResult.status === "RUNTIME_ERROR" ||
+                executionResult.status === "MEMORY_LIMIT_EXCEEDED" ||
+                executionResult.status === "TIME_LIMIT_EXCEEDED" ? (
+                  <div>
+                    <div className="p-1">
+                      <div className="w-full bg-destructive p-5 rounded-md bg-opacity-0 text-destructive-foreground">
+                        <Label htmlFor="execution-result-message">
+                          <span className="text-nowrap text-base">
+                            {executionResult.status}
+                          </span>
+                        </Label>
+                        <div className="text-xs" id="execution-result-message">
+                          {(executionResult.error || "")
+                            .split("\n")
+                            .map((line, index) => (
+                              <div key={index}>{line}</div>
+                            ))}
+                        </div>
+                      </div>
+                      <div className="mt-5">
+                        <Label htmlFor="execution-result-output">
+                          <span className="text-nowrap text-base">
+                            Last Execution Output
+                          </span>
+                        </Label>
+                        <div
+                          className="mt-1 flex items-center whitespace-pre-wrap min-h-9 h-content w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                          id="execution-result-output"
+                        >
+                          {executionResult.output}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ) : null}
+                ) : null}
 
-              {executionResult.status !== "COMPILATION_ERROR" &&
-              executionResult.status !== "RUNTIME_ERROR" &&
-              executionResult.status !== "MEMORY_LIMIT_EXCEEDED" &&
-              executionResult.status !== "TIME_LIMIT_EXCEEDED" ? (
-                <Tabs
-                  className="w-full h-full p-1"
-                  defaultValue={`test-result-${1}`}
-                >
-                  <TabsList>
-                    {testResults.map((testResult, idx) => (
-                      <TabsTrigger
-                        key={testResult.testCase.id}
-                        value={`test-result-${idx + 1}`}
-                      >
-                        Case {idx + 1}
-                      </TabsTrigger>
-                    ))}
-                  </TabsList>
-                  {/* <Separator className="mt-1" /> */}
-                  <ScrollArea className="w-full h-[calc(100%-5.2rem)]">
-                    <ScrollBar orientation="vertical" />
-                    <div>
-                      {testResults.map((testResult, idx) => (
-                        <TabsContent
-                          className="pb-2 px-2"
-                          key={testResult.testCase.id}
-                          value={`test-result-${idx + 1}`}
-                        >
-                          <div>
-                            {testResult.testCase.input.map((item) => {
-                              const key = Object.keys(item)[0];
-                              const value = item[key];
-                              return (
-                                <div className="mt-5" key={key}>
-                                  <Label
-                                    htmlFor={`test-result-${idx}-input-${key}`}
-                                  >
-                                    <span className="text-nowrap text-base">
-                                      {key}
-                                    </span>
-                                  </Label>
-                                  <Input
-                                    className="mt-1"
-                                    id={`test-result-${idx}-input-${key}`}
-                                    readOnly
-                                    value={value}
-                                  />
+                {executionResult.status !== "COMPILATION_ERROR" &&
+                executionResult.status !== "RUNTIME_ERROR" &&
+                executionResult.status !== "MEMORY_LIMIT_EXCEEDED" &&
+                executionResult.status !== "TIME_LIMIT_EXCEEDED" ? (
+                  <Tabs
+                    className="w-full h-full p-1"
+                    defaultValue={`test-result-${1}`}
+                  >
+                    <TabsList>
+                      {testResults.map((testResult, idx) => {
+                        console.log("ddkjk: ", testResult);
+                        return (
+                          <TabsTrigger
+                            key={testResult.testCase.id}
+                            value={`test-result-${idx + 1}`}
+                          >
+                            {" "}
+                            <span
+                              className={`mr-1.5 w-1.5 h-1.5 rounded-full inline-block ${
+                                testResult.status === "ACCEPTED"
+                                  ? "bg-green-700"
+                                  : "bg-destructive"
+                              }`}
+                            >
+                              {" "}
+                            </span>
+                            Case {idx + 1}
+                          </TabsTrigger>
+                        );
+                      })}
+                    </TabsList>
+                    {/* <Separator className="mt-1" /> */}
+                    {/* <ScrollArea className="w-full h-[calc(100%-5.2rem)]"> */}
+                      {/* <ScrollBar orientation="vertical" /> */}
+                      <div>
+                        {testResults.map((testResult, idx) => (
+                          <TabsContent
+                            className="pb-2 px-2"
+                            key={testResult.testCase.id}
+                            value={`test-result-${idx + 1}`}
+                          >
+                            <div>
+                              {testResult.testCase.input.map((item) => {
+                                const key = Object.keys(item)[0];
+                                const value = item[key];
+                                return (
+                                  <div className="mt-5" key={key}>
+                                    <Label
+                                      htmlFor={`test-result-${idx}-input-${key}`}
+                                    >
+                                      <span className="text-nowrap text-base">
+                                        {key}
+                                      </span>
+                                    </Label>
+                                    <Input
+                                      className="mt-1"
+                                      id={`test-result-${idx}-input-${key}`}
+                                      readOnly
+                                      value={value}
+                                    />
+                                  </div>
+                                );
+                              })}
+                            </div>
+                            <div>
+                              <div className="mt-5">
+                                <Label htmlFor={`test-result-${idx}-output`}>
+                                  <span className="text-nowrap text-base">
+                                    Output
+                                  </span>
+                                </Label>
+                                <div
+                                  className="mt-1 flex items-center whitespace-pre-wrap min-h-9 h-content w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                  id={`test-result-${idx}-output`}
+                                >
+                                  {testResult.output}
                                 </div>
-                              );
-                            })}
-                          </div>
-                          <div>
-                            <div className="mt-5">
-                              <Label htmlFor={`test-result-${idx}-output`}>
-                                <span className="text-nowrap text-base">
-                                  Output
-                                </span>
-                              </Label>
-                              <div
-                                className="mt-1 flex items-center whitespace-pre-wrap min-h-9 h-content w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                                id={`test-result-${idx}-output`}
-                              >
-                                {testResult.output}
                               </div>
                             </div>
-                          </div>
-                          <div>
-                            <div className="mt-5">
-                              <Label
-                                htmlFor={`test-result-${idx}-expected-output`}
-                              >
-                                <span className="text-nowrap text-base">
-                                  Expected Output
-                                </span>
-                              </Label>
-                              <div
-                                className="mt-1 flex items-center whitespace-pre-wrap h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                                id={`test-result-${idx}-expected-output`}
-                              >
-                                {testResult.testCase.expectedOutput}
+                            <div>
+                              <div className="mt-5">
+                                <Label
+                                  htmlFor={`test-result-${idx}-expected-output`}
+                                >
+                                  <span className="text-nowrap text-base">
+                                    Expected Output
+                                  </span>
+                                </Label>
+                                <div
+                                  className="mt-1 flex items-center whitespace-pre-wrap h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                  id={`test-result-${idx}-expected-output`}
+                                >
+                                  {testResult.testCase.expectedOutput}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                          <div>
-                            <div className="mt-5">
-                              <Label htmlFor={`test-result-${idx}-stderr`}>
-                                <span className="text-nowrap text-base">
-                                  stderr
-                                </span>
-                              </Label>
-                              <div
-                                className="mt-1 flex items-center whitespace-pre-wrap h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                                id={`test-result-${idx}-stderr`}
-                              >
-                                {testResult.stderr}
+                            <div>
+                              <div className="mt-5">
+                                <Label htmlFor={`test-result-${idx}-stderr`}>
+                                  <span className="text-nowrap text-base">
+                                    stderr
+                                  </span>
+                                </Label>
+                                <div
+                                  className="mt-1 flex items-center whitespace-pre-wrap h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                  id={`test-result-${idx}-stderr`}
+                                >
+                                  {testResult.stderr}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </TabsContent>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                </Tabs>
-              ) : null}
-            </div>
-          )
-        }
-      </TabsContent>
+                          </TabsContent>
+                        ))}
+                      </div>
+                    {/* </ScrollArea> */}
+                  </Tabs>
+                ) : null}
+              </div>
+            )
+          }
+        </TabsContent>
+        <ScrollBar orientation="vertical" />
+      </ScrollArea>
     </Tabs>
   );
 }

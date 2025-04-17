@@ -103,5 +103,11 @@ export {
   CardContent,
 } from "./components/card";
 export { Badge, badgeVariants } from "./components/badge";
+export {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+} from "./components/tooltip";
 
 // export * from "./theme/tailwind-theme";

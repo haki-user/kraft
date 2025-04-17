@@ -1,10 +1,12 @@
 import type { TestCase, SubmissionStatus } from "@kraft/types";
+import { spawn } from "child_process";
 import { exec } from "child_process";
 import { promisify } from "util";
 import * as fs from "fs/promises";
 // import * as fsSync from "fs";
 import * as path from "path";
 import type { TestRunResult } from "@kraft/types";
+// import e from "express";
 
 const execAsync = promisify(exec);
 
@@ -58,16 +60,64 @@ const executeCode = async (
   try {
     switch (language.toLowerCase()) {
       case "python":
+        // Create temporary files for code and input
         filePath = await createTempFile(code, ".py");
-        // Create a file for input
         const inputFilePath = await createTempFile(input, ".txt");
 
-        const { stdout, stderr } = await execAsync(
-          `python ${filePath} < ${inputFilePath}`,
-          {
-            timeout: 5000,
+        // Define memory limit (in KB) and output limit (in characters)
+        const memoryLimitKB = 256 * 1024; // 256 MB in KB
+        const outputLimit = 10000; // maximum allowed output characters
+
+        // Spawn the child process using bash to set memory limit via ulimit
+        const command = `ulimit -v ${memoryLimitKB} > /dev/null 2>&1 && python ${filePath}`;
+        const child = spawn("bash", ["-c", command], { shell: true });
+
+        let stdout = "";
+        let stderr = "";
+
+        // Pass the input content via stdin
+        child.stdin.write(input);
+        child.stdin.end();
+
+        // Monitor stdout data and enforce output limit
+        child.stdout.on("data", (data) => {
+          const text = data.toString();
+          stdout += text;
+          if (stdout.length > outputLimit) {
+            child.kill("SIGTERM");
+            stderr += "\nOutput limit exceeded.";
+          }
+        });
+
+        child.stderr.on("data", (data) => {
+          stderr += data.toString();
+        });
+
+        const timeout = 5000;
+        const timeoutPromise = new Promise<never>((_resolve, reject) => {
+          const timer = setTimeout(() => {
+            child.kill("SIGTERM");
+            reject(new Error("Timeout exceeded"));
+          }, timeout);
+          child.on("exit", () => clearTimeout(timer));
+        });
+
+        const childPromise = new Promise<{ stdout: string; stderr: string }>(
+          (resolve, reject) => {
+            child.on("error", (error) => reject(error));
+            child.on("close", (code) => {
+              if (code !== 0) {
+                return reject(
+                  new Error(stderr || `Process exited with code ${code}`)
+                );
+              }
+              resolve({ stdout, stderr });
+            });
           }
         );
+
+        const { stdout: commandOutput, stderr: commandError } =
+          await Promise.race([childPromise, timeoutPromise]);
 
         if (stderr) throw new Error(stderr);
         const output = stdout.trim();
@@ -111,12 +161,16 @@ const executor = async (
     if (isTestRun) {
       const test = async (testCase: TestCase) => {
         const formattedInput = formatInput(testCase.input);
-
+        const start = Date.now();
         const { output, runtime, memoryUsed } = await executeCode(
           code,
           formattedInput,
           language
         );
+        const elapsed = Date.now() - start;
+        if (elapsed > 5000) {
+          throw new Error("Time Limit Exceeded");
+        }
 
         const status: SubmissionStatus =
           output === testCase.expectedOutput ? "ACCEPTED" : "WRONG_ANSWER";
@@ -202,19 +256,47 @@ const executor = async (
       };
     }
   } catch (err) {
-    const error = err instanceof Error ? err.message : "Unknown error occurred";
+    console.log("Error:", err);
+    const errorMessage = (err as Error)?.message || "";
+    const stdout = ((err as any)?.stdout as string) || "";
+
+    const stderr = ((err as any)?.stderr as string) || "";
 
     // Check for specific error types
+    if (stderr.includes("SyntaxError")) {
+      return {
+        error: "stderr: " + stderr,
+        status: "RUNTIME_ERROR",
+        memoryUsed: 0,
+        runtime: 0,
+      };
+    }
+    if (stderr.includes("timeout")) {
+      return {
+        error: errorMessage + "\nstderr: " + stderr,
+        status: "TIME_LIMIT_EXCEEDED",
+        memoryUsed: 0,
+        runtime: 0,
+        output: stdout,
+      };
+    }
 
-    if (!error.includes("timeout")) {
-      throw Error(`Unknow error. ${err}`);
+    if (stderr.includes("Killed") || errorMessage.includes("Buffer")) {
+      return {
+        error: errorMessage + "\nstderr: " + stderr,
+        status: "MEMORY_LIMIT_EXCEEDED",
+        memoryUsed: 0,
+        runtime: 0,
+        output: stdout,
+      };
     }
 
     return {
-      error,
-      status: "TIME_LIMIT_EXCEEDED",
+      error: errorMessage + "\nstderr: " + stderr,
+      status: "RUNTIME_ERROR",
       memoryUsed: 0,
       runtime: 0,
+      output: stdout,
     };
   }
 };

@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { fetchPublicProblemById } from "@/services/problems-service";
 import ProblemClient from "./client-component";
-import { notFound } from "next/navigation";
+// import { notFound } from "next/navigation";
 import { AxiosError } from "axios";
 
 // Generate metadata for SEO

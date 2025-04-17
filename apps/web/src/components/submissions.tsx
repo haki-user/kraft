@@ -44,7 +44,10 @@ export default function SubmissionSection({
   }, []);
 
   const formatDate = (timestamp: number) => {
-    return new Date(timestamp).toLocaleString();
+    return new Date(timestamp).toLocaleString("en-US", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
   };
 
   const getStatusBadgeClass = (status: Submission["status"]) => {
@@ -146,10 +149,14 @@ export default function SubmissionSection({
                     </Button>
                   </TableCell>
                   <TableCell>
-                    {submission.runtime > 0 ? `${submission.runtime} ms` : "-"}
+                    {submission.runtime > 0
+                      ? `${Math.round(submission.runtime)} ms`
+                      : "-"}
                   </TableCell>
                   <TableCell>
-                    {submission.memory > 0 ? `${submission.memory} MB` : "-"}
+                    {submission.memory > 0
+                      ? `${Math.round(submission.memory * 10) / 10} MB`
+                      : "-"}
                   </TableCell>
                   <TableCell
                   // className="text-right"

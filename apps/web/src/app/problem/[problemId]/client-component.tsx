@@ -274,6 +274,17 @@ function ProblemSection({
 }: {
   problemData: Problem;
 }): JSX.Element {
+  // Insert paragraph breaks before each example heading in the description.
+  const formattedDescription = problemData.description.replace(
+    /(<strong class="example">)/g,
+    "</p><p>$1"
+  );
+  
+  // Ensure the content is wrapped in a <p> to start if it doesn't already.
+  const htmlToRender = formattedDescription.trim().startsWith("<p>")
+    ? formattedDescription
+    : `<p>${formattedDescription}</p>`;
+
   return (
     <div className="w-full h-full mt-1 pr-2 pb-4">
       <div className="w-full h-full flex flex-col space-y-6">
@@ -283,7 +294,7 @@ function ProblemSection({
           </h1>
           <div
             className="problem-description dark:text-opacity-[60%] dark:text-white"
-            dangerouslySetInnerHTML={{ __html: problemData.description }}
+            dangerouslySetInnerHTML={{ __html: htmlToRender }}
           />
         </div>
       </div>
@@ -296,8 +307,12 @@ function SubmissionSection({
 }: {
   allSubmissions: Submissions;
 }): JSX.Element {
+
   const formatDate = (timestamp: number) => {
-    return new Date(timestamp).toLocaleString();
+    return new Date(timestamp).toLocaleString("en-US", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
   };
 
   const getStatusBadgeClass = (status: Submission["status"]) => {
@@ -366,10 +381,14 @@ function SubmissionSection({
                   </Button>
                 </TableCell>
                 <TableCell>
-                  {submission.runtime > 0 ? `${submission.runtime} ms` : "-"}
+                  {submission.runtime > 0
+                    ? `${Math.round(submission.runtime)} ms`
+                    : "-"}
                 </TableCell>
                 <TableCell>
-                  {submission.memory > 0 ? `${submission.memory} MB` : "-"}
+                  {submission.memory > 0
+                    ? `${Math.round(submission.memory * 10) / 10} MB`
+                    : "-"}
                 </TableCell>
                 <TableCell className="text-right">
                   {formatDate(submission.timestamp)}
