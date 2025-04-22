@@ -15,6 +15,7 @@
     "preset": "@kraft/jest-presets/node"
   },
   "dependencies": {
+    "@azure/service-bus": "^7.9.5",
     "@kraft/logger": "workspace:*",
     "@prisma/client": "^6.6.0",
     "@types/cookie-parser": "^1.4.8",
@@ -28,6 +29,7 @@
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
+    "uuid": "^11.1.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {

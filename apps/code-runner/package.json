@@ -18,14 +18,16 @@
     "@kraft/eslint-config": "workspace:*",
     "@kraft/types": "workspace:*",
     "@kraft/typescript-config": "workspace:*",
-    "@types/amqplib": "^0.10.6",
     "@types/express": "^5.0.0",
     "@types/node": "^20.11.24",
+    "@types/pg": "^8.11.13",
     "tsup": "^8.2.4"
   },
   "dependencies": {
-    "amqplib": "^0.10.5",
+    "@azure/service-bus": "^7.9.5",
+    "dotenv": "^16.4.5",
     "express": "^4.21.0",
-    "node-docker-api": "^1.1.22"
+    "pg": "^8.14.1",
+    "uuid": "^11.1.0"
   }
 }

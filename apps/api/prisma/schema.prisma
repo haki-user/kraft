@@ -36,6 +36,7 @@ enum SubmissionStatus {
   PENDING
   ACCEPTED
   WRONG_ANSWER
+  FAILED
   TIME_LIMIT_EXCEEDED
   MEMORY_LIMIT_EXCEEDED
   RUNTIME_ERROR
@@ -160,6 +161,13 @@ model Submission {
   problemId String
   problem   Problem @relation(fields: [problemId], references: [id])
 
+  // if testcase failed
+  input          String?
+  output         String?
+  stderr         String?
+  expectedOutput String?
+  error          String?
+
   status    SubmissionStatus @default(PENDING)
   score     Float            @default(0)
   createdAt DateTime         @default(now())
@@ -172,4 +180,26 @@ model AuditLog {
   action    String
   details   String?
   createdAt DateTime @default(now())
+}
+
+model Executors {
+  id        String   @id @default(uuid())
+  language  String
+  endpoint  String
+  createdAt DateTime @default(now())
+}
+
+model JobResults {
+  jobId           String   @id @default(uuid())
+  input           String
+  output          String
+  stderr          String
+  expectedOutput  String
+  error           String
+  testCasesPassed Int
+  totalTestCases  Int
+  status          String
+  runtime         Float
+  memoryUsed      Float
+  processedAt     DateTime @default(now())
 }

@@ -48,7 +48,7 @@ export default function ProblemPage({
 }): JSX.Element {
   const { problemId, contestId } = params;
   const [problem, setProblem] = useState<Problem>();
-  const [testCases, setTestCases] = useState<TestCase[]>([]);
+  // const [testCases, setTestCases] = useState<TestCase[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   // const languages = ["C++", "JavaScript", "TypeScript", "Go", "Python"];
   const languages = ["Python"];

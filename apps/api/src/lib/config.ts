@@ -4,14 +4,17 @@ dotenv.config();
 
 function getEnv(key: string, defaultValue?: string): string {
   const value = process.env[key] || defaultValue;
-  if (value === undefined) {
-    throw new Error(`Environment variable ${key} is not set.`);
+  if (!value) {
+    throw new Error(`Missing environment variable: ${key}`);
   }
   return value;
 }
 
 export const config = {
-  PORT: getEnv("PORT", "3001"),
+  PORT: getEnv("PORT", "5001"),
+  DATABASE_URL: getEnv("DATABASE_URL"),
+  JWT_SECRET: getEnv("JWT_SECRET"),
+  JWT_REFRESH_SECRET: getEnv("JWT_REFRESH_SECRET"),
   AZURE_SERVICE_BUS_CONNECTION_STRING: getEnv(
     "AZURE_SERVICE_BUS_CONNECTION_STRING"
   ),
@@ -19,8 +22,8 @@ export const config = {
     "AZURE_SERVICE_BUS_JOBS_QUEUE_NAME"
   ),
   AZURE_SERVICE_BUS_PROCESSED_JOBS_QUEUE_NAME: getEnv(
-    "AZURE_SERVICE_BUS_PROCESSED_JOBS_QUEUE_NAME"
+    "AZURE_SERVICE_BUS_PROCESSED_JOBS_QUEUE_NAME",
+    ""
   ),
-  POSTGRES_CONNECTION_STRING: getEnv("DATABASE_CONNECTION_STRING"),
-  AIVEN_CA_CERT_PATH: getEnv("AIVEN_CA_CERT_PATH"),
+  FRONTEND_URL: process.env.FRONTEND_URL || "",
 };

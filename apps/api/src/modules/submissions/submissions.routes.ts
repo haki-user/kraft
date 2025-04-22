@@ -4,7 +4,22 @@ import { authMiddleware } from "../auth/auth.middleware";
 
 const router: Router = Router();
 
+// Endpoint for creating a new submission.
 router.post("/", authMiddleware, submissionsController.createSubmissionHandler);
+
+// Endpoint for clients to ping for submission results by jobId.
+router.get(
+  "/ping-submission/:jobId", // -- remove it later on... or rename it
+  authMiddleware,
+  submissionsController.pingSubmissionByJobIdHandler
+);
+
+// Endpoint for updating the submission result (called by the code-runner backend). -- Remove it later on...
+router.post(
+  "/update-result",
+  submissionsController.updateSubmissionResultHandler
+);
+
 router.get(
   "/:id",
   authMiddleware,
@@ -23,8 +38,10 @@ router.get(
 router.post(
   "/test-run",
   authMiddleware,
-  submissionsController.executeTestRunHandler
+  submissionsController.createTestRunHandler
 );
+// Endpoint for clients to ping for test run results by jobId.
+router.get("/test-run/:jobId", submissionsController.getTestRunResultHandler);
 
 export default router;
 

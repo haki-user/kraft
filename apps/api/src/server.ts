@@ -10,6 +10,7 @@ import problemsRoutes from "./modules/problems/problems.routes";
 import contestsRoutes from "./modules/contests/contests.routes";
 import submissionRoutes from "./modules/submissions/submissions.routes";
 import leaderBoardRoutes from "./modules/leaderboard/leaderboard.routes";
+import { processProcessedJobs } from "./modules/submissions/submissions.service";
 
 export const createServer = (): Express => {
   const app = express();
@@ -36,6 +37,9 @@ export const createServer = (): Express => {
       res.json({ ok: true });
     })
     .use(errorHandler);
+
+  // Start listening for processed jobs from the code-runner. processProcessedJobs();
+  processProcessedJobs();
 
   return app;
 };

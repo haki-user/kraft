@@ -161,7 +161,7 @@ Started server on http://localhost:3000
           <FeatureCard
             icon={<Zap className="h-8 w-8 text-primary" />}
             title="Scalable Architecture"
-            description="Built with RabbitMQ and Lambda to scale easily and handle thousands of concurrent submissions."
+            description="Built with message queue and serverless functions to scale easily and handle thousands of concurrent submissions."
           />
           <FeatureCard
             icon={<GitMerge className="h-8 w-8 text-primary" />}
@@ -383,8 +383,8 @@ Started server on http://localhost:3000
               </div>
               <h3 className="text-xl font-semibold mb-2">Queue Processing</h3>
               <p className="text-muted-foreground">
-                Submissions enter a RabbitMQ queue for efficient processing and
-                fair scheduling
+                Submissions enter a queue for efficient processing and fair
+                scheduling
               </p>
             </div>
 
@@ -394,7 +394,7 @@ Started server on http://localhost:3000
               </div>
               <h3 className="text-xl font-semibold mb-2">Secure Execution</h3>
               <p className="text-muted-foreground">
-                Code runs in isolated environments (Lambda functions or
+                Code runs in isolated environments (serverless functions or
                 containers) with strict resource limits
               </p>
             </div>

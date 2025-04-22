@@ -4,6 +4,7 @@ import type { TestResult } from "./code-runner";
 export type SubmissionStatus =
   | "PENDING"
   | "ACCEPTED"
+  | "FAILED"
   | "WRONG_ANSWER"
   | "TIME_LIMIT_EXCEEDED"
   | "MEMORY_LIMIT_EXCEEDED"
@@ -52,8 +53,9 @@ export interface TestRunResult {
 }
 
 export interface ExecutorResult {
-  input?: string;
+  input?: Record<string, any>[];
   output?: string;
+  stderr?: string;
   expectedOutput?: string;
   error?: string;
   testCasesPassed?: number;
@@ -61,7 +63,7 @@ export interface ExecutorResult {
   status: SubmissionStatus;
   memoryUsed: number;
   runtime: number;
-  results?: TestRunResult[];
+  results?: TestResult[];
 }
 
 export interface Submissions {
@@ -80,6 +82,10 @@ export interface Submission {
   runtime: number;
   memory: number;
   timestamp: number; // Unix timestamp for better performance
+  input?: string;
+  output?: string;
+  stderr?: string;
+  error?: string;
 }
 
 // export interface CreateSubmissionDTO {

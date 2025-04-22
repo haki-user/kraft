@@ -1,34 +1,47 @@
 import type { TestCase } from "./problems";
+import { SubmissionStatus } from "./submissions";
 // export interface TestCase {
 //   input: string;
 //   expectedOutput: string;
 // }
 
+export type Language = "python" | "cpp" | "javascript";
+
 export interface Job {
   id: string;
   code: string;
-  language: "python" | "cpp" | "javascript";
+  language: Language;
+  isTestRun: boolean;
   testCases: TestCase[];
 }
 
 export interface TestResult {
-  input: string;
+  id: string;
+  inputStr: string;
+  input?: Record<string, any>[];
   stdout: string;
   stderr: string;
   expectedOutput: string;
-  passed: boolean;
   runtime: number;
-  memory: number;
+  status: SubmissionStatus;
+  memoryUsed: number;
 }
 
 export interface ExecutionResult {
+  input?: Record<string, any>[];
+  inputStr?: string;
+  output?: string; // ???
+  stdout?: string;
+  stderr?: string;
+  expectedOutput?: string;
+
   jobId: string;
-  status: "success" | "compile_error" | "runtime_error" | "timeout";
+  status: SubmissionStatus;
   results: TestResult[];
-  totalPassed: number;
-  totalCases: number;
-  averageRuntime: number;
-  maxMemory: number;
+  testCasesPassed: number;
+  totalTestCases: number;
+  runtime: number;
+  memoryUsed: number;
 }
 
 export type ExecutorConfig = {

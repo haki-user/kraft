@@ -1,50 +1,10 @@
-// import { connectQueue, getJob, publishResult, closeQueue } from './queue';
-// import { executeJob } from './executor';
-
-// async function startWorker() {
-//   await connectQueue();
-//   console.log('Worker started');
-
-//   process.on('SIGINT', async () => {
-//     console.log('Shutting down worker...');
-//     await closeQueue();
-//     process.exit(0);
-//   });
-
-//   while (true) {
-//     const job = await getJob();
-//     if (!job) {
-//       await new Promise(resolve => setTimeout(resolve, 1000));
-//       continue;
-//     }
-
-//     try {
-//       const result = await executeJob(job);
-//       await publishResult(result);
-//       console.log({result})
-//     } catch (error) {
-//       console.error(`Job ${job.id} failed:`, error);
-//       await publishResult({
-//         jobId: job.id,
-//         status: 'runtime_error',
-//         results: [],
-//         totalPassed: 0,
-//         totalCases: job.testCases.length,
-//         averageRuntime: 0,
-//         maxMemory: 0
-//       });
-//     }
-//   }
-// }
-
-// startWorker();
-
 import express from "express";
 import type { Request, Response } from "express";
 import { RunnerService } from "./runner";
 import { ExecutorConfig } from "@kraft/types";
+import { config } from "./config";
 
-const PORT = process.env.PORT || 3001;
+const PORT = config.PORT;
 
 (async () => {
   try {
@@ -71,6 +31,94 @@ const PORT = process.env.PORT || 3001;
     // Set up the Express admin API.
     const app = express();
     app.use(express.json());
+
+    // simple html dashboard that shows executor count, add and delete options
+    app.get("/", async (_req: Request, res: Response) => {
+      res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Admin Dashboard</title>
+        <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
+        .container { width: 80%; margin: 20px auto; background: #fff; padding: 20px; border-radius: 5px; }
+        input, button { padding: 10px; margin: 5px; }
+        .executor-item { margin-bottom: 5px; }
+        .delete-button { margin-left: 10px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+        <h1>Admin Dashboard</h1>
+        <h2>Registered Executors (<span id="executorCount">0</span>)</h2>
+        <button onclick="fetchExecutors()">Refresh List</button>
+        <ul id="executorList"></ul>
+        <h3>Add Executor</h3>
+        <input type="text" id="language" placeholder="Language">
+        <input type="text" id="endpoint" placeholder="Endpoint">
+        <button onclick="addExecutor()">Add Executor</button>
+        <p id="actionResult"></p>
+        </div>
+        <script>
+        async function fetchExecutors() {
+          try {
+          const response = await fetch('/api/executors');
+          const executors = await response.json();
+          const list = document.getElementById('executorList');
+          const countSpan = document.getElementById('executorCount');
+          list.innerHTML = '';
+          executors.forEach(exe => {
+            const li = document.createElement('li');
+            li.className = 'executor-item';
+            li.textContent = exe.language + ': ' + exe.endpoint;
+            
+            const delButton = document.createElement('button');
+            delButton.textContent = 'Delete';
+            delButton.className = 'delete-button';
+            delButton.onclick = async () => {
+            try {
+              const delResponse = await fetch('/api/executors/' + encodeURIComponent(exe.language), { method: 'DELETE' });
+              const delResult = await delResponse.text();
+              document.getElementById('actionResult').innerText = delResult;
+              fetchExecutors();
+            } catch (error) {
+              console.error(error);
+            }
+            };
+            
+            li.appendChild(delButton);
+            list.appendChild(li);
+          });
+          countSpan.textContent = executors.length;
+          } catch (error) {
+          console.error(error);
+          }
+        }
+        
+        async function addExecutor() {
+          const language = document.getElementById('language').value;
+          const endpoint = document.getElementById('endpoint').value;
+          try {
+          const response = await fetch('/api/executors', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ language, endpoint })
+          });
+          const resultText = await response.text();
+          document.getElementById('actionResult').innerText = resultText;
+          fetchExecutors();
+          } catch (error) {
+          console.error(error);
+          }
+        }
+        
+        // Automatically fetch executors on page load
+        fetchExecutors();
+        </script>
+      </body>
+      </html>
+      `);
+    });
 
     // Endpoint to add a new executor.
     app.post(

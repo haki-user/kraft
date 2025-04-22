@@ -47,7 +47,7 @@ export default function ProblemPage({
   problemId: string;
 }): JSX.Element {
   const [problem, setProblem] = useState<Problem>();
-  const [testCases, setTestCases] = useState<TestCase[]>([]);
+  // const [testCases, setTestCases] = useState<TestCase[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   // const languages = ["C++", "JavaScript", "TypeScript", "Go", "Python"];
   const languages = ["Python"];
@@ -112,7 +112,6 @@ export default function ProblemPage({
     try {
       const res = await createSubmission({
         problemId,
-        // contestId,
         code,
         language: activeLanguage,
       });
@@ -279,7 +278,7 @@ function ProblemSection({
     /(<strong class="example">)/g,
     "</p><p>$1"
   );
-  
+
   // Ensure the content is wrapped in a <p> to start if it doesn't already.
   const htmlToRender = formattedDescription.trim().startsWith("<p>")
     ? formattedDescription
@@ -307,7 +306,6 @@ function SubmissionSection({
 }: {
   allSubmissions: Submissions;
 }): JSX.Element {
-
   const formatDate = (timestamp: number) => {
     return new Date(timestamp).toLocaleString("en-US", {
       dateStyle: "medium",

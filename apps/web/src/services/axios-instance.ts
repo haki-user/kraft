@@ -1,5 +1,5 @@
 import axios, {
-  AxiosError,
+  // AxiosError,
   AxiosInstance,
   InternalAxiosRequestConfig,
 } from "axios";
@@ -25,7 +25,7 @@ const getAccessToken = (): string | null => {
 const api: AxiosInstance = axios.create({
   baseURL: BASE_API_URL,
   withCredentials: true,
-  timeout: 10000,
+  timeout: 20 * 1000,
   headers: {
     "Content-Type": "application/json",
   },

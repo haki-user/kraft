@@ -28,3 +28,6 @@ logs/
 # OS-specific files
 .DS_Store
 Thumbs.db
+
+# Secret files
+*.pem

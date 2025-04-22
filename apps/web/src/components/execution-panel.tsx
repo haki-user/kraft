@@ -13,18 +13,19 @@ import {
   Button,
   Skeleton,
 } from "@kraft/ui";
-import { useToast } from "@/hooks/use-toast";
+// import { useToast } from "@/hooks/use-toast";
 import type {
-  CreateSubmissionDTO,
+  // CreateSubmissionDTO,
   ExecutorResult,
   SubmissionResult,
   SubmissionStatus,
   TestCase,
-  TestRunResult,
+  TestResult,
+  // TestRunResult,
 } from "@kraft/types";
 // import { error } from "console";
 
-type TestCaseInput = Record<string, string>;
+// type TestCaseInput = Record<string, string>;
 
 // interface TestCase {
 //   readonly id: string;
@@ -39,7 +40,7 @@ interface ExecutionPanelProps {
   initialTestCases: TestCase[];
 }
 
-type TestStatus = SubmissionStatus;
+// type TestStatus = SubmissionStatus;
 
 // interface TestResult {
 //   readonly id: number;
@@ -51,12 +52,12 @@ type TestStatus = SubmissionStatus;
 //   // readonly stdout?: string;
 // }
 
-interface ExecutionResult {
-  status: TestStatus;
-  message: string;
-  output: string;
-  stderr?: string;
-}
+// interface ExecutionResult {
+//   status: TestStatus;
+//   message: string;
+//   output: string;
+//   stderr?: string;
+// }
 
 // type ExecutionState = {
 //   isExecuting: boolean;
@@ -70,8 +71,8 @@ export function ExecutionPanel({
   initialTestCases,
 }: ExecutionPanelProps): JSX.Element {
   const [testCases, setTestCases] = useState<TestCase[]>(initialTestCases);
-  const [testResults, setTestResults] = useState<TestRunResult[]>([]);
-  const { toast } = useToast();
+  const [testResults, setTestResults] = useState<TestResult[]>([]);
+  // const { toast } = useToast();
   // const handleRun = ()
   useEffect(() => {
     setTestResults([]);
@@ -102,23 +103,12 @@ export function ExecutionPanel({
     },
     []
   );
-
   const handleRun = async (): Promise<void> => {
     setIsExecuting(true);
     setActiveTab("skeleton");
-    // const res = await handleTestRun(testCases);
-    // console.log({ res }, "zzz");
-    // setTestResults(res);
-    // setExecutionResult({
-    //   status: res.status,
-    //   message: "",
-    //   output: "",
-    // });
     try {
       const res: ExecutorResult | null = await handleTestRun(testCases);
       if (!res) return;
-
-      // console.log({ res }, "zzz");
 
       if (res.results) {
         setTestResults(res.results);
@@ -127,6 +117,7 @@ export function ExecutionPanel({
       setExecutionResult({
         status: res.status,
         output: res.output,
+        stderr: res.stderr,
         error: res.error,
         memoryUsed: res.memoryUsed,
         runtime: res.runtime,
@@ -141,7 +132,6 @@ export function ExecutionPanel({
   const handleSubmit = async () => {
     setIsExecuting(true);
     const res = await handleSubmission();
-    console.log(res);
     setIsExecuting(false);
   };
 
@@ -192,7 +182,7 @@ export function ExecutionPanel({
       </div>
       {/* <Separator className="mt-1" /> */}
       {/* Accepted + show runtime */}
-      <ScrollArea className="w-full h-full">
+      <ScrollArea className="w-full h-full max-h-full">
         {executionResult?.status === "ACCEPTED" &&
           activeTab === "test-results" && (
             <div className="bg-background my-4">
@@ -222,40 +212,38 @@ export function ExecutionPanel({
             </TabsList>
             {/* <Separator className="mt-1" /> */}
             {/* <ScrollArea className="w-full h-[calc(100%-5.2rem)] pt-2"> */}
-              {testCases.map(({ id: testCaseId, input }) => (
-                <TabsContent
-                  className="pb-2 px-2"
-                  key={testCaseId}
-                  value={`test-case-${testCaseId}`}
-                >
-                  {input.map((item) => {
-                    const key = Object.keys(item)[0];
-                    const value = item[key];
+            {testCases.map(({ id: testCaseId, input }) => (
+              <TabsContent
+                className="pb-2 px-2"
+                key={testCaseId}
+                value={`test-case-${testCaseId}`}
+              >
+                {input.map((item) => {
+                  const key = Object.keys(item)[0];
+                  const value = item[key];
 
-                    return (
-                      <div className="mt-5" key={key}>
-                        <Label htmlFor={`test-case-${testCaseId}-input-${key}`}>
-                          <span className="text-nowrap text-base">{key}</span>
-                        </Label>
-                        <Input
-                          className="mt-1"
-                          id={`test-case-${testCaseId}-input-${key}`}
-                          onChange={(
-                            e: React.ChangeEvent<HTMLInputElement>
-                          ) => {
-                            handleTestCaseInputChange(
-                              testCaseId,
-                              key,
-                              e.target.value
-                            );
-                          }}
-                          value={value}
-                        />
-                      </div>
-                    );
-                  })}
-                </TabsContent>
-              ))}
+                  return (
+                    <div className="mt-5" key={key}>
+                      <Label htmlFor={`test-case-${testCaseId}-input-${key}`}>
+                        <span className="text-nowrap text-base">{key}</span>
+                      </Label>
+                      <Input
+                        className="mt-1"
+                        id={`test-case-${testCaseId}-input-${key}`}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                          handleTestCaseInputChange(
+                            testCaseId,
+                            key,
+                            e.target.value
+                          );
+                        }}
+                        value={value}
+                      />
+                    </div>
+                  );
+                })}
+              </TabsContent>
+            ))}
             {/* </ScrollArea> */}
           </Tabs>
         </TabsContent>
@@ -289,7 +277,7 @@ export function ExecutionPanel({
                           </span>
                         </Label>
                         <div className="text-xs" id="execution-result-message">
-                          {(executionResult.error || "")
+                          {(executionResult.stderr || "")
                             .split("\n")
                             .map((line, index) => (
                               <div key={index}>{line}</div>
@@ -303,7 +291,7 @@ export function ExecutionPanel({
                           </span>
                         </Label>
                         <div
-                          className="mt-1 flex items-center whitespace-pre-wrap min-h-9 h-content w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                          className="mt-1 mb-1 flex items-center whitespace-pre-wrap min-h-9 h-content w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                           id="execution-result-output"
                         >
                           {executionResult.output}
@@ -323,10 +311,9 @@ export function ExecutionPanel({
                   >
                     <TabsList>
                       {testResults.map((testResult, idx) => {
-                        console.log("ddkjk: ", testResult);
                         return (
                           <TabsTrigger
-                            key={testResult.testCase.id}
+                            key={testResult.id}
                             value={`test-result-${idx + 1}`}
                           >
                             {" "}
@@ -346,88 +333,89 @@ export function ExecutionPanel({
                     </TabsList>
                     {/* <Separator className="mt-1" /> */}
                     {/* <ScrollArea className="w-full h-[calc(100%-5.2rem)]"> */}
-                      {/* <ScrollBar orientation="vertical" /> */}
-                      <div>
-                        {testResults.map((testResult, idx) => (
-                          <TabsContent
-                            className="pb-2 px-2"
-                            key={testResult.testCase.id}
-                            value={`test-result-${idx + 1}`}
-                          >
-                            <div>
-                              {testResult.testCase.input.map((item) => {
-                                const key = Object.keys(item)[0];
-                                const value = item[key];
-                                return (
-                                  <div className="mt-5" key={key}>
-                                    <Label
-                                      htmlFor={`test-result-${idx}-input-${key}`}
-                                    >
-                                      <span className="text-nowrap text-base">
-                                        {key}
-                                      </span>
-                                    </Label>
-                                    <Input
-                                      className="mt-1"
-                                      id={`test-result-${idx}-input-${key}`}
-                                      readOnly
-                                      value={value}
-                                    />
-                                  </div>
-                                );
-                              })}
-                            </div>
-                            <div>
-                              <div className="mt-5">
-                                <Label htmlFor={`test-result-${idx}-output`}>
-                                  <span className="text-nowrap text-base">
-                                    Output
-                                  </span>
-                                </Label>
-                                <div
-                                  className="mt-1 flex items-center whitespace-pre-wrap min-h-9 h-content w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                                  id={`test-result-${idx}-output`}
-                                >
-                                  {testResult.output}
+                    {/* <ScrollBar orientation="vertical" /> */}
+                    <div>
+                      {testResults.map((testResult, idx) => (
+                        <TabsContent
+                          className="pb-2 px-2"
+                          key={testResult.id}
+                          value={`test-result-${idx + 1}`}
+                        >
+                          <div>
+                            {testResult.input?.map((item) => {
+                              const key = Object.keys(item)[0];
+                              const value = item[key];
+                              return (
+                                <div className="mt-5" key={key}>
+                                  <Label
+                                    htmlFor={`test-result-${idx}-input-${key}`}
+                                  >
+                                    <span className="text-nowrap text-base">
+                                      {key}
+                                    </span>
+                                  </Label>
+                                  <Input
+                                    className="mt-1"
+                                    id={`test-result-${idx}-input-${key}`}
+                                    readOnly
+                                    value={value}
+                                  />
                                 </div>
+                              );
+                            })}
+                          </div>
+                          <div>
+                            <div className="mt-5">
+                              <Label htmlFor={`test-result-${idx}-output`}>
+                                <span className="text-nowrap text-base">
+                                  Output
+                                </span>
+                              </Label>
+                              <div
+                                className="mt-1 flex items-center whitespace-pre-wrap min-h-9 h-content w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                id={`test-result-${idx}-output`}
+                              >
+                                {testResult.stdout}
                               </div>
                             </div>
-                            <div>
-                              <div className="mt-5">
-                                <Label
-                                  htmlFor={`test-result-${idx}-expected-output`}
-                                >
-                                  <span className="text-nowrap text-base">
-                                    Expected Output
-                                  </span>
-                                </Label>
-                                <div
-                                  className="mt-1 flex items-center whitespace-pre-wrap h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                                  id={`test-result-${idx}-expected-output`}
-                                >
-                                  {testResult.testCase.expectedOutput}
-                                </div>
+                          </div>
+                          <div>
+                            <div className="mt-5">
+                              <Label
+                                htmlFor={`test-result-${idx}-expected-output`}
+                              >
+                                <span className="text-nowrap text-base">
+                                  Expected Output
+                                </span>
+                              </Label>
+                              <div
+                                className="mt-1 flex items-center whitespace-pre-wrap h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                id={`test-result-${idx}-expected-output`}
+                              >
+                                {testResult.expectedOutput}
                               </div>
                             </div>
-                            <div>
-                              <div className="mt-5">
-                                <Label htmlFor={`test-result-${idx}-stderr`}>
-                                  <span className="text-nowrap text-base">
-                                    stderr
-                                  </span>
-                                </Label>
-                                <div
-                                  className="mt-1 flex items-center whitespace-pre-wrap h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                                  id={`test-result-${idx}-stderr`}
-                                >
-                                  {testResult.stderr}
-                                </div>
+                          </div>
+                          <div>
+                            <div className="mt-5">
+                              <Label htmlFor={`test-result-${idx}-stderr`}>
+                                <span className="text-nowrap text-base">
+                                  stderr
+                                </span>
+                              </Label>
+                              <div
+                                className="mt-1 mb-1 flex items-center whitespace-pre-wrap h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm max-h-full"
+                                id={`test-result-${idx}-stderr`}
+                              >
+                                {testResult.stderr}
                               </div>
                             </div>
-                          </TabsContent>
-                        ))}
-                      </div>
+                          </div>
+                        </TabsContent>
+                      ))}
+                    </div>
                     {/* </ScrollArea> */}
+                    <div>&nbsp;</div>
                   </Tabs>
                 ) : null}
               </div>

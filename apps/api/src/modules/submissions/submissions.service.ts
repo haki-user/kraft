@@ -1,76 +1,110 @@
-import prisma from "../../lib/prisma"; // Prisma client instance
+import { v4 as uuidv4 } from "uuid";
+import prisma from "../../lib/prisma";
+import {
+  jobSender,
+  processedJobReceiver,
+} from "../../lib/azure-service-bus-client";
+import { setSubmissionResult } from "./test-run-cache";
 import {
   CreateSubmissionDTO,
   ExecuteTestRunDTO,
-  Submission,
-  SubmissionResult,
-  TestCase,
-  ExecutorResult,
+  // Submission,
+  // SubmissionResult,
+  // TestCase,
+  // ExecutorResult,
   Submissions,
+  Job,
+  Language,
+  SubmissionStatus,
 } from "@kraft/types";
-import executor from "./code-execution.service";
+// import executor from "./code-execution.service";
 // import test from "node:test";
 // import { timeStamp } from "console";
 
 /**
- * Create a new submission for a problem.
+ * Creates a submission record with status "PENDING" and pushes a job
+ * onto the Service Bus queue so that the code-runner app can process it.
  */
-export const createSubmission = async ({
-  userId,
-  problemId,
-  contestId,
-  code,
-  language,
-}: CreateSubmissionDTO) => {
-  // Save submission in database with PENDING status
+export const createSubmission = async (
+  data: CreateSubmissionDTO
+): Promise<{ jobId: string }> => {
+  // Create submission record with a default PENDING status.
   const submission = await prisma.submission.create({
+    data: { ...data, status: "PENDING" },
+  });
+  const testCasesData = await prisma.testCase.findMany({
+    where: { problemId: submission.problemId },
+  });
+  const parsedTestCases = testCasesData.map((testCase) => ({
+    // redundant -- remove later on.
+    ...testCase,
+    input: JSON.parse(testCase.input),
+  }));
+
+  // Build the job payload in a format the code-runner understands.
+  const job: Job = {
+    id: submission.id,
+    code: submission.code,
+    isTestRun: false,
+    language: submission.language as Language,
+    testCases: parsedTestCases, // Optionally load test cases from your DB if needed.
+  };
+
+  try {
+    // Push the job into the Service Bus queue.
+    await jobSender.sendMessages({
+      body: job,
+      subject: "JobSubmission",
+    });
+    console.log(`Job ${job.id} submitted to queue.`);
+    return { jobId: job.id };
+  } catch (error) {
+    console.error("Failed to push job to queue", error);
+    // Optionally, update submission status if the job could not be queued.
+    await prisma.submission.update({
+      where: { id: submission.id },
+      data: { status: "FAILED" },
+    });
+    throw error;
+  }
+  // return {
+  // id: submission.id,
+  // status: submission.status,
+  // problemId: submission.problemId,
+  // language: submission.language,
+  // };
+};
+
+/**
+ * Updates an existing submission record with the result from the code-runner.
+ */
+export const updateSubmissionResult = async (
+  submissionId: string,
+  result: {
+    status:
+      | "ACCEPTED"
+      | "WRONG_ANSWER"
+      | "RUNTIME_ERROR"
+      | "TIME_LIMIT_EXCEEDED"
+      | string;
+    score?: number;
+    runtime?: number;
+    memoryUsed?: number;
+    output?: string;
+    error?: string;
+  }
+): Promise<void> => {
+  await prisma.submission.update({
+    where: { id: submissionId },
     data: {
-      userId,
-      problemId,
-      contestId,
-      code,
-      language,
-      status: "PENDING",
+      status: result.status as SubmissionStatus,
+      score: result.score || 0,
+      runtime: result.runtime,
+      memory: result.memoryUsed,
+      output: result.output,
+      error: result.error,
     },
   });
-
-  const testCases = await prisma.testCase.findMany({
-    where: {
-      problemId,
-    },
-  });
-
-  const parsedTestCases = testCases.map((testCase) => {
-    return {
-      ...testCase,
-      input: JSON.parse(testCase.input),
-    };
-  });
-
-  const executionResult: ExecutorResult = await executor(
-    code,
-    parsedTestCases,
-    false,
-    language
-  );
-  console.log(executionResult);
-
-  // Update submission with execution results
-  const updatedSubmission = await prisma.submission.update({
-    where: { id: submission.id },
-    data: {
-      status: executionResult.status,
-      runtime: executionResult.runtime,
-      memory: executionResult.memoryUsed,
-      score: executionResult.results?.every(
-        (result) => result.status === "ACCEPTED"
-      )
-        ? 100
-        : 0,
-    },
-  });
-
-  return updatedSubmission;
 };
 
 /**
@@ -164,27 +198,98 @@ export const getAllUserContestSubmissions = async ({
   return tmp;
 };
 
+// /**
+//  * Execute a test run with custom inputs.
+//  */
+// export const executeTestRun = async ({
+//   problemId,
+//   code,
+//   language,
+//   testCases,
+// }: ExecuteTestRunDTO): Promise<ExecutorResult> => {
+//   // const executionResult = await axios.post(
+//   //   "http://execution-microservice/test-run",
+//   //   {
+//   //     problemId,
+//   //     code,
+//   //     language,
+//   //     input,
+//   //   }
+//   // );
+//   const executionResult = await executor(code, testCases, true, language);
+
+//   return executionResult;
+// };
+
 /**
  * Execute a test run with custom inputs.
+ * The job is pushed to the Code Runner queue with the isTestRun flag.
+ * The API returns a jobId and does not wait for or store the result.
  */
 export const executeTestRun = async ({
   problemId,
   code,
   language,
   testCases,
-}: ExecuteTestRunDTO): Promise<ExecutorResult> => {
-  // const executionResult = await axios.post(
-  //   "http://execution-microservice/test-run",
-  //   {
-  //     problemId,
-  //     code,
-  //     language,
-  //     input,
-  //   }
-  // );
-  const executionResult = await executor(code, testCases, true, language);
+}: ExecuteTestRunDTO): Promise<{ jobId: string }> => {
+  const jobId = uuidv4();
 
-  return executionResult;
+  const job = {
+    id: jobId,
+    code,
+    language,
+    problemId,
+    testCases,
+    isTestRun: true,
+  };
+
+  try {
+    await jobSender.sendMessages({
+      body: job,
+      subject: "JobSubmission",
+    });
+    console.log(`Test run job ${jobId} submitted to queue.`);
+  } catch (error) {
+    console.error("Failed to push test run job to queue", error);
+    throw error;
+  }
+  return { jobId };
+};
+
+/**
+ * Listens for processed test run results coming from the Code Runner via the processed jobs queue.
+ * Once a result is received the in-memory cache is updated.
+ */
+export const processProcessedJobs = (): void => {
+  processedJobReceiver.subscribe({
+    processMessage: async (message) => {
+      const { jobId, result, isTestRun } = message.body as {
+        jobId: string;
+        result: any;
+        isTestRun: boolean;
+      };
+      console.log(
+        `Processed job result received for job ${jobId}, result:`,
+        result,
+        { isTestRun }
+      );
+      if (!isTestRun) {
+        await updateSubmissionResult(jobId, {
+          status: result.status,
+          score: result.score,
+          runtime: result.runtime,
+          memoryUsed: result.memoryUsed,
+          output: result.output,
+          error: result.error,
+        });
+      }
+      setSubmissionResult(jobId, result);
+      await processedJobReceiver.completeMessage(message);
+    },
+    processError: async (error) => {
+      console.error("Error processing processed job message:", error);
+    },
+  });
 };
 
 // import { SubmissionStatus } from '@prisma/client';
