@@ -80,11 +80,14 @@ export interface Submission {
   language: string;
   status: SubmissionStatus;
   runtime: number;
-  memory: number;
+  memoryUsed: number;
   timestamp: number; // Unix timestamp for better performance
+  totalTestCases: number;
+  testCasesPassed: number;
   input?: string;
   output?: string;
   stderr?: string;
+  expectedOutput?: string;
   error?: string;
 }
 

@@ -8,18 +8,11 @@ import { setSubmissionResult } from "./test-run-cache";
 import {
   CreateSubmissionDTO,
   ExecuteTestRunDTO,
-  // Submission,
-  // SubmissionResult,
-  // TestCase,
-  // ExecutorResult,
   Submissions,
   Job,
   Language,
-  SubmissionStatus,
+  Submission,
 } from "@kraft/types";
-// import executor from "./code-execution.service";
-// import test from "node:test";
-// import { timeStamp } from "console";
 
 /**
  * Creates a submission record with status "PENDING" and pushes a job
@@ -28,12 +21,12 @@ import {
 export const createSubmission = async (
   data: CreateSubmissionDTO
 ): Promise<{ jobId: string }> => {
+  const testCasesData = await prisma.testCase.findMany({
+    where: { problemId: data.problemId },
+  });
   // Create submission record with a default PENDING status.
   const submission = await prisma.submission.create({
-    data: { ...data, status: "PENDING" },
-  });
-  const testCasesData = await prisma.testCase.findMany({
-    where: { problemId: submission.problemId },
+    data: { ...data, status: "PENDING", totalTestCases: testCasesData.length },
   });
   const parsedTestCases = testCasesData.map((testCase) => ({
     // redundant -- remove later on.
@@ -47,7 +40,7 @@ export const createSubmission = async (
     code: submission.code,
     isTestRun: false,
     language: submission.language as Language,
-    testCases: parsedTestCases, // Optionally load test cases from your DB if needed.
+    testCases: parsedTestCases,
   };
 
   try {
@@ -67,12 +60,6 @@ export const createSubmission = async (
     });
     throw error;
   }
-  // return {
-  // id: submission.id,
-  // status: submission.status,
-  // problemId: submission.problemId,
-  // language: submission.language,
-  // };
 };
 
 /**
@@ -80,30 +67,11 @@ export const createSubmission = async (
  */
 export const updateSubmissionResult = async (
   submissionId: string,
-  result: {
-    status:
-      | "ACCEPTED"
-      | "WRONG_ANSWER"
-      | "RUNTIME_ERROR"
-      | "TIME_LIMIT_EXCEEDED"
-      | string;
-    score?: number;
-    runtime?: number;
-    memoryUsed?: number;
-    output?: string;
-    error?: string;
-  }
+  payload: Partial<Submission>
 ): Promise<void> => {
   await prisma.submission.update({
     where: { id: submissionId },
-    data: {
-      status: result.status as SubmissionStatus,
-      score: result.score || 0,
-      runtime: result.runtime,
-      memory: result.memoryUsed,
-      output: result.output,
-      error: result.error,
-    },
+    data: payload,
   });
 };
 
@@ -152,8 +120,10 @@ export const getSubmissionsForProblem = async ({
     language: submission.language,
     status: submission.status,
     runtime: submission.runtime,
-    memory: submission.memory,
+    memoryUsed: submission.memoryUsed,
     timestamp: submission.createdAt.getTime(),
+    totalTestCases: submission.totalTestCases,
+    testCasesPassed: submission.testCasesPassed,
   }));
 
   return {
@@ -192,34 +162,11 @@ export const getAllUserContestSubmissions = async ({
     language: submission.language,
     status: submission.status,
     runtime: submission.runtime,
-    memory: submission.memory,
+    memoryUsed: submission.memoryUsed,
     timestamp: submission.createdAt,
   }));
   return tmp;
 };
-
-// /**
-//  * Execute a test run with custom inputs.
-//  */
-// export const executeTestRun = async ({
-//   problemId,
-//   code,
-//   language,
-//   testCases,
-// }: ExecuteTestRunDTO): Promise<ExecutorResult> => {
-//   // const executionResult = await axios.post(
-//   //   "http://execution-microservice/test-run",
-//   //   {
-//   //     problemId,
-//   //     code,
-//   //     language,
-//   //     input,
-//   //   }
-//   // );
-//   const executionResult = await executor(code, testCases, true, language);
-
-//   return executionResult;
-// };
 
 /**
  * Execute a test run with custom inputs.
@@ -274,14 +221,22 @@ export const processProcessedJobs = (): void => {
         { isTestRun }
       );
       if (!isTestRun) {
-        await updateSubmissionResult(jobId, {
+        const payload: Partial<Submission> = {
           status: result.status,
-          score: result.score,
           runtime: result.runtime,
           memoryUsed: result.memoryUsed,
-          output: result.output,
-          error: result.error,
-        });
+          ...(result.input && { input: result.input }),
+          ...(result.output && { output: result.output }),
+          ...(result.expectedOutput && {
+            expectedOutput: result.expectedOutput,
+          }),
+          ...(result.stderr && { stderr: result.stderr }),
+          ...(result.error && { error: result.error }),
+          ...(result.testCasesPassed && {
+            testCasesPassed: result.testCasesPassed,
+          }),
+        };
+        await updateSubmissionResult(jobId, payload);
       }
       setSubmissionResult(jobId, result);
       await processedJobReceiver.completeMessage(message);
@@ -291,69 +246,3 @@ export const processProcessedJobs = (): void => {
     },
   });
 };
-
-// import { SubmissionStatus } from '@prisma/client';
-// import {
-//   // SubmissionRepository,
-//   SubmissionService,
-//   CreateSubmissionDTO,
-//   SubmissionQuery,
-//   SubmissionResponse,
-//   CodeExecutionService
-// } from '@kraft/types';
-
-// export const createSubmissionService = (
-//   submissionRepository: ReturnType<typeof createSubmissionRepository>,
-//   codeExecutionService: CodeExecutionService
-// ): SubmissionService => ({
-//   async createSubmission(data: CreateSubmissionDTO): Promise<SubmissionResponse> {
-//     // 1. Validate problem existence
-//     // 2. Check user permissions
-//     // 3. Check contest participation (if applicable)
-
-//     // Create initial submission record
-//     const submission = await submissionRepository.create(data);
-
-//     try {
-//       // Invoke code execution service (AWS Lambda)
-//       const executionResult = await codeExecutionService.runCode({
-//         code: data.code,
-//         language: data.language,
-//         problemId: data.problemId
-//       });
-
-//       // Update submission status based on execution result
-//       return await submissionRepository.updateStatus(
-//         submission.id,
-//         executionResult.status
-//       );
-//     } catch (error) {
-//       // Handle execution service errors
-//       return await submissionRepository.updateStatus(
-//         submission.id,
-//         'RUNTIME_ERROR'
-//       );
-//     }
-//   },
-
-//   async getSubmissionById(id: string): Promise<SubmissionResponse | null> {
-//     return submissionRepository.findById(id);
-//   },
-
-//   async listSubmissions(query: SubmissionQuery): Promise<{
-//     submissions: SubmissionResponse[];
-//     total: number;
-//     page: number;
-//     limit: number;
-//   }> {
-//     return submissionRepository.list(query);
-//   },
-
-//   async updateSubmissionStatus(
-//     id: string,
-//     status: SubmissionStatus,
-//     score?: number
-//   ): Promise<SubmissionResponse> {
-//     return submissionRepository.updateStatus(id, status, score);
-//   }
-// });

@@ -146,11 +146,11 @@ model ContestParticipation {
 }
 
 model Submission {
-  id       String @id @default(uuid())
-  code     String
-  language String
-  runtime  Float  @default(0)
-  memory   Float  @default(0)
+  id         String @id @default(uuid())
+  code       String
+  language   String
+  runtime    Float  @default(0)
+  memoryUsed Float  @default(0)
 
   userId String
   user   User   @relation(fields: [userId], references: [id])
@@ -161,6 +161,9 @@ model Submission {
   problemId String
   problem   Problem @relation(fields: [problemId], references: [id])
 
+  totalTestCases  Int
+  testCasesPassed Int @default(0)
+
   // if testcase failed
   input          String?
   output         String?
@@ -169,7 +172,7 @@ model Submission {
   error          String?
 
   status    SubmissionStatus @default(PENDING)
-  score     Float            @default(0)
+  // score     Float            @default(0)
   createdAt DateTime         @default(now())
 }
 

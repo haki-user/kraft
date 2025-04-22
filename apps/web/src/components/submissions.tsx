@@ -132,8 +132,8 @@ export default function SubmissionSection({
                       : "-"}
                   </TableCell>
                   <TableCell>
-                    {submission.memory > 0
-                      ? `${Math.round(submission.memory * 10) / 10} MB`
+                    {submission.memoryUsed > 0
+                      ? `${Math.round(submission.memoryUsed * 10) / 10} MB`
                       : "-"}
                   </TableCell>
                   <TableCell
