@@ -37,6 +37,8 @@ import { SubmissionSection } from "@/components/submissions-section";
 import "./styles.css";
 import { config } from "@/utils";
 
+let renderCount = 0;
+
 export default function ProblemPage({
   params,
 }: {
@@ -58,6 +60,7 @@ export default function ProblemPage({
     acceptedCount: 0,
   });
   const [activeTab, setActiveTab] = useState("problem");
+  const key = `${problemId}-${activeLanguage}-code`;
 
   const fetchProblem = async () => {
     setIsLoading(true);
@@ -129,14 +132,23 @@ export default function ProblemPage({
   useEffect(() => {
     void fetchProblem();
     void handleFetchSubmissoins();
-    const locallySavedCode = localStorage.getItem(`${problemId}-code`);
+    const locallySavedCode = localStorage.getItem(key);
     if (locallySavedCode) setCode(locallySavedCode);
   }, []);
 
   // Handle code change: Saving etc...
   useEffect(() => {
-    localStorage.setItem(`${problemId}-code`, code);
+    localStorage.setItem(key, code);
   }, [code]);
+
+  useEffect(() => {
+    if (renderCount < 2) {
+      renderCount++;
+      return;
+    }
+    const locallySavedCode = localStorage.getItem(key);
+    setCode(locallySavedCode || code);
+  }, [activeLanguage]);
 
   if (isLoading) {
     return (

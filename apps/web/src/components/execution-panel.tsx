@@ -360,7 +360,6 @@ export function ExecutionPanel({
                           {/* </div> */}
                         </div>
                       </div>
-                      <div>&nbsp;</div>
                     </div>
                   </div>
                 ) : null}
@@ -482,7 +481,6 @@ export function ExecutionPanel({
                       ))}
                     </div>
                     {/* </ScrollArea> */}
-                    <div>&nbsp;</div>
                   </Tabs>
                 ) : null}
               </div>

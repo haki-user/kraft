@@ -36,6 +36,8 @@ import { SubmissionSection } from "@/components/submissions-section";
 import "./styles.css";
 import { config } from "@/utils";
 
+let renderCount = 0;
+
 export default function ProblemPage({
   problemId,
 }: {
@@ -56,6 +58,7 @@ export default function ProblemPage({
     acceptedCount: 0,
   });
   const [activeTab, setActiveTab] = useState("problem");
+  const key = `${problemId}-${activeLanguage}-code`;
 
   useEffect(() => {
     if (activeTab === "submissions") {
@@ -135,15 +138,24 @@ export default function ProblemPage({
   useEffect(() => {
     void fetchProblem();
     void handleFetchSubmissoins();
-    const locallySavedCode = localStorage.getItem(`${problemId}-code`);
+    const locallySavedCode = localStorage.getItem(key);
     if (locallySavedCode) setCode(locallySavedCode);
   }, []);
 
   // Handle code change: Saving etc...
   useEffect(() => {
-    localStorage.setItem(`${problemId}-code`, code);
+    localStorage.setItem(key, code);
     console.log("saved", code);
   }, [code]);
+
+  useEffect(() => {
+    if (renderCount < 2) {
+      renderCount++;
+      return;
+    }
+    const locallySavedCode = localStorage.getItem(key);
+    setCode(locallySavedCode || "");
+  }, [activeLanguage]);
 
   if (isLoading) {
     return (
@@ -248,7 +260,7 @@ export default function ProblemPage({
                   withHandle
                 />
                 <ResizablePanel defaultSize={45}>
-                  <div className="w-full h-full p-4 pb-0">
+                  <div className="w-full h-full p-4 pb-5">
                     <ExecutionPanel
                       initialTestCases={problem.testCases}
                       handleTestRun={handleTestRun}

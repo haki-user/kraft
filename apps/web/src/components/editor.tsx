@@ -86,7 +86,6 @@ export default function Editor({
       setTempSettings(editorSettingsLocal);
     }
   }, []);
-  console.log({ settings }, {activeLanguage});
 
   useEffect(() => {
     if (monaco) {
