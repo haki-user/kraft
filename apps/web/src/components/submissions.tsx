@@ -16,7 +16,12 @@ import {
 import type { Submission, Submissions } from "@kraft/types";
 import { getAllUserContestSubmissions } from "@/services/submissions-service";
 import { Code } from "lucide-react";
-import { formatDate, formatStatus, getStatusBadgeClass } from "@/utils";
+import {
+  formatDate,
+  formatLanguageName,
+  formatStatus,
+  getStatusBadgeClass,
+} from "@/utils";
 
 export default function SubmissionSection({
   contestId,
@@ -118,7 +123,7 @@ export default function SubmissionSection({
                       onClick={() => setSelectedSubmission(submission)}
                       title="View Submission"
                     >
-                      {submission.language}
+                      {formatLanguageName(submission.language)}
                     </Button>
                   </TableCell>
                   <TableCell>

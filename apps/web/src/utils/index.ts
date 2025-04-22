@@ -33,4 +33,17 @@ export const getStatusBadgeClass = (status: Submission["status"]) => {
   }
 };
 
+export const formatLanguageName = (language: string) => {
+  switch (language) {
+    case "cpp":
+      return "C++";
+    case "python":
+      return "Python";
+    case "javascript":
+      return "JavaScript";
+    default:
+      return language;
+  }
+};
+
 export { config } from "./config";

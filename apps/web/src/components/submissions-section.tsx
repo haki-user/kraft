@@ -10,7 +10,12 @@ import {
   ScrollBar,
 } from "@kraft/ui";
 import type { Submissions } from "@kraft/types";
-import { formatDate, formatStatus, getStatusBadgeClass } from "@/utils";
+import {
+  formatDate,
+  formatLanguageName,
+  formatStatus,
+  getStatusBadgeClass,
+} from "@/utils";
 
 export function SubmissionSection({
   allSubmissions,
@@ -61,7 +66,7 @@ export function SubmissionSection({
                     }
                     title="Copy code"
                   >
-                    {submission.language}
+                    {formatLanguageName(submission.language)}
                   </Button>
                 </TableCell>
                 <TableCell>

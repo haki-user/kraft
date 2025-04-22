@@ -24,6 +24,7 @@ import {
   DialogTrigger,
   Input,
 } from "@kraft/ui";
+import { formatLanguageName } from "@/utils";
 
 interface EditorSettings {
   keyBindings: "normal" | "vim";
@@ -85,7 +86,7 @@ export default function Editor({
       setTempSettings(editorSettingsLocal);
     }
   }, []);
-  console.log({ settings });
+  console.log({ settings }, {activeLanguage});
 
   useEffect(() => {
     if (monaco) {
@@ -115,7 +116,7 @@ export default function Editor({
             setActiveLanguage(value);
           }}
         >
-          <SelectTrigger className="w-[115px]">
+          <SelectTrigger className="w-[115px] capitalize">
             <SelectValue placeholder="Select a programming language" />
           </SelectTrigger>
           <SelectContent>
@@ -123,8 +124,12 @@ export default function Editor({
               <SelectLabel>Programming Languages</SelectLabel>
               {languages.map((language) => {
                 return (
-                  <SelectItem key={language} value={language}>
-                    {language}
+                  <SelectItem
+                    key={language}
+                    value={language}
+                    className="capitalize"
+                  >
+                    {formatLanguageName(language)}
                   </SelectItem>
                 );
               })}

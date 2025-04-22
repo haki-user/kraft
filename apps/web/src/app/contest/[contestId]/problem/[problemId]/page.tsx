@@ -35,6 +35,7 @@ import { ProblemSection } from "@/components/problem-section";
 import { SubmissionSection } from "@/components/submissions-section";
 
 import "./styles.css";
+import { config } from "@/utils";
 
 export default function ProblemPage({
   params,
@@ -46,8 +47,10 @@ export default function ProblemPage({
   // const [testCases, setTestCases] = useState<TestCase[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   // const languages = ["C++", "JavaScript", "TypeScript", "Go", "Python"];
-  const languages = ["Python"];
-  const [activeLanguage, setActiveLanguage] = useState("Python");
+  const languages = config.SUPPORTED_LANGUAGES;
+  const [activeLanguage, setActiveLanguage] = useState(
+    config.DEFAULT_ACTIVE_LANGUAGE || "python"
+  );
   const [code, setCode] = useState<string>("");
   const [submissions, setSubmissions] = useState<Submissions>({
     submissions: [],
