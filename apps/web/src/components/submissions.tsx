@@ -16,6 +16,7 @@ import {
 import type { Submission, Submissions } from "@kraft/types";
 import { getAllUserContestSubmissions } from "@/services/submissions-service";
 import { Code } from "lucide-react";
+import { formatDate, formatStatus, getStatusBadgeClass } from "@/utils";
 
 export default function SubmissionSection({
   contestId,
@@ -26,6 +27,7 @@ export default function SubmissionSection({
   const [isLoading, setIsLoading] = useState(true);
   const [selectedSubmission, setSelectedSubmission] =
     useState<Submission | null>(null);
+
   const handleFetchSubmissoins = async () => {
     setIsLoading(true);
     try {
@@ -42,35 +44,6 @@ export default function SubmissionSection({
   useEffect(() => {
     handleFetchSubmissoins();
   }, []);
-
-  const formatDate = (timestamp: number) => {
-    return new Date(timestamp).toLocaleString("en-US", {
-      dateStyle: "medium",
-      timeStyle: "short",
-    });
-  };
-
-  const getStatusBadgeClass = (status: Submission["status"]) => {
-    switch (status) {
-      case "ACCEPTED":
-        return "bg-green-500/20 text-green-500 dark:bg-green-500/10";
-      case "WRONG_ANSWER":
-        return "bg-red-500/20 text-red-500 dark:bg-red-500/10";
-      case "RUNTIME_ERROR":
-        return "bg-orange-500/20 text-orange-500 dark:bg-orange-500/10";
-      case "TIME_LIMIT_EXCEEDED":
-        return "bg-yellow-500/20 text-yellow-500 dark:bg-yellow-500/10";
-      default:
-        return "bg-gray-500/20 text-gray-500 dark:bg-gray-500/10";
-    }
-  };
-
-  const formatStatus = (status: string) => {
-    return status
-      .split("_")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
-  };
 
   return (
     <div className="w-full space-y-4">

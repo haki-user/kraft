@@ -2,12 +2,6 @@
 import { useState, useEffect } from "react";
 import {
   Icons,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
   Tabs,
   TabsContent,
   TabsList,
@@ -18,7 +12,6 @@ import {
   ScrollArea,
   ScrollBar,
   Badge,
-  Button,
 } from "@kraft/ui";
 import Editor from "@/components/editor";
 import { ExecutionPanel } from "@/components/execution-panel";
@@ -34,10 +27,11 @@ import type {
   Problem,
   SubmissionResult,
   // TestRunResult,
-  Submission,
+  // Submission,
   Submissions,
 } from "@kraft/types";
 import type { TestCase } from "@kraft/types";
+import { SubmissionSection } from "@/components/submissions-section";
 
 import "./styles.css";
 
@@ -269,6 +263,7 @@ export default function ProblemPage({
 }
 
 function ProblemSection({
+  // pending -- remove this later on.
   problemData,
 }: {
   problemData: Problem;
@@ -296,109 +291,6 @@ function ProblemSection({
             dangerouslySetInnerHTML={{ __html: htmlToRender }}
           />
         </div>
-      </div>
-    </div>
-  );
-}
-
-function SubmissionSection({
-  allSubmissions,
-}: {
-  allSubmissions: Submissions;
-}): JSX.Element {
-  const formatDate = (timestamp: number) => {
-    return new Date(timestamp).toLocaleString("en-US", {
-      dateStyle: "medium",
-      timeStyle: "short",
-    });
-  };
-
-  const getStatusBadgeClass = (status: Submission["status"]) => {
-    switch (status) {
-      case "ACCEPTED":
-        return "bg-green-500/20 text-green-500 dark:bg-green-500/10";
-      case "WRONG_ANSWER":
-        return "bg-red-500/20 text-red-500 dark:bg-red-500/10";
-      case "RUNTIME_ERROR":
-        return "bg-orange-500/20 text-orange-500 dark:bg-orange-500/10";
-      case "TIME_LIMIT_EXCEEDED":
-        return "bg-yellow-500/20 text-yellow-500 dark:bg-yellow-500/10";
-      default:
-        return "bg-gray-500/20 text-gray-500 dark:bg-gray-500/10";
-    }
-  };
-
-  const formatStatus = (status: string) => {
-    return status
-      .split("_")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
-  };
-
-  return (
-    <div className="w-full space-y-4">
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="max-w-[150px]">Status</TableHead>
-              <TableHead>Language</TableHead>
-              <TableHead>Runtime</TableHead>
-              <TableHead>Memory</TableHead>
-              <TableHead className="text-right">Submitted</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {[
-              ...allSubmissions.submissions.sort(
-                (a, b) =>
-                  new Date(b.timestamp).getTime() -
-                  new Date(a.timestamp).getTime()
-              ),
-            ].map((submission) => (
-              <TableRow key={submission.id}>
-                <TableCell>
-                  <span
-                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-nowrap ${getStatusBadgeClass(
-                      submission.status
-                    )}`}
-                  >
-                    {formatStatus(submission.status)}
-                  </span>
-                </TableCell>
-                <TableCell className="font-medium">
-                  <Button
-                    variant="link"
-                    className="px-2 hover:text-primary/75 active:text-primary/55"
-                    onClick={() =>
-                      navigator.clipboard.writeText(submission?.code || "")
-                    }
-                    title="Copy code"
-                  >
-                    {submission.language}
-                  </Button>
-                </TableCell>
-                <TableCell>
-                  {submission.runtime > 0
-                    ? `${Math.round(submission.runtime)} ms`
-                    : "-"}
-                </TableCell>
-                <TableCell>
-                  {submission.memory > 0
-                    ? `${Math.round(submission.memory * 10) / 10} MB`
-                    : "-"}
-                </TableCell>
-                <TableCell className="text-right">
-                  {formatDate(submission.timestamp)}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-      <div className="text-sm text-muted-foreground">
-        Total Submissions: {allSubmissions.totalCount} | Accepted:{" "}
-        {allSubmissions.acceptedCount}
       </div>
     </div>
   );

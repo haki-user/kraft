@@ -95,3 +95,49 @@ body {
 .debug-3 {
   border: 1px solid blue;
 }
+
+/* Hide native scrollbar */
+.scrollbar-hide {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Custom scrollbar */
+.scrollbar-custom {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(215.4 16.3% 46.9% / 0.3) transparent;
+}
+
+.scrollbar-custom::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb {
+  background-color: hsl(215.4 16.3% 46.9% / 0.3);
+  border-radius: 9999px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(215.4 16.3% 46.9% / 0.4);
+}
+
+/* Dark mode */
+.dark .scrollbar-custom {
+  scrollbar-color: hsl(215.4 16.3% 56.9% / 0.3) transparent;
+}
+
+.dark .scrollbar-custom::-webkit-scrollbar-thumb {
+  background-color: hsl(215.4 16.3% 56.9% / 0.3);
+}
+
+.dark .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(215.4 16.3% 56.9% / 0.4);
+}

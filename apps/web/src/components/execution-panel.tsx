@@ -285,18 +285,82 @@ export function ExecutionPanel({
                         </div>
                       </div>
                       <div className="mt-5">
-                        <Label htmlFor="execution-result-output">
+                        <Label>
                           <span className="text-nowrap text-base">
-                            Last Execution Output
+                            Last Execution:
                           </span>
                         </Label>
-                        <div
-                          className="mt-1 mb-1 flex items-center whitespace-pre-wrap min-h-9 h-content w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                          id="execution-result-output"
-                        >
-                          {executionResult.output}
+                      </div>
+                      <div>
+                        {executionResult.input?.map((item) => {
+                          const key = Object.keys(item)[0];
+                          const value = item[key];
+                          return (
+                            <div className="mt-5" key={key}>
+                              <Label htmlFor={`test-result-last-input-${key}`}>
+                                <span className="text-nowrap text-base">
+                                  {key}
+                                </span>
+                              </Label>
+                              <Input
+                                className="mt-1"
+                                id={`test-result-last-input-${key}`}
+                                readOnly
+                                value={value}
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <div>
+                        <div className="mt-5">
+                          <Label htmlFor={`test-result-last-output`}>
+                            <span className="text-nowrap text-base">
+                              Output
+                            </span>
+                          </Label>
+                          <div
+                            className="mt-1 mb-1 w-full whitespace-pre-wrap min-h-9 max-h-[30vh] scrollbar-custom overflow-scroll rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                            // className="mt-1 flex items-center whitespace-pre-wrap min-h-9 h-content w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                            id={`test-result-last-output`}
+                          >
+                            {executionResult.output}
+                          </div>
                         </div>
                       </div>
+                      <div>
+                        <div className="mt-5">
+                          <Label htmlFor={`test-result-last-expected-output`}>
+                            <span className="text-nowrap text-base">
+                              Expected Output
+                            </span>
+                          </Label>
+                          <div
+                            className="mt-1 mb-1 w-full whitespace-pre-wrap min-h-9 max-h-[30vh] scrollbar-custom overflow-scroll rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                            // className="mt-1 flex items-center whitespace-pre-wrap h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                            id={`test-result-last-expected-output`}
+                          >
+                            {executionResult.expectedOutput}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="h-full">
+                        <div className="mt-5 h-full">
+                          <Label htmlFor={`test-result-last-stderr`}>
+                            <span className="text-nowrap text-base">
+                              stderr
+                            </span>
+                          </Label>
+                          <div
+                            className="mt-1 mb-1 w-full whitespace-pre-wrap min-h-9 max-h-[30vh] scrollbar-custom overflow-scroll rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                            id={`test-result-last-stderr`}
+                          >
+                            {executionResult.stderr}
+                          </div>
+                          {/* </div> */}
+                        </div>
+                      </div>
+                      <div>&nbsp;</div>
                     </div>
                   </div>
                 ) : null}
@@ -372,7 +436,8 @@ export function ExecutionPanel({
                                 </span>
                               </Label>
                               <div
-                                className="mt-1 flex items-center whitespace-pre-wrap min-h-9 h-content w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                className="mt-1 mb-1 w-full whitespace-pre-wrap min-h-9 max-h-[30vh] scrollbar-custom overflow-scroll rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                // className="mt-1 flex items-center whitespace-pre-wrap min-h-9 h-content w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                                 id={`test-result-${idx}-output`}
                               >
                                 {testResult.stdout}
@@ -389,7 +454,8 @@ export function ExecutionPanel({
                                 </span>
                               </Label>
                               <div
-                                className="mt-1 flex items-center whitespace-pre-wrap h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                className="mt-1 mb-1 w-full whitespace-pre-wrap min-h-9 max-h-[30vh] scrollbar-custom overflow-scroll rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                // className="mt-1 flex items-center whitespace-pre-wrap h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                                 id={`test-result-${idx}-expected-output`}
                               >
                                 {testResult.expectedOutput}
@@ -404,7 +470,8 @@ export function ExecutionPanel({
                                 </span>
                               </Label>
                               <div
-                                className="mt-1 mb-1 flex items-center whitespace-pre-wrap h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm max-h-full"
+                                className="mt-1 mb-1 w-full whitespace-pre-wrap min-h-9 max-h-[30vh] scrollbar-custom overflow-scroll rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                // className="mt-1 mb-1 flex items-center whitespace-pre-wrap h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm max-h-full"
                                 id={`test-result-${idx}-stderr`}
                               >
                                 {testResult.stderr}

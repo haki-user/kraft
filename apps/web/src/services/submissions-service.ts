@@ -1,3 +1,4 @@
+import { config } from "@/utils";
 import api from "./axios-instance";
 import {
   CreateSubmissionDTO,
@@ -13,8 +14,7 @@ export const createSubmission = async (
 ): Promise<SubmissionResult> => {
   const res = await api.post<{ jobId: string }>("/submissions/", data);
 
-  const maxWaitTime =
-    Number(process.env.NEXT_PUBLIC_SUBMISSION_RUN_WAIT_TIME) || 2 * 60 * 1000;
+  const maxWaitTime = Number(config.SUBMISSION_RUN_WAIT_TIME) || 2 * 60 * 1000;
   const initialInterval = 1000; // Start with 1s
   let currentInterval = initialInterval;
   const startTime = Date.now();
@@ -77,8 +77,7 @@ export const executeTestRun = async (
 ): Promise<ExecutorResult> => {
   const res = await api.post<{ jobId: string }>("/submissions/test-run", data);
 
-  const maxWaitTime =
-    Number(process.env.NEXT_PUBLIC_TEST_RUN_MAX_WAIT_TIME_MS) || 60000;
+  const maxWaitTime = Number(config.TEST_RUN_MAX_WAIT_TIME_MS) || 60000;
   const initialInterval = 500; // Start with 0.5s
   let currentInterval = initialInterval;
   const startTime = Date.now();
