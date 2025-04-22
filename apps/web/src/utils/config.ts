@@ -10,5 +10,9 @@ export const config = {
   SUPPORTED_LANGUAGES: (
     process.env.NEXT_PUBLIC_SUPPORTED_LANGUAGES || ""
   ).split(","),
-  DEFAULT_ACTIVE_LANGUAGE: process.env.NEXT_PUBLIC_DEFAULT_ACTIVE_LANGUAGE || "python",
+  DEFAULT_ACTIVE_LANGUAGE:
+    process.env.NEXT_PUBLIC_DEFAULT_ACTIVE_LANGUAGE || "python",
+  AXIOS_API_TIMEOUT_SEC: parseInt(
+    process.env.NEXT_PUBLIC_AXIOS_API_TIMEOUT_SEC || "30"
+  ),
 };

@@ -11,7 +11,7 @@ const getAccessToken = (): string | null => {
 const api: AxiosInstance = axios.create({
   baseURL: config.API_BASE_URL,
   withCredentials: true,
-  timeout: 20 * 1000,
+  timeout: config.AXIOS_API_TIMEOUT_SEC * 1000,
   headers: {
     "Content-Type": "application/json",
   },
