@@ -59,6 +59,7 @@ ARG PROJECT
 # Add Python support
 RUN apk add --no-cache python3 py3-pip libc6-compat openssl
 RUN apk add --no-cache procps
+RUN apk add --no-cache bash
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nodejs
@@ -75,4 +76,3 @@ EXPOSE ${PORT}
 
 # Use JSON format for CMD to prevent OS signal issues
 CMD ["node", "dist/index.js"]
-
