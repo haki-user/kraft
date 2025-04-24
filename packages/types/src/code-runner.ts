@@ -11,6 +11,7 @@ export interface Job {
   id: string;
   code: string;
   language: Language;
+  problemId?: string;
   isTestRun: boolean;
   testCases: TestCase[];
 }

@@ -21,26 +21,27 @@ import {
 export const createSubmission = async (
   data: CreateSubmissionDTO
 ): Promise<{ jobId: string }> => {
-  const testCasesData = await prisma.testCase.findMany({
+  const totalTestCases = await prisma.testCase.count({
     where: { problemId: data.problemId },
   });
   // Create submission record with a default PENDING status.
   const submission = await prisma.submission.create({
-    data: { ...data, status: "PENDING", totalTestCases: testCasesData.length },
+    data: { ...data, status: "PENDING", totalTestCases },
   });
-  const parsedTestCases = testCasesData.map((testCase) => ({
-    // redundant -- remove later on.
-    ...testCase,
-    input: JSON.parse(testCase.input),
-  }));
+  // const parsedTestCases = testCasesData.map((testCase) => ({
+  //   // redundant -- remove later on.
+  //   ...testCase,
+  //   input: JSON.parse(testCase.input),
+  // }));
 
   // Build the job payload in a format the code-runner understands.
   const job: Job = {
     id: submission.id,
     code: submission.code,
+    problemId: submission.problemId,
     isTestRun: false,
     language: submission.language as Language,
-    testCases: parsedTestCases,
+    testCases: [], // Not sending test cases from here due to ASB message size limit. Fetch test cases inside the code runner.
   };
 
   try {
@@ -225,7 +226,7 @@ export const processProcessedJobs = (): void => {
           status: result.status,
           runtime: result.runtime,
           memoryUsed: result.memoryUsed,
-          ...(result.input && { input: result.input }),
+          ...(result.input && { input: JSON.stringify(result.input) }),
           ...(result.output && { output: result.output }),
           ...(result.expectedOutput && {
             expectedOutput: result.expectedOutput,
@@ -236,6 +237,7 @@ export const processProcessedJobs = (): void => {
             testCasesPassed: result.testCasesPassed,
           }),
         };
+        console.log("---> updateSubmissionResult", jobId, payload);
         await updateSubmissionResult(jobId, payload);
       }
       setSubmissionResult(jobId, result);

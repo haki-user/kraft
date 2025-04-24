@@ -183,7 +183,7 @@ export const createTestRunHandler = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { problemId, code, language, testCases } = req.body;
+    const { problemId, code, language, testCases } = req.body; // add validations, currently anyone can run test on this problem with just problemId + input validations
     const job = await submissionsService.executeTestRun({
       problemId,
       code,
@@ -256,119 +256,4 @@ export const updateSubmissionResultHandler = async (
     console.error("Error updating submission result:", error);
     res.status(500).json({ error: "Failed to update submission result" });
   }
-};
-
-// import { Request, Response, NextFunction } from 'express';
-// import { SubmissionService, CodeExecutionService } from './submission-types';
-// import { SubmissionStatus } from '@prisma/client';
-
-// export const createSubmissionController = (
-//   submissionService: ReturnType<typeof createSubmissionService>,
-//   codeExecutionService: CodeExecutionService
-// ) => ({
-//   async createSubmission(req: Request, res: Response, next: NextFunction) {
-//     try {
-//       const {
-//         userId,
-//         problemId,
-//         code,
-//         language,
-//         contestId
-//       } = req.body;
-
-//       // Optional: Add authentication and authorization checks
-//       // 1. Verify user exists
-//       // 2. Check problem accessibility
-//       // 3. Validate contest participation (if applicable)
-
-//       const submission = await submissionService.createSubmission({
-//         userId,
-//         problemId,
-//         code,
-//         language,
-//         ...(contestId && { contestId })
-//       });
-
-//       res.status(201).json(submission);
-//     } catch (error) {
-//       next(error);
-//     }
-//   },
-
-//   async runCodeTest(req: Request, res: Response, next: NextFunction) {
-//     try {
-//       const {
-//         code,
-//         language,
-//         problemId,
-//         customInput
-//       } = req.body;
-
-//       // Directly use code execution service without storing submission
-//       const result = await codeExecutionService.runCode({
-//         code,
-//         language,
-//         problemId,
-//         customInput
-//       });
-
-//       res.json(result);
-//     } catch (error) {
-//       next(error);
-//     }
-//   },
-
-//   async getSubmissionById(req: Request, res: Response, next: NextFunction) {
-//     try {
-//       const { id } = req.params;
-
-//       // Optional: Add authorization check
-
-//       const submission = await submissionService.getSubmissionById(id);
-
-//       if (!submission) {
-//         return res.status(404).json({ message: 'Submission not found' });
-//       }
-
-//       res.json(submission);
-//     } catch (error) {
-//       next(error);
-//     }
-//   },
-
-//   async listSubmissions(req: Request, res: Response, next: NextFunction) {
-//     try {
-//       const {
-//         userId,
-//         problemId,
-//         contestId,
-//         status,
-//         page = 1,
-//         limit = 10
-//       } = req.query;
-
-//       // Optional: Add authorization checks
-
-//       const result = await submissionService.listSubmissions({
-//         userId: userId as string,
-//         problemId: problemId as string,
-//         contestId: contestId as string,
-//         status: status as SubmissionStatus,
-//         page: Number(page),
-//         limit: Number(limit)
-//       });
-
-//       res.json(result);
-//     } catch (error) {
-//       next(error);
-//     }
-//   }
-// });
-
-// create dummy python submission to test the controller for this
-const dummySubmission = {
-  id: "12345",
-  problemId: "problem1",
-  userId: "user1",
-  code: "print('Hello, World!')",
 };

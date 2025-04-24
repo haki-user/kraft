@@ -2,6 +2,7 @@ import fs from "fs";
 import { v4 as uuidv4 } from "uuid";
 import { Client as PGClient } from "pg";
 import { config } from "./config";
+import { TestCase } from "@kraft/types";
 
 const postgresConnectionString = config.POSTGRES_CONNECTION_STRING;
 const caCert = fs.readFileSync(config.AIVEN_CA_CERT_PATH).toString();
@@ -13,7 +14,7 @@ export const pgClient = new PGClient({
     ca: caCert,
     rejectUnauthorized: true,
   },
-  query_timeout: 10 * 1000, // 5 seconds
+  query_timeout: 60 * 1000,
 });
 pgClient
   .connect()
@@ -65,4 +66,25 @@ export async function syncJobResult(
   } catch (error) {
     console.error(`Failed to sync job ${jobId} result to Postgres:`, error);
   }
+}
+
+export async function getProblemTestCases(
+  problemId: string
+): Promise<TestCase[]> {
+  const query = `SELECT * FROM "TestCase" WHERE "problemId" = $1`;
+  const res = await pgClient.query(query, [problemId]);
+  return res.rows.map((testCase) => {
+    return {
+      ...testCase,
+      input: JSON.parse(testCase.input),
+    };
+  });
+}
+
+export async function updateSubmissionStatus(
+  submissonId: string,
+  status: string
+): Promise<void> {
+  const query = `UPDATE "Submission" SET status = $1 WHERE id = $2`;
+  await pgClient.query(query, [status, submissonId]);
 }

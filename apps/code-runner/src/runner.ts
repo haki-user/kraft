@@ -13,7 +13,9 @@ import {
   loadExecutors,
   upsertExecutor,
   deleteExecutor,
-  syncJobResult,
+  // syncJobResult,
+  getProblemTestCases,
+  updateSubmissionStatus,
 } from "./db";
 import { config } from "./config";
 
@@ -40,16 +42,16 @@ export class RunnerService {
 
   // Load executors from the database to sync the in-memory state.
   private async loadExecutorsFromDB(): Promise<void> {
-    try {
-      const rows = await loadExecutors();
-      this.executors = rows.map((row) => ({
-        language: row.language,
-        endpoint: row.endpoint,
-      }));
-      console.log(`Loaded ${this.executors.length} executors from database.`);
-    } catch (error) {
-      console.error("Error loading executors from database:", error);
-    }
+    // try {
+    const rows = await loadExecutors();
+    this.executors = rows.map((row) => ({
+      language: row.language,
+      endpoint: row.endpoint,
+    }));
+    console.log(`Loaded ${this.executors.length} executors from database.`);
+    // } catch (error) {
+    // console.error("Error loading executors from database:", error);
+    // }
   }
 
   // Register a new executor and sync with the database.
@@ -84,16 +86,16 @@ export class RunnerService {
     if (index === -1) {
       throw new Error("Executor not found");
     }
-    try {
-      await deleteExecutor(language);
-      this.executors.splice(index, 1);
-      console.log(
-        `Executor for language ${language} removed and synced to database.`
-      );
-    } catch (error) {
-      console.error("Error removing executor from database:", error);
-      throw error;
-    }
+    // try {
+    await deleteExecutor(language);
+    this.executors.splice(index, 1);
+    console.log(
+      `Executor for language ${language} removed and synced to database.`
+    );
+    // } catch (error) {
+    // console.error("Error removing executor from database:", error);
+    // throw error;
+    // }
   }
 
   // List all registered executors.
@@ -150,6 +152,11 @@ export class RunnerService {
     const MAX_MESSAGE_SIZE = 256 * 1000; // bytes
 
     try {
+      // if full submission test cases are not included in queue, fetch them from db.
+      if (!job.isTestRun && job.problemId) {
+        job.testCases = await getProblemTestCases(job.problemId);
+      }
+
       const executionResult: ExecutionResult = await this.executeJob(
         job,
         executor.endpoint
@@ -158,7 +165,10 @@ export class RunnerService {
       // Prepare message payload
       let payload = {
         jobId: job.id,
-        result: executionResult,
+        result: {
+          ...executionResult,
+          output: executionResult.stdout,
+        },
         isTestRun: job.isTestRun,
       };
       let payloadStr = JSON.stringify(payload);
@@ -171,6 +181,7 @@ export class RunnerService {
             jobId: job.id,
             status: "RUNTIME_ERROR",
             stderr: "Output limit exceeded",
+            output: undefined,
             results: [],
             testCasesPassed: 0,
             totalTestCases: 0,
@@ -187,32 +198,35 @@ export class RunnerService {
       console.log(`Job ${job.id} processed and result sent.`);
     } catch (error) {
       // if azure function rejects due to function timeout limit
-      if (
-        error instanceof Error &&
-        (error.message.includes("timeout") ||
-          error.message.includes("statusCode: 500"))
-      ) {
-        const payload = {
+      const payload = {
+        jobId: job.id,
+        isTestRun: job.isTestRun,
+        result: {
           jobId: job.id,
-          isTestRun: job.isTestRun,
-          result: {
-            jobId: job.id,
-            status: "TIME_LIMIT_EXCEEDED",
-            stderr: "Execution time limit exceeded.",
-            results: [],
-            testCasesPassed: 0,
-            totalTestCases: 0,
-            runtime: 0,
-            memoryUsed: 0,
-          },
-        };
-        await processedJobSender.sendMessages({
-          body: payload,
-          subject: "JobProcessed",
-        });
-        return;
+          status: "FAILED",
+          stderr: "",
+          results: [],
+          testCasesPassed: 0,
+          totalTestCases: 0,
+          runtime: 0,
+          memoryUsed: 0,
+        },
+      };
+      if (error instanceof Error && error.message.includes("statusCode: 500")) {
+        payload.result.status = "TIME_LIMIT_EXCEEDED";
+        payload.result.stderr = "Execution time limit exceeded.";
+      }
+      await processedJobSender.sendMessages({
+        body: payload,
+        subject: "JobProcessed",
+      });
+      if (!job.isTestRun && payload.result.status === "FAILED") {
+        await updateSubmissionStatus(job.id, "FAILED");
       }
       console.error(`Error processing job ${job.id}:`, error);
+      if (payload.result.status !== "FAILED") {
+        return;
+      }
       throw error;
     }
   }
