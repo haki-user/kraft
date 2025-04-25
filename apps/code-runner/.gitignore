@@ -31,3 +31,6 @@ Thumbs.db
 
 # Secret files
 *.pem
+
+# deployment files
+app.yaml
