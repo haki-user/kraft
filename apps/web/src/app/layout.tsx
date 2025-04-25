@@ -26,10 +26,10 @@ export default function RootLayout({
             <div>Contest</div>
             <div>Problems</div>
           </nav> */}
+            <Toaster />
             <Navbar />
             <Separator />
             <main>{children}</main>
-            <Toaster />
           </AuthProvider>
         </ThemeProvider>
       </body>

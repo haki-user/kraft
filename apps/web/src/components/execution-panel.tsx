@@ -16,10 +16,7 @@ import {
 } from "@kraft/ui";
 // import { useToast } from "@/hooks/use-toast";
 import type {
-  // CreateSubmissionDTO,
   ExecutorResult,
-  SubmissionResult,
-  SubmissionStatus,
   TestCase,
   TestResult,
   // TestRunResult,
@@ -37,7 +34,7 @@ import type {
 interface ExecutionPanelProps {
   handleTestRun: (testCases: TestCase[]) => Promise<ExecutorResult | null>;
   handleSubmission: () // data: Omit<CreateSubmissionDTO, "userId">
-  => Promise<SubmissionResult | null>;
+  => Promise<void>;
   initialTestCases: TestCase[];
 }
 
@@ -108,35 +105,33 @@ export function ExecutionPanel({
   const handleRun = async (): Promise<void> => {
     setIsExecuting(true);
     setActiveTab("skeleton");
-    try {
-      const res: ExecutorResult | null = await handleTestRun(testCases);
-      if (!res) return;
-
-      if (res.results) {
-        setTestResults(res.results);
-      }
-
-      setExecutionResult({
-        status: res.status,
-        output: res.output,
-        stderr: res.stderr,
-        error: res.error,
-        memoryUsed: res.memoryUsed,
-        runtime: res.runtime,
-      });
-    } catch (e) {
-    } finally {
+    const res: ExecutorResult | null = await handleTestRun(testCases);
+    if (!res) {
       setIsExecuting(false);
-      setActiveTab("test-results");
+      setActiveTab("test-cases");
+      return;
     }
+
+    if (res.results) {
+      setTestResults(res.results);
+    }
+
+    setExecutionResult({
+      status: res.status,
+      output: res.output,
+      stderr: res.stderr,
+      error: res.error,
+      memoryUsed: res.memoryUsed,
+      runtime: res.runtime,
+    });
+    setIsExecuting(false);
+    setActiveTab("test-results");
   };
 
   const handleSubmit = async () => {
-    setIsExecuting(true);
     setIsExecutingSub(true);
     await handleSubmission();
     setIsExecutingSub(false);
-    setIsExecuting(false);
   };
 
   return (
@@ -149,7 +144,7 @@ export function ExecutionPanel({
       <div className="flex justify-between">
         <TabsList>
           <TabsTrigger
-            disabled={isExecuting}
+            disabled={isExecuting || isExecutingSub}
             onClick={() => {
               setActiveTab("test-cases");
             }}
@@ -158,7 +153,7 @@ export function ExecutionPanel({
             Test Cases
           </TabsTrigger>
           <TabsTrigger
-            disabled={isExecuting}
+            disabled={isExecuting || isExecutingSub}
             onClick={() => {
               setActiveTab("test-results");
             }}
@@ -169,7 +164,7 @@ export function ExecutionPanel({
         </TabsList>
         <div className="flex gap-2">
           <Button
-            disabled={isExecuting}
+            disabled={isExecuting || isExecutingSub}
             onClick={handleRun}
             variant="secondary"
           >
@@ -178,7 +173,7 @@ export function ExecutionPanel({
           </Button>
           <Button
             className="bg-green-700 hover:bg-green-800 active:bg-green-900"
-            disabled={isExecuting}
+            disabled={isExecuting || isExecutingSub}
             onClick={handleSubmit}
           >
             {isExecutingSub ? <Icons.spinner className="animate-spin" /> : null}

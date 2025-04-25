@@ -24,6 +24,12 @@ export const createServer = (): Express => {
         credentials: true,
         methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         allowedHeaders: ["Content-Type", "Authorization", "Skip-Interceptor"],
+        exposedHeaders: [
+          "Retry-After",
+          "RateLimit-Limit",
+          "RateLimit-Remaining",
+          "RateLimit-Reset",
+        ],
       })
     )
     .use(helmet())

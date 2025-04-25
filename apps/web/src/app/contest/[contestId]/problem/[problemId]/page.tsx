@@ -33,9 +33,10 @@ import type {
 } from "@kraft/types";
 import { ProblemSection } from "@/components/problem-section";
 import { SubmissionSection } from "@/components/submissions-section";
-
-import "./styles.css";
 import { config } from "@/utils";
+import { toast } from "@/hooks/use-toast";
+import { AxiosError } from "axios";
+import "./styles.css";
 
 let renderCount = 0;
 
@@ -96,12 +97,24 @@ export default function ProblemPage({
 
       return res;
     } catch (err) {
+      if (err instanceof AxiosError && err.response?.status === 429) {
+        toast({
+          title: "Too many code runs",
+          description: `Please try again after ${err.response.headers["retry-after"]} seconds.`,
+          variant: "destructive",
+        });
+        console.error(
+          "Rate limit exceeded. Please try again later.",
+          err.response.data.message
+        );
+        return null;
+      }
       console.error(err);
       return null;
     }
   };
   const handleSubmission = async () // data: Omit<CreateSubmissionDTO, "userId">
-  : Promise<SubmissionResult | null> => {
+  : Promise<void> => {
     try {
       const res = await createSubmission({
         problemId,
@@ -112,10 +125,20 @@ export default function ProblemPage({
       console.log({ res }, "submission...");
       await handleFetchSubmissoins();
       setActiveTab("submissions");
-      return res;
     } catch (e) {
+      if (e instanceof AxiosError && e.response?.status === 429) {
+        toast({
+          title: "Too many submissions",
+          description: `Please try again after ${e.response.headers["retry-after"]} seconds.`,
+          variant: "destructive",
+        });
+        console.error(
+          "Rate limit exceeded. Please try again later.",
+          e.response.data.message
+        );
+        return;
+      }
       console.log(e);
-      return null;
     }
   };
 

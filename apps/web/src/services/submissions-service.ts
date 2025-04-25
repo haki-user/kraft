@@ -33,7 +33,7 @@ export const createSubmission = async (
     currentInterval = Math.min(currentInterval * 2, 10000); // Cap at 10s
   }
 
-  throw new Error("Submission timed out after 2 minutes");
+  throw new Error(`Submission timed out after ${maxWaitTime / 1000} minutes`);
 };
 
 export const pingSubmissionByJobId = async (jobId: string) => {
