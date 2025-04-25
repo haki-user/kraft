@@ -1,11 +1,20 @@
 import { Router } from "express";
 import * as submissionsController from "./submissions.controller";
 import { authMiddleware } from "../auth/auth.middleware";
+import {
+  testRunRateLimiter,
+  submissionRateLimiter,
+} from "../../middlewares/rate-limit";
 
 const router: Router = Router();
 
 // Endpoint for creating a new submission.
-router.post("/", authMiddleware, submissionsController.createSubmissionHandler);
+router.post(
+  "/",
+  authMiddleware,
+  submissionRateLimiter,
+  submissionsController.createSubmissionHandler
+);
 
 // Endpoint for clients to ping for submission results by jobId.
 router.get(
@@ -38,6 +47,7 @@ router.get(
 router.post(
   "/test-run",
   authMiddleware,
+  testRunRateLimiter,
   submissionsController.createTestRunHandler
 );
 // Endpoint for clients to ping for test run results by jobId.

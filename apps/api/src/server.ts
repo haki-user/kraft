@@ -11,6 +11,7 @@ import contestsRoutes from "./modules/contests/contests.routes";
 import submissionRoutes from "./modules/submissions/submissions.routes";
 import leaderBoardRoutes from "./modules/leaderboard/leaderboard.routes";
 import { processProcessedJobs } from "./modules/submissions/submissions.service";
+import { generalRateLimiter } from "./middlewares/rate-limit";
 
 export const createServer = (): Express => {
   const app = express();
@@ -28,6 +29,7 @@ export const createServer = (): Express => {
     .use(helmet())
     .use(cookieParser())
     .use(express.json())
+    .use(generalRateLimiter)
     .use("/api/auth", authRoutes)
     .use("/api/problems/", problemsRoutes)
     .use("/api/contests", contestsRoutes)
