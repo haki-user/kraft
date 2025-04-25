@@ -1,11 +1,9 @@
 import { log } from "@kraft/logger";
-import dotenv from "dotenv";
 import { createServer } from "./server";
 import prisma from "./lib/prisma";
+import { config } from "./lib/config";
 
-dotenv.config();
-
-const port = process.env.PORT || 5001;
+const port = config.PORT || 5001;
 const server = createServer();
 
 // Graceful shutdown

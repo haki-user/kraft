@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { JWTPayload } from "@kraft/types";
+import { config } from "./config";
 
 export const generateAccessToken = (payload: JWTPayload) => {
   return jwt.sign(
@@ -8,8 +9,8 @@ export const generateAccessToken = (payload: JWTPayload) => {
       email: payload.email,
       role: payload.role,
     },
-    process.env.JWT_SECRET!,
-    { expiresIn: "100h" }
+    config.JWT_SECRET,
+    { expiresIn: config.JWT_EXPIRES_IN }
   );
 };
 
@@ -20,7 +21,7 @@ export const generateRefreshToken = (payload: JWTPayload) => {
       email: payload.email,
       role: payload.role,
     },
-    process.env.JWT_REFRESH_SECRET!,
-    { expiresIn: "7d" }
+    config.JWT_REFRESH_SECRET,
+    { expiresIn: config.JWT_REFRESH_EXPIRES_IN }
   );
 };

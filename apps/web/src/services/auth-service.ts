@@ -1,18 +1,19 @@
 import { RegisterDTO, LoginDTO, AuthResponse } from "@kraft/types";
 import { useAuthStore } from "@/store/auth-store";
 import api from "./axios-instance";
+import { AxiosError } from "axios";
 
 export const registerUser = async (
   data: RegisterDTO
 ): Promise<AuthResponse> => {
   const response = await api.post("/auth/register", data);
   const authData = response.data;
-  
+
   // Store token in localStorage
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     localStorage.setItem("accessToken", authData.accessToken);
   }
-  
+
   useAuthStore.getState().login(authData);
   return authData;
 };
@@ -20,12 +21,12 @@ export const registerUser = async (
 export const loginUser = async (data: LoginDTO): Promise<AuthResponse> => {
   const response = await api.post("/auth/login", data);
   const authData = response.data;
-  
+
   // Store token in localStorage
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     localStorage.setItem("accessToken", authData.accessToken);
   }
-  
+
   useAuthStore.getState().login(authData);
   return authData;
 };
@@ -37,13 +38,16 @@ export const verifyToken = async (): Promise<void> => {
     if (!token) {
       throw new Error("No token available");
     }
-    
+
     const response = await api.post("/auth/verify-token");
     const user = response.data;
     useAuthStore.getState().setUser(user);
   } catch (err) {
     console.error("Error verifying token:", err);
-    await logoutUser();
+    if (err instanceof AxiosError && err.response?.status === 401) {
+      console.error("Token expired or invalid");
+      await logoutUser();
+    }
   }
 };
 
@@ -55,24 +59,15 @@ export const logoutUser = async () => {
     console.error("Error during logout:", error);
   } finally {
     // Always clean up local state
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       localStorage.removeItem("accessToken");
     }
     useAuthStore.getState().logout();
-    
+
     // Dispatch logout event to trigger redirect
-    window.dispatchEvent(new Event('auth:logout'));
+    window.dispatchEvent(new Event("auth:logout"));
   }
 };
-
-
-
-
-
-
-
-
-
 
 // import { RegisterDTO, LoginDTO, AuthResponse } from "@kraft/types";
 // import { useAuthStore } from "@/store/auth-store";
@@ -129,6 +124,3 @@ export const logoutUser = async () => {
 //   useAuthStore.getState().logout();
 //   localStorage.removeItem("accessToken");
 // };
-
-
-
