@@ -282,7 +282,7 @@ export default function Editor({
       </div>
       <div className="h-full w-full">
         <MonacoEditor
-          defaultValue="// Write code here"
+          defaultValue=""
           height={height}
           language={activeLanguage.toLowerCase()}
           loading={<div>Loading...</div>}

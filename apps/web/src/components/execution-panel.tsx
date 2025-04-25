@@ -12,6 +12,7 @@ import {
   ScrollBar,
   Button,
   Skeleton,
+  Icons,
 } from "@kraft/ui";
 // import { useToast } from "@/hooks/use-toast";
 import type {
@@ -80,6 +81,7 @@ export function ExecutionPanel({
   const [executionResult, setExecutionResult] =
     useState<ExecutorResult | null>();
   const [isExecuting, setIsExecuting] = useState<boolean>(false);
+  const [isExecutingSub, setIsExecutingSub] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<
     "test-cases" | "test-results" | "skeleton"
   >("test-cases");
@@ -131,7 +133,9 @@ export function ExecutionPanel({
 
   const handleSubmit = async () => {
     setIsExecuting(true);
-    const res = await handleSubmission();
+    setIsExecutingSub(true);
+    await handleSubmission();
+    setIsExecutingSub(false);
     setIsExecuting(false);
   };
 
@@ -169,6 +173,7 @@ export function ExecutionPanel({
             onClick={handleRun}
             variant="secondary"
           >
+            {isExecuting ? <Icons.spinner className="animate-spin" /> : null}
             Run
           </Button>
           <Button
@@ -176,6 +181,7 @@ export function ExecutionPanel({
             disabled={isExecuting}
             onClick={handleSubmit}
           >
+            {isExecutingSub ? <Icons.spinner className="animate-spin" /> : null}
             Submit
           </Button>
         </div>
