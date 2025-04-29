@@ -4,8 +4,8 @@ ARG PROJECT=code-runner
 # Alpine image
 FROM node:${NODE_VERSION}-alpine AS alpine
 RUN apk update
-# Add OpenSSL explicitly to address Prisma's requirements
-RUN apk add --no-cache libc6-compat openssl
+# # Add OpenSSL explicitly to address Prisma's requirements
+# RUN apk add --no-cache libc6-compat openssl
 
 # Setup pnpm and turbo on the alpine base
 FROM alpine AS base
@@ -37,12 +37,6 @@ RUN --mount=type=cache,id=pnpm,target=~/.pnpm-store pnpm install
 # Copy source code of isolated subworkspace
 COPY --from=pruner /app/out/full/ .
 
-# # Navigate to the API directory where the prisma schema should be
-# WORKDIR /app/apps/api
-
-# # Generate Prisma client with the updated schema
-# RUN pnpm dlx prisma generate --schema=./prisma/schema.prisma
-
 # Return to the app directory for the rest of the build
 WORKDIR /app
 
@@ -53,13 +47,10 @@ RUN rm -rf ./**/*/src
 # Final image
 FROM alpine AS runner
 ARG PROJECT
+ARG CA_CERT=aiven-ca.pem
 
-## Make sure we also have OpenSSL in the final image
-RUN apk add --no-cache libc6-compat openssl
-# Add Python support
-# RUN apk add --no-cache python3 py3-pip libc6-compat openssl
-# RUN apk add --no-cache procps
-# RUN apk add --no-cache bash
+# ## Make sure we also have OpenSSL in the final image
+# RUN apk add --no-cache libc6-compat openssl
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nodejs
@@ -67,6 +58,7 @@ USER nodejs
 
 WORKDIR /app
 COPY --from=builder --chown=nodejs:nodejs /app .
+COPY --chown=nodejs:nodejs apps/code-runner/${CA_CERT} apps/code-runner/${CA_CERT}
 WORKDIR /app/apps/${PROJECT}
 
 ARG PORT=8080
