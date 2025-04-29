@@ -164,6 +164,9 @@ export default function ProblemPage({
   const handleFetchSubmissoins = async () => {
     try {
       const res = await getSubmissionsForProblemByTitleSlug(titleSlug);
+      res.submissions.sort((a, b) => {
+        return b.timestamp - a.timestamp;
+      });
       setSubmissions(res);
       // setActiveTab("submissions");
     } catch (e) {
@@ -288,6 +291,11 @@ export default function ProblemPage({
                       languages={languages}
                       activeLanguage={activeLanguage}
                       setActiveLanguage={setActiveLanguage}
+                      lastSubmittedCode={
+                        submissions.submissions.find(
+                          (submission) => submission.language === activeLanguage
+                        )?.code
+                      }
                     />
                   </div>
                 </ResizablePanel>

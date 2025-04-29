@@ -25,6 +25,7 @@ import {
   Input,
 } from "@kraft/ui";
 import { formatLanguageName } from "@/utils";
+import { CloudDownloadIcon } from "lucide-react";
 
 interface EditorSettings {
   keyBindings: "normal" | "vim";
@@ -37,6 +38,7 @@ interface EditorSettings {
 interface EditorProps {
   width?: number | string;
   height?: number | string;
+  lastSubmittedCode?: string;
   editorSettings?: EditorSettings;
   code: string;
   setCode: (code: string) => void;
@@ -57,6 +59,7 @@ const getEditorSettingsLocal = (): EditorSettings | null => {
 export default function Editor({
   width,
   height,
+  lastSubmittedCode,
   editorSettings = {
     keyBindings: "normal",
     lineNumbers: "on",
@@ -108,33 +111,49 @@ export default function Editor({
 
   return (
     <div className="w-full h-full border-b-[1px] border-solid">
-      <div className="flex px-1 gap-2 scale-y-90 justify-between">
-        <Select
-          defaultValue={activeLanguage}
-          onValueChange={(value: string) => {
-            setActiveLanguage(value);
-          }}
-        >
-          <SelectTrigger className="w-[115px] capitalize">
-            <SelectValue placeholder="Select a programming language" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Programming Languages</SelectLabel>
-              {languages.map((language) => {
-                return (
-                  <SelectItem
-                    key={language}
-                    value={language}
-                    className="capitalize"
-                  >
-                    {formatLanguageName(language)}
-                  </SelectItem>
-                );
-              })}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+      <div className="flex px-1 gap-2 scale-y-90 justify-between items-center">
+        <div className="flex gap-1 items-center">
+          <Select
+            defaultValue={activeLanguage}
+            onValueChange={(value: string) => {
+              setActiveLanguage(value);
+            }}
+          >
+            <SelectTrigger className="capitalize">
+              <SelectValue placeholder="Select a programming language" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Programming Languages</SelectLabel>
+                {languages.map((language) => {
+                  return (
+                    <SelectItem
+                      key={language}
+                      value={language}
+                      className="capitalize"
+                    >
+                      {formatLanguageName(language)}
+                    </SelectItem>
+                  );
+                })}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+          {lastSubmittedCode ? (
+            <Button
+              variant="ghost"
+              title="Insert last submitted code"
+              size="sm"
+              onClick={() => {
+                setCode(lastSubmittedCode);
+              }}
+            >
+              <CloudDownloadIcon className="" />
+            </Button>
+          ) : (
+            ""
+          )}
+        </div>
         <Dialog onOpenChange={setOpen} open={open}>
           <DialogTrigger asChild>
             <Button variant="ghost">
