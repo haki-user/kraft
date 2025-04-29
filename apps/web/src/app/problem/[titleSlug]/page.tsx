@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { fetchPublicProblemById } from "@/services/problems-service";
+import { fetchPublicProblemByTitleSlug } from "@/services/problems-service";
 import ProblemClient from "./client-component";
 // import { notFound } from "next/navigation";
 import { AxiosError } from "axios";
@@ -12,7 +12,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   let problem;
   try {
-    problem = await fetchPublicProblemById(params.titleSlug);
+    problem = await fetchPublicProblemByTitleSlug(params.titleSlug);
   } catch (e) {
     if (e instanceof AxiosError)
       console.error("Failed to fetch problem:", e.message);

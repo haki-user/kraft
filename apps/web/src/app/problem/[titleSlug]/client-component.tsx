@@ -16,8 +16,8 @@ import {
 import Editor from "@/components/editor";
 import { ExecutionPanel } from "@/components/execution-panel";
 import {
-  fetchProblemById,
-  fetchProblemByTitleSlug,
+  // fetchProblemById,
+  fetchPublicProblemByTitleSlug,
 } from "@/services/problems-service";
 import {
   createSubmission,
@@ -77,7 +77,7 @@ export default function ProblemPage({
   const fetchProblem = async () => {
     setIsLoading(true);
     try {
-      const res = await fetchProblemByTitleSlug(titleSlug);
+      const res = await fetchPublicProblemByTitleSlug(titleSlug);
       console.log({ res });
       setProblem({
         title: res.title,

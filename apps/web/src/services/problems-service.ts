@@ -13,7 +13,7 @@ export const fetchPublicProblemById = async (
   return response.data;
 };
 
-export const fetchProblemByTitleSlug = async (
+export const fetchPublicProblemByTitleSlug = async (
   titleSlug: string
 ): Promise<Problem> => {
   const res = await api.get(`problems/public/title/${titleSlug}`);
