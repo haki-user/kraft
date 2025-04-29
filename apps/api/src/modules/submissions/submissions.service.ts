@@ -4,7 +4,7 @@ import {
   jobSender,
   processedJobReceiver,
 } from "../../lib/azure-service-bus-client";
-import { setSubmissionResult } from "./test-run-cache";
+import { setSubmissionResult } from "./submissions-cache";
 import {
   CreateSubmissionDTO,
   ExecuteTestRunDTO,
@@ -92,6 +92,60 @@ export const getSubmissionById = async (id: string) => {
   return submission;
 };
 
+/**
+ * Get submissions for a specific problem by titleSlug.
+ */
+export const getSubmissionsForProblemByTitleSlug = async ({
+  titleSlug,
+  contestId,
+  userId,
+}: {
+  titleSlug: string;
+  contestId?: string;
+  userId?: string;
+}): Promise<Submissions> => {
+  //TODO: fix this mess from scratch.
+  // Fetch the problemId using the titleSlug
+  const problem = await prisma.problem.findUnique({
+    select: {
+      id: true,
+    },
+    where: { titleSlug },
+  });
+  if (!problem) {
+    throw new Error("Problem not found");
+  }
+  const submissions = await prisma.submission.findMany({
+    where: {
+      problemId: problem.id,
+      ...(contestId && { contestId }),
+      ...(userId && { userId }),
+    },
+    include: { user: true, contest: true },
+  });
+
+  const transformedSubmissions = submissions.map((submission) => ({
+    id: submission.id,
+    problemId: submission.problemId,
+    userId: submission.userId,
+    code: submission.code,
+    language: submission.language,
+    status: submission.status,
+    runtime: submission.runtime,
+    memoryUsed: submission.memoryUsed,
+    timestamp: submission.createdAt.getTime(),
+    totalTestCases: submission.totalTestCases,
+    testCasesPassed: submission.testCasesPassed,
+  }));
+
+  return {
+    submissions: transformedSubmissions,
+    totalCount: submissions.length,
+    acceptedCount: submissions.filter(
+      (submission) => submission.status === "ACCEPTED"
+    ).length,
+  };
+};
 /**
  * Get submissions for a specific problem.
  */

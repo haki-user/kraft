@@ -8,11 +8,11 @@ import { AxiosError } from "axios";
 export async function generateMetadata({
   params,
 }: {
-  params: { problemId: string };
+  params: { titleSlug: string };
 }): Promise<Metadata> {
   let problem;
   try {
-    problem = await fetchPublicProblemById(params.problemId);
+    problem = await fetchPublicProblemById(params.titleSlug);
   } catch (e) {
     if (e instanceof AxiosError)
       console.error("Failed to fetch problem:", e.message);
@@ -38,17 +38,17 @@ function stripHtml(html: string): string {
 export default async function ProblemPage({
   params,
 }: {
-  params: { problemId: string };
+  params: { titleSlug: string };
 }) {
   // const problem = await fetchPublicProblemById(params.problemId);
 
   // if (!problem) {
-    // notFound();
+  // notFound();
   // }
 
   return (
     <div>
-      <ProblemClient problemId={params.problemId}/>
+      <ProblemClient titleSlug={params.titleSlug} />
     </div>
   );
 }

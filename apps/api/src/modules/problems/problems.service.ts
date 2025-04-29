@@ -35,6 +35,7 @@ export const getAllProblemsData = async () => {
       id: true,
       title: true,
       difficulty: true,
+      titleSlug: true,
     },
     where: {
       isPublic: true,
@@ -54,6 +55,7 @@ export const getAllProblemsDataPaginated = async (
         id: true,
         title: true,
         difficulty: true,
+        titleSlug: true,
       },
       where: {
         isPublic: true,
@@ -72,6 +74,7 @@ export const getProblemDataById = async (problemId: string) => {
       id: true,
       title: true,
       difficulty: true,
+      titleSlug: true,
     },
     where: {
       id: problemId,
@@ -113,7 +116,9 @@ export const getProblemById = async (id: string): Promise<Problem | null> => {
   return getParsedTestCaseInputProblems([problem])[0];
 };
 
-export const getPublicProblemById = async (id: string): Promise<Problem | null> => {
+export const getPublicProblemById = async (
+  id: string
+): Promise<Problem | null> => {
   const problem = await prisma.problem.findUnique({
     where: {
       id,
@@ -131,6 +136,25 @@ export const getPublicProblemById = async (id: string): Promise<Problem | null> 
   return getParsedTestCaseInputProblems([problem])[0];
 };
 
+export const getPublicProblemByTitleSlug = async (
+  titleSlug: string
+): Promise<Problem | null> => {
+  const problem = await prisma.problem.findUnique({
+    where: {
+      titleSlug,
+      isPublic: true,
+    },
+    include: {
+      testCases: {
+        where: {
+          isPublic: true,
+        },
+      },
+    },
+  });
+  if (!problem) return null;
+  return getParsedTestCaseInputProblems([problem])[0];
+};
 
 export const createProblem = async (problem: CreateProblemDTO) => {
   console.log({ problem });

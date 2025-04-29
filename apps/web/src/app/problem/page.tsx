@@ -33,7 +33,8 @@ const ProblemsPage: React.FC = () => {
       const data = await getPublicProblems(page, 10);
       console.log(data);
       setProblems(data.data);
-      setTotalPages(data.totalPages);
+      setTotalPages(data.pagination.totalPages);
+      // console.log("----_->", data);
     } catch (error) {
       console.error("Failed to fetch problems:", error);
     } finally {
@@ -81,7 +82,7 @@ const ProblemsPage: React.FC = () => {
                 <TableRow key={problem.id}>
                   <TableCell>
                     <Link
-                      href={`/problem/${problem.id}`}
+                      href={`/problem/${problem.titleSlug}`}
                       className="text-blue-600 hover:underline"
                     >
                       {problem.title}

@@ -6,9 +6,18 @@ export const fetchProblemById = async (problemId: string): Promise<Problem> => {
   return response.data;
 };
 
-export const fetchPublicProblemById = async (problemId: string): Promise<Problem> => {
+export const fetchPublicProblemById = async (
+  problemId: string
+): Promise<Problem> => {
   const response = await api.get(`/problems/public/${problemId}`);
   return response.data;
+};
+
+export const fetchProblemByTitleSlug = async (
+  titleSlug: string
+): Promise<Problem> => {
+  const res = await api.get(`problems/public/title/${titleSlug}`);
+  return res.data;
 };
 
 /**

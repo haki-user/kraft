@@ -15,17 +15,20 @@ import {
 } from "@kraft/ui";
 import Editor from "@/components/editor";
 import { ExecutionPanel } from "@/components/execution-panel";
-import { fetchProblemById } from "@/services/problems-service";
+import {
+  fetchProblemById,
+  fetchProblemByTitleSlug,
+} from "@/services/problems-service";
 import {
   createSubmission,
   executeTestRun,
-  getSubmissionsForProblem,
+  getSubmissionsForProblemByTitleSlug,
 } from "@/services/submissions-service";
 import type {
   // CreateSubmissionDTO,
   ExecutorResult,
   Problem,
-  SubmissionResult,
+  // SubmissionResult,
   // TestRunResult,
   // Submission,
   Submissions,
@@ -41,9 +44,9 @@ import { error } from "console";
 let renderCount = 0;
 
 export default function ProblemPage({
-  problemId,
+  titleSlug,
 }: {
-  problemId: string;
+  titleSlug: string;
 }): JSX.Element {
   const [problem, setProblem] = useState<Problem>();
   // const [testCases, setTestCases] = useState<TestCase[]>([]);
@@ -60,12 +63,12 @@ export default function ProblemPage({
     acceptedCount: 0,
   });
   const [activeTab, setActiveTab] = useState("problem");
-  const key = `${problemId}-${activeLanguage}-code`;
+  const key = `${titleSlug}-${activeLanguage}-code`;
 
   useEffect(() => {
     if (activeTab === "submissions") {
       (async () => {
-        const res = await getSubmissionsForProblem(problemId);
+        const res = await getSubmissionsForProblemByTitleSlug(titleSlug);
         setSubmissions(res);
       })();
     }
@@ -74,7 +77,7 @@ export default function ProblemPage({
   const fetchProblem = async () => {
     setIsLoading(true);
     try {
-      const res = await fetchProblemById(problemId);
+      const res = await fetchProblemByTitleSlug(titleSlug);
       console.log({ res });
       setProblem({
         title: res.title,
@@ -94,11 +97,15 @@ export default function ProblemPage({
   const handleTestRun = async (
     testCases: TestCase[]
   ): Promise<ExecutorResult | null> => {
+    // TODO: fix it, better error handling.
+    if (!problem) {
+      return null;
+    }
     try {
       const res = await executeTestRun({
         code,
         language: activeLanguage,
-        problemId,
+        problemId: problem.id,
         testCases,
       });
       console.log({ res });
@@ -124,9 +131,13 @@ export default function ProblemPage({
   };
   const handleSubmission = async () // data: Omit<CreateSubmissionDTO, "userId">
   : Promise<void> => {
+    // TODO: fix it, better error handling.
+    if (!problem) {
+      return;
+    }
     try {
       const res = await createSubmission({
-        problemId,
+        problemId: problem.id,
         code,
         language: activeLanguage,
       });
@@ -152,7 +163,7 @@ export default function ProblemPage({
 
   const handleFetchSubmissoins = async () => {
     try {
-      const res = await getSubmissionsForProblem(problemId);
+      const res = await getSubmissionsForProblemByTitleSlug(titleSlug);
       setSubmissions(res);
       // setActiveTab("submissions");
     } catch (e) {

@@ -63,6 +63,19 @@ export const getSubmissionsForProblem = async (
   return response.data;
 };
 
+export const getSubmissionsForProblemByTitleSlug = async (
+  problemId: string,
+  contestId?: string
+): Promise<Submissions> => {
+  const response = await api.get<Submissions>(
+    `/submissions/problem/title/${problemId}`,
+    {
+      params: { contestId },
+    }
+  );
+  return response.data;
+};
+
 export const getAllUserContestSubmissions = async (
   contestId: string
 ): Promise<Submissions> => {

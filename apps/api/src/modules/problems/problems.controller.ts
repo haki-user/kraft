@@ -43,6 +43,7 @@ export const getProblemDataById = async (req: Request, res: Response) => {
 };
 
 export const getProblemById = async (req: Request, res: Response) => {
+  // TODO: Add checks and validations
   const { problemId } = req.params;
   try {
     const problem = await ProblemsService.getProblemById(problemId);
@@ -61,6 +62,21 @@ export const getPublicProblemById = async (req: Request, res: Response) => {
   const { problemId } = req.params;
   try {
     const problem = await ProblemsService.getPublicProblemById(problemId);
+    if (!problem) {
+      res.status(404).json({ error: "Problem not found." });
+      return;
+    }
+    res.json(problem);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch the problem." });
+  }
+};
+
+export const getPublicProblemByTitleSlug = async (req: Request, res: Response) => {
+  const { titleSlug } = req.params;
+  try {
+    const problem = await ProblemsService.getPublicProblemByTitleSlug(titleSlug);
     if (!problem) {
       res.status(404).json({ error: "Problem not found." });
       return;

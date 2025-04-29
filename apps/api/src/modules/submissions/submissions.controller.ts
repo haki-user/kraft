@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import * as submissionsService from "./submissions.service";
-import { getSubmissionResult, setSubmissionResult } from "./test-run-cache";
+import { getSubmissionResult, setSubmissionResult } from "./submissions-cache";
 
 /**
  * Handles submission creation by a user.
@@ -83,6 +83,33 @@ export const getSubmissionsForProblemHandler = async (
   try {
     const submissions = await submissionsService.getSubmissionsForProblem({
       problemId,
+      contestId: contestId as string | undefined,
+      userId: userId as string | undefined,
+    });
+    res.status(200).json(submissions);
+  } catch (error) {
+    console.log(error);
+    if (error instanceof Error) {
+      res.status(400).json({ error: error.message });
+      return;
+    }
+    res.sendStatus(500);
+  }
+};
+
+/**
+ * Get submissions for a specific problem.
+ */
+export const getSubmissionsForProblemByTitleSlugHandler = async (
+  req: Request,
+  res: Response
+) => {
+  const { titleSlug } = req.params;
+  const { contestId, userId } = req.query;
+
+  try {
+    const submissions = await submissionsService.getSubmissionsForProblemByTitleSlug({
+      titleSlug,
       contestId: contestId as string | undefined,
       userId: userId as string | undefined,
     });
