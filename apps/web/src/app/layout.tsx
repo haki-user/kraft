@@ -3,6 +3,8 @@ import { ThemeProvider } from "@kraft/ui";
 import { Navbar } from "@/components/navbar";
 import { Toaster } from "@/components/toaster";
 import AuthProvider from "@/components/auth-provider";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import "./styles.css";
 
@@ -30,6 +32,8 @@ export default function RootLayout({
             <Navbar />
             <Separator />
             <main>{children}</main>
+            <Analytics />
+            <SpeedInsights />
           </AuthProvider>
         </ThemeProvider>
       </body>
