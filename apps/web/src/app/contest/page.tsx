@@ -21,137 +21,10 @@ import {
   registerForContest,
   fetchAllContests,
 } from "@/services/contests-service";
-
-// // Enhanced contest type
-// interface Contest {
-//   id: number;
-//   title: string;
-//   description: string;
-//   startTime: string;
-//   endTime: string;
-//   participantsCount: number;
-//   problemsCount: number;
-//   isRegistered?: boolean;
-//   status: "upcoming" | "active" | "ended";
-// }
-
-// Sample data with more contests and status
-// const sampleContests: Contest[] = [
-//   {
-//     id: 1,
-//     title: "Weekly Programming Contest 1",
-//     description: "Algorithmic challenges focusing on data structures",
-//     startTime: "2024-02-20T15:00:00",
-//     endTime: "2024-02-20T17:00:00",
-//     participantsCount: 156,
-//     problemsCount: 4,
-//     isRegistered: true,
-//     status: "upcoming",
-//   },
-//   {
-//     id: 2,
-//     title: "Dynamic Programming Special",
-//     description:
-//       "Contest focused on DP problemsCount with increasing difficulty",
-//     startTime: "2024-11-05T18:00:00",
-//     endTime: "2024-12-25T21:00:00",
-//     participantsCount: 89,
-//     problemsCount: 6,
-//     status: "upcoming",
-//   },
-//   {
-//     id: 3,
-//     title: "Graph Theory Challenge",
-//     description: "Master graph algorithms and problem-solving",
-//     startTime: "2024-12-15T10:00:00",
-//     endTime: "2024-12-15T13:00:00",
-//     participantsCount: 234,
-//     problemsCount: 5,
-//     status: "ended",
-//   },
-//   {
-//     id: 4,
-//     title: "Graph Theory Challenge",
-//     description: "Master graph algorithms and problem-solving",
-//     startTime: "2024-12-15T10:00:00",
-//     endTime: "2024-12-15T13:00:00",
-//     participantsCount: 234,
-//     problemsCount: 5,
-//     status: "ended",
-//   },
-// ];
-
-// export default function Contests(): JSX.Element {
-//   const [contests, setContests] = useState(sampleContests);
-
-//   const handleRegister = (contestId: number): void => {
-//     setContests((prev) =>
-//       prev.map((contest) =>
-//         contest.id === contestId
-//           ? { ...contest, isRegistered: !contest.isRegistered }
-//           : contest
-//       )
-//     );
-//   };
-
-//   const getContestStatus = (
-//     contest: Contest
-//   ): "upcoming" | "active" | "ended" => {
-//     const now = new Date();
-//     const start = new Date(contest.startTime);
-//     const end = new Date(contest.endTime);
-
-//     if (now < start) return "upcoming";
-//     if (now > end) return "ended";
-//     return "active";
-//   };
-
-//   return (
-//     <div className="container mx-auto py-8 px-4">
-//       <div className="space-y-6">
-//         <div className="flex items-center justify-between">
-//           <h1 className="text-3xl font-bold tracking-tight">Contests</h1>
-//         </div>
-
-//         <div className="space-y-8">
-//           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-//             {contests
-//               .sort((a, b) => {
-//                 // Sort by start date, with active contests first
-//                 const statusA = getContestStatus(a);
-//                 const statusB = getContestStatus(b);
-//                 if (statusA === "active" && statusB !== "active") return -1;
-//                 if (statusB === "active" && statusA !== "active") return 1;
-//                 return (
-//                   new Date(a.startTime).getTime() -
-//                   new Date(b.startTime).getTime()
-//                 );
-//               })
-//               .map((contest) => (
-//                 <ContestCard
-//                   contest={contest}
-//                   contestStatus={getContestStatus(contest)}
-//                   handleRegister={handleRegister}
-//                   key={contest.id}
-//                 />
-//               ))}
-//           </div>
-//         </div>
-
-//         {contests.length === 0 && (
-//           <div className="text-center py-12">
-//             <p className="text-muted-foreground">
-//               No contests available at the moment.
-//             </p>
-//           </div>
-//         )}
-//       </div>
-//     </div>
-//   );
-// }
+import { AxiosError } from "axios";
+import { toast } from "@/hooks/use-toast";
 
 export default function Contests(): JSX.Element {
-  // const [contests1, setContests1] = useState(sampleContests);
   const [isLoading, setIsLoading] = useState(true);
   const { contests, setContests } = useContestStore();
   const { user, accessToken } = useAuthStore();
@@ -174,30 +47,26 @@ export default function Contests(): JSX.Element {
 
   console.log({ contests }, { user, accessToken }, "zzzz");
 
-  // return <></>;
   const handleRegister = async (contestId: string): Promise<void> => {
     console.log("registering...", contestId);
-    await registerForContest(contestId);
-    // setContests((prev) =>
-    //   prev.map((contest) =>
-    //     contest.id === contestId
-    //       ? { ...contest, isRegistered: !contest.isRegistered }
-    //       : contest
-    //   )
-    // );
+    try {
+      await registerForContest(contestId);
+      toast({
+        title: "Registered successfully",
+        description: "You have been registered for the contest.",
+        variant: "default",
+      });
+    } catch (err) {
+      console.log(err);
+      if (err instanceof AxiosError) {
+        toast({
+          title: "Failed to register",
+          description: err.response?.data.message || "Registration failed",
+          variant: "destructive",
+        });
+      }
+    }
   };
-
-  // const getContestStatus = (
-  //   contest: Contest
-  // ): "SCHEDULED" | "ONGOING" | "COMPLETED" => {
-  //   const now = new Date();
-  //   const start = new Date(contest.startTime);
-  //   const end = new Date(contest.endTime);
-
-  //   if (now < start) return "SCHEDULED";
-  //   if (now > end) return "COMPLETED";
-  //   return "ONGOING";
-  // };
 
   const groupedContests = contests.reduce(
     (acc, contest) => {
@@ -316,18 +185,16 @@ function ContestCard({
                 month: "short",
                 hour: "2-digit",
                 minute: "2-digit",
+                ...(new Date(contest.startTime).getFullYear() !==
+                  new Date().getFullYear() && {
+                  year: "numeric",
+                }),
               })}
             </span>
           </div>
           <div className="flex items-center text-sm text-muted-foreground">
             <Icons.Timer className="mr-2 h-4 w-4" />
-            <span>
-              Duration:{" "}
-              {(new Date(contest.endTime).getTime() -
-                new Date(contest.startTime).getTime()) /
-                (1000 * 60)}{" "}
-              minutes
-            </span>
+            <span>Duration: {contest.durationMinutes} minutes</span>
           </div>
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center text-muted-foreground">

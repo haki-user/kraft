@@ -1,12 +1,5 @@
 import api from "./axios-instance";
-
-interface LeaderboardParticipant {
-  rank: number;
-  username: string;
-  score: number;
-  penalty: number;
-  submissionTime: string;
-}
+import { LeaderboardParticipant } from "@kraft/types";
 
 export const fetchLeaderboard = async (
   contestId: string

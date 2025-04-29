@@ -3,7 +3,7 @@ import type {
   ContestUpdateDTO,
   CreateContestDTO,
   Contest,
-  Problem,
+  // Problem,
   ContestProblem,
 } from "@kraft/types";
 
@@ -345,6 +345,7 @@ export const getAllContestsForUser = async (
     title: contest.title,
     description: contest.description,
     creatorId: contest.creatorId,
+    durationMinutes: contest.durationMinutes,
     startTime: contest.startTime,
     endTime: contest.endTime,
     status: contest.status,
@@ -410,11 +411,44 @@ export const registerUserForContest = async (
     select: {
       maxParticipants: true,
       _count: { select: { participants: true } },
+      status: true,
+      allowedDomains: true,
     },
   });
 
   if (!contest) {
     throw new Error("Contest not found.");
+  }
+
+  if (contest.status === "DRAFT") {
+    throw new Error("Contest is in draft status.");
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { organizationDomain: true },
+  });
+
+  if (!user) {
+    throw new Error("User not found.");
+  }
+
+  const alreadyRegistered = await prisma.contestParticipation.findFirst({
+    where: { contestId, userId },
+  });
+
+  if (alreadyRegistered) {
+    console.log("throwing the error...");
+    throw new Error("User is already registered for this contest.");
+  }
+
+  if (!contest.allowedDomains?.includes("all")) {
+    if (
+      !user ||
+      !contest.allowedDomains?.includes(user.organizationDomain || "")
+    ) {
+      throw new Error("User is not allowed to register for this contest.");
+    }
   }
 
   if (
@@ -509,6 +543,7 @@ export const getContestById = async (
     title: contest.title,
     description: contest.description,
     creatorId: contest.creatorId,
+    durationMinutes: contest.durationMinutes,
     startTime: contest.startTime,
     endTime: contest.endTime,
     status: contest.status,

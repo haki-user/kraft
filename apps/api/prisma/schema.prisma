@@ -78,6 +78,8 @@ model ContestProblem {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([contestId, problemId])
 }
 
 model Contest {
@@ -89,16 +91,20 @@ model Contest {
   creatorId String
   creator   User   @relation("ContestCreator", fields: [creatorId], references: [id])
 
-  startTime DateTime
-  endTime   DateTime
-  status    ContestStatus @default(DRAFT)
+  durationMinutes Int // in minutes
+  startTime       DateTime
+  endTime         DateTime
+  status          ContestStatus @default(DRAFT)
 
   allowedDomains  String[]
   maxParticipants Int?
 
   contestProblems ContestProblem[] // Many-to-many relationship
   participants    ContestParticipation[]
-  Submission      Submission[]
+  submissions     Submission[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Problem {
@@ -113,6 +119,9 @@ model Problem {
   contestProblems ContestProblem[] // Many-to-many relationship
   testCases       TestCase[]
   submissions     Submission[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model TestCase {
@@ -123,6 +132,9 @@ model TestCase {
 
   problemId String
   problem   Problem @relation(fields: [problemId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model ContestParticipation {
@@ -143,6 +155,9 @@ model ContestParticipation {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // only one time participation. contestId and userId should be unique
+  @@unique([userId, contestId])
 }
 
 model Submission {
@@ -174,6 +189,7 @@ model Submission {
   status    SubmissionStatus @default(PENDING)
   // score     Float            @default(0)
   createdAt DateTime         @default(now())
+  // updatedAt DateTime         @updatedAt
 }
 
 model AuditLog {

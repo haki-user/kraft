@@ -19,6 +19,7 @@ export interface Contest {
   description: string;
   startTime: Date;
   endTime: Date;
+  durationMinutes: number;
   status: ContestStatus;
   creatorId: string;
   participantsCount: number;
@@ -33,6 +34,7 @@ export interface CreateContestDTO {
   title: string;
   titleSlug: string;
   description: string;
+  durationMinutes: number;
   startTime: Date;
   endTime: Date;
   status?: ContestStatus; // Optional, defaults to "DRAFT"

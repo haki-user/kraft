@@ -1,10 +1,13 @@
 import prisma from "../../lib/prisma";
 import { SubmissionStatus } from "@prisma/client";
+import type { LeaderboardParticipant } from "@kraft/types";
 
 /**
  * Get leaderboard for a contest, including submission time and sorted by score
  */
-export const getLeaderboard = async (contestId: string) => {
+export const getLeaderboard = async (
+  contestId: string
+): Promise<LeaderboardParticipant[]> => {
   const contestParticipants = await prisma.contestParticipation.findMany({
     where: { contestId },
     include: {
@@ -19,7 +22,7 @@ export const getLeaderboard = async (contestId: string) => {
               createdAt: "asc",
             },
             select: {
-              score: true,
+              // score: true,
               createdAt: true,
             },
           },
@@ -31,59 +34,32 @@ export const getLeaderboard = async (contestId: string) => {
 
   // Map the contest participants to include their total score, penalty, and rank
   const leaderboard = contestParticipants.map((participant) => {
-    const sortedSubmissions = participant.user.submissions;
-
-    let penalty = 0;
-    let submissionTime = "NA";
-    let totalScore = 0;
-
-    if (sortedSubmissions.length > 0) {
-      // Get the first accepted submission time for penalty calculation
-      console.log(sortedSubmissions)
-      submissionTime = sortedSubmissions[0]?.createdAt?.toISOString() || "NA";
-
-      // Calculate the total score (sum of all accepted submission scores)
-      totalScore = sortedSubmissions.reduce(
-        (acc, submission) => acc + submission.score,
-        0
-      );
-
-      // Calculate the penalty as the time difference between contest start and first accepted submission
-      const firstAcceptedSubmissionTime = sortedSubmissions[0]?.createdAt;
-      const contestStartTime = participant.contest.startTime;
-
-      if (firstAcceptedSubmissionTime) {
-        // Penalty in seconds (only if a submission exists)
-        penalty = Math.floor(
-          (firstAcceptedSubmissionTime.getTime() - contestStartTime.getTime()) /
-            (10000 * totalScore)
-        );
-      }
-    }
+    const finishTime = participant.endTime || new Date();
 
     return {
       userId: participant.user.id,
       username: participant.user.username,
-      score: totalScore,
-      penalty: totalScore > 0 ? penalty : 0,
-      submissionTime: submissionTime || "NA",
+      score: participant.score,
+      penalty: participant.penalty,
+      finishTime,
+      rank: 0,
     };
   });
-  console.log({leaderboard})
 
-  // Sort by score (descending), then by penalty (ascending)
+  // Sort by score (descending) considering penalty, then by finish time (ascending)
   leaderboard.sort((a, b) => {
-    if (b.score === a.score) {
-      return a.penalty - b.penalty; // If scores are equal, rank by submission time (penalty)
+    const scoreA = a.score - a.penalty;
+    const scoreB = b.score - b.penalty;
+    if (scoreA === scoreB) {
+      // a.finishTime - b.finishTime: earlier finish time ranks higher
+      return a.finishTime.getTime() - b.finishTime.getTime();
     }
-    return b.score - a.score; // Rank by score
+    return scoreB - scoreA;
   });
 
   // Assign ranks based on sorted leaderboard
-  const tmp = leaderboard;
-  tmp.forEach((participant, index) => {
-    (participant as any).rank = index + 1;
+  leaderboard.forEach((participant, index) => {
+    participant.rank = index + 1;
   });
-console.log({tmp})
-  return tmp;
+  return leaderboard;
 };
