@@ -4,7 +4,7 @@ import { Button, Card, Input, Icons } from "@kraft/ui";
 import { useState } from "react";
 import type { RegisterDTO } from "@kraft/types";
 import { useRouter } from "next/navigation";
-import { registerUser, loginUser } from "@/services/auth-service";
+import { registerUser } from "@/services/auth-service";
 import { useToast } from "@/hooks/use-toast";
 import { AxiosError } from "axios";
 
@@ -26,7 +26,6 @@ export function Signup(): JSX.Element {
       toast({
         title: "Success",
         description: "Account created successfully",
-        // variant: "success",
       });
       if (document.referrer && document.referrer !== window.location.href) {
         router.back();

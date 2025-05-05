@@ -6,8 +6,6 @@ import {
   TableRow,
   TableCell,
   Button,
-  ScrollArea,
-  ScrollBar,
 } from "@kraft/ui";
 import type { Submissions } from "@kraft/types";
 import {

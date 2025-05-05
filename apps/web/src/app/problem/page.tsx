@@ -2,16 +2,16 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { Button } from "@kraft/ui";
 import {
+  Button,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
+  Skeleton,
 } from "@kraft/ui";
-import { Skeleton } from "@kraft/ui";
 import { getPublicProblems } from "../../services/problems-service";
 
 export interface Problem {

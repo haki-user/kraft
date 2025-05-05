@@ -22,12 +22,8 @@ import {
   getSubmissionsForProblem,
 } from "@/services/submissions-service";
 import type {
-  // CreateSubmissionDTO,
   ExecutorResult,
   Problem,
-  SubmissionResult,
-  // TestRunResult,
-  // Submission,
   Submissions,
   TestCase,
 } from "@kraft/types";
@@ -47,9 +43,7 @@ export default function ProblemPage({
 }): JSX.Element {
   const { problemId, contestId } = params;
   const [problem, setProblem] = useState<Problem>();
-  // const [testCases, setTestCases] = useState<TestCase[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  // const languages = ["C++", "JavaScript", "TypeScript", "Go", "Python"];
   const languages = config.SUPPORTED_LANGUAGES;
   const [activeLanguage, setActiveLanguage] = useState(
     config.DEFAULT_ACTIVE_LANGUAGE || "python"
@@ -113,8 +107,7 @@ export default function ProblemPage({
       return null;
     }
   };
-  const handleSubmission = async () // data: Omit<CreateSubmissionDTO, "userId">
-  : Promise<void> => {
+  const handleSubmission = async (): Promise<void> => {
     try {
       const res = await createSubmission({
         problemId,
@@ -146,7 +139,6 @@ export default function ProblemPage({
     try {
       const res = await getSubmissionsForProblem(problemId, contestId);
       setSubmissions(res);
-      // setActiveTab("submissions");
     } catch (e) {
       console.log(e);
     }

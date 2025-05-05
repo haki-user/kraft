@@ -75,9 +75,6 @@ export default function Editor({
 }: EditorProps): JSX.Element {
   const monaco = useMonaco();
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
-  // const languages = ["C++", "JavaScript", "TypeScript", "Go", "Python"];
-  // const [activeLanguage, setActiveLanguage] = useState("JavaScript");
-  // const [code, setCode] = useState<string>("");
   const [settings, setSettings] = useState<EditorSettings>(editorSettings);
   const [tempSettings, setTempSettings] = useState<EditorSettings>(settings);
   const [open, setOpen] = useState(false);

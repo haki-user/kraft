@@ -23,11 +23,6 @@ export default function RootLayout({
           enableSystem
         >
           <AuthProvider>
-            {/* <nav className="flex justify-start bg-slate-900 color-white">
-            <div>Home</div>
-            <div>Contest</div>
-            <div>Problems</div>
-          </nav> */}
             <Toaster />
             <Navbar />
             <Separator />

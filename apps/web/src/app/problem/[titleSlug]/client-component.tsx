@@ -15,31 +15,23 @@ import {
 } from "@kraft/ui";
 import Editor from "@/components/editor";
 import { ExecutionPanel } from "@/components/execution-panel";
-import {
-  // fetchProblemById,
-  fetchPublicProblemByTitleSlug,
-} from "@/services/problems-service";
+import { fetchPublicProblemByTitleSlug } from "@/services/problems-service";
 import {
   createSubmission,
   executeTestRun,
   getSubmissionsForProblemByTitleSlug,
 } from "@/services/submissions-service";
 import type {
-  // CreateSubmissionDTO,
   ExecutorResult,
   Problem,
-  // SubmissionResult,
-  // TestRunResult,
-  // Submission,
   Submissions,
+  TestCase,
 } from "@kraft/types";
-import type { TestCase } from "@kraft/types";
 import { SubmissionSection } from "@/components/submissions-section";
 import { config } from "@/utils";
 import { AxiosError } from "axios";
 import { toast } from "@/hooks/use-toast";
 import "./styles.css";
-import { error } from "console";
 
 let renderCount = 0;
 
@@ -49,12 +41,10 @@ export default function ProblemPage({
   titleSlug: string;
 }): JSX.Element {
   const [problem, setProblem] = useState<Problem>();
-  // const [testCases, setTestCases] = useState<TestCase[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  // const languages = ["C++", "JavaScript", "TypeScript", "Go", "Python"];
   const languages = config.SUPPORTED_LANGUAGES;
   const [activeLanguage, setActiveLanguage] = useState(
-    config.DEFAULT_ACTIVE_LANGUAGE || "python"
+    config.DEFAULT_ACTIVE_LANGUAGE
   );
   const [code, setCode] = useState<string>("");
   const [submissions, setSubmissions] = useState<Submissions>({

@@ -1,5 +1,4 @@
 "use client";
-import Link from "next/link";
 import { Button, Card, Input, Icons } from "@kraft/ui";
 import { useState } from "react";
 import type { LoginDTO } from "@kraft/types";
@@ -22,7 +21,6 @@ export function Login(): JSX.Element {
       toast({
         title: "Success",
         description: "Logged in successfully",
-        // variant: "success",
       });
       if (document.referrer && document.referrer !== window.location.href) {
         router.back();

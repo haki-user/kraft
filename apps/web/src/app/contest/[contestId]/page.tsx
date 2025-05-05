@@ -2,29 +2,22 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
-  // cn,
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-  // Separator,
-  // Label,
-  // Input,
   ScrollArea,
   ScrollBar,
   Icons,
-  // Button,
-  // Skeleton,
 } from "@kraft/ui";
 import { fetchContestProblemDetails } from "@/services/contests-service";
-import { ContestProblem } from "@kraft/types";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { AxiosError } from "axios";
 import Leaderboard from "@/components/leaderboard";
 import Submissions from "@/components/submissions";
 import { fetchContestById } from "@/services/contests-service";
-import type { Contest } from "@kraft/types";
+import type { ContestProblem, Contest } from "@kraft/types";
 
 export default function Contest({
   params,

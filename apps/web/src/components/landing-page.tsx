@@ -1,8 +1,5 @@
 // "use client";
-
 import Link from "next/link";
-// import { useState, useEffect } from "react";
-// import { motion } from "framer-motion";
 import {
   Code,
   Server,
@@ -22,7 +19,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  // CardFooter,
   CardHeader,
   CardTitle,
   Button,
@@ -31,20 +27,9 @@ import {
   TabsTrigger,
   TabsContent,
   Badge,
-  // ScrollArea,
-  // ScrollBar,
 } from "@kraft/ui";
 
 export function LandingPage() {
-  // const [mounted, setMounted] = useState(false);
-
-  // // Ensure hydration
-  // useEffect(() => {
-  //   setMounted(true);
-  // }, []);
-
-  // if (!mounted) return null;
-
   return (
     <div className="flex flex-col min-h-screen bg-background w-full h-[100vh] overflow-y-scroll">
       {/* Hero Section */}
@@ -117,7 +102,7 @@ $ pnpm run dev
 ✓ Ready in 3.8s
 ✓ Compiled successfully!
 
-Started server on http://localhost:3000
+Started server on http://localhost:3002
 `}</code>
                   </pre>
                 </CardContent>

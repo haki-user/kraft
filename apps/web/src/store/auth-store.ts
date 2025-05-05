@@ -1,33 +1,9 @@
-// "use client";
-// import { create } from "zustand";
-// import { AuthState } from "@kraft/types";
-
-// export const useAuthStore = create<AuthState>((set) => ({
-//   accessToken: null,
-//   user: null,
-//   login: (data) => {
-//     console.log("seetting the new data", data);
-//     set({ accessToken: data.accessToken, user: data.user });
-//   },
-//   logout: () => {
-//     set({ accessToken: null, user: null });
-//   },
-//   setAccessToken: (token: string) => {
-//     set({ accessToken: token });
-//   },
-//   setUser: (user) => {
-//     set({ user: user });
-//   },
-// }));
-
-
 "use client";
 import { create } from "zustand";
 import { AuthState } from "@kraft/types";
 import { useEffect } from "react";
 import { persist, createJSONStorage } from "zustand/middleware";
 
-// Create the store with persistence
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
@@ -76,13 +52,19 @@ export function useAuthSync() {
     }
 
     // Add event listeners
-    window.addEventListener('auth:token-refreshed', handleTokenRefreshed as EventListener);
-    window.addEventListener('auth:logout', handleLogout);
+    window.addEventListener(
+      "auth:token-refreshed",
+      handleTokenRefreshed as EventListener
+    );
+    window.addEventListener("auth:logout", handleLogout);
 
     // Clean up
     return () => {
-      window.removeEventListener('auth:token-refreshed', handleTokenRefreshed as EventListener);
-      window.removeEventListener('auth:logout', handleLogout);
+      window.removeEventListener(
+        "auth:token-refreshed",
+        handleTokenRefreshed as EventListener
+      );
+      window.removeEventListener("auth:logout", handleLogout);
     };
   }, []);
 

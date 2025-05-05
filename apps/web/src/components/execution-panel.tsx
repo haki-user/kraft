@@ -5,7 +5,6 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
-  // Separator,
   Label,
   Input,
   ScrollArea,
@@ -14,54 +13,13 @@ import {
   Skeleton,
   Icons,
 } from "@kraft/ui";
-// import { useToast } from "@/hooks/use-toast";
-import type {
-  ExecutorResult,
-  TestCase,
-  TestResult,
-  // TestRunResult,
-} from "@kraft/types";
-// import { error } from "console";
-
-// type TestCaseInput = Record<string, string>;
-
-// interface TestCase {
-//   readonly id: string;
-//   input: TestCaseInput[];
-//   outpt?: string;
-// }
+import type { ExecutorResult, TestCase, TestResult } from "@kraft/types";
 
 interface ExecutionPanelProps {
   handleTestRun: (testCases: TestCase[]) => Promise<ExecutorResult | null>;
-  handleSubmission: () // data: Omit<CreateSubmissionDTO, "userId">
-  => Promise<void>;
+  handleSubmission: () => Promise<void>;
   initialTestCases: TestCase[];
 }
-
-// type TestStatus = SubmissionStatus;
-
-// interface TestResult {
-//   readonly id: number;
-//   readonly message?: string;
-//   readonly status: TestStatus;
-//   readonly output?: string;
-//   readonly stderr?: string;
-//   readonly input: TestCaseInput[];
-//   // readonly stdout?: string;
-// }
-
-// interface ExecutionResult {
-//   status: TestStatus;
-//   message: string;
-//   output: string;
-//   stderr?: string;
-// }
-
-// type ExecutionState = {
-//   isExecuting: boolean;
-//   error?: Error;
-//   progress?: number;
-// };
 
 export function ExecutionPanel({
   handleTestRun,
@@ -70,8 +28,6 @@ export function ExecutionPanel({
 }: ExecutionPanelProps): JSX.Element {
   const [testCases, setTestCases] = useState<TestCase[]>(initialTestCases);
   const [testResults, setTestResults] = useState<TestResult[]>([]);
-  // const { toast } = useToast();
-  // const handleRun = ()
   useEffect(() => {
     setTestResults([]);
   }, []);

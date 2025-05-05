@@ -1,4 +1,4 @@
-import { RegisterDTO, LoginDTO, AuthResponse } from "@kraft/types";
+import type { RegisterDTO, LoginDTO, AuthResponse } from "@kraft/types";
 import { useAuthStore } from "@/store/auth-store";
 import api from "./axios-instance";
 import { AxiosError } from "axios";

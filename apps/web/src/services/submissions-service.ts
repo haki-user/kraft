@@ -1,13 +1,12 @@
 import { config } from "@/utils";
 import api from "./axios-instance";
-import {
+import type {
   CreateSubmissionDTO,
   Submissions,
   SubmissionResult,
   TestRunDTO,
+  ExecutorResult,
 } from "@kraft/types";
-// import { SubmissionStatus, TestRunResult } from "@kraft/types";
-import { ExecutorResult } from "@kraft/types";
 
 export const createSubmission = async (
   data: Omit<CreateSubmissionDTO, "userId">
