@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import {
-  Button,
   Table,
   TableBody,
   TableCell,
@@ -13,113 +12,146 @@ import {
   Skeleton,
 } from "@kraft/ui";
 import { getPublicProblems } from "../../services/problems-service";
-
-export interface Problem {
-  id: string;
-  title: string;
-  titleSlug: string;
-  difficulty: "EASY" | "MEDIUM" | "HARD";
-}
+import type { Problem } from "@kraft/types";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const ProblemsPage: React.FC = () => {
   const [problems, setProblems] = useState<Problem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [page, setPage] = useState<number>(1);
-  const [totalPages, setTotalPages] = useState<number>(1);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
-  const fetchProblems = async (page: number) => {
-    setIsLoading(true);
-    try {
-      const data = await getPublicProblems(page, 10);
-      console.log(data);
-      setProblems(data.data);
-      setTotalPages(data.pagination.totalPages);
-      // console.log("----_->", data);
-    } catch (error) {
-      console.error("Failed to fetch problems:", error);
-    } finally {
-      setIsLoading(false);
+  useEffect(() => {
+    const fetchProblems = async () => {
+      setIsLoading(true);
+      try {
+        const data = await getPublicProblems(page, 10);
+        setProblems(
+          data.data.sort((a, b) => a.problemNumber - b.problemNumber)
+        );
+        setTotalPages(data.pagination.totalPages);
+      } catch (error) {
+        console.error("Failed to fetch problems:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchProblems();
+  }, [page]);
+
+  const getDifficultyStyles = (difficulty: string) => {
+    const base =
+      "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium";
+    switch (difficulty.toUpperCase()) {
+      case "EASY":
+        return `${base} bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400`;
+      case "MEDIUM":
+        return `${base} bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400`;
+      case "HARD":
+        return `${base} bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400`;
+      default:
+        return `${base} bg-gray-100 text-gray-800 dark:bg-gray-800/30 dark:text-gray-400`;
     }
   };
 
-  console.log({ problems });
-  useEffect(() => {
-    fetchProblems(page);
-  }, [page]);
-
-  const getDifficultyBadge = (difficulty: "EASY" | "MEDIUM" | "HARD") => {
-    const color =
-      difficulty === "EASY"
-        ? "bg-green-100 text-green-800"
-        : difficulty === "MEDIUM"
-          ? "bg-yellow-100 text-yellow-800"
-          : "bg-red-100 text-red-800";
-
-    return (
-      <span className={`px-2 py-1 text-xs font-medium rounded ${color}`}>
-        {difficulty}
-      </span>
-    );
-  };
-
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-2xl font-bold mb-6">Problems</h1>
+    <div className="min-h-screen py-8 px-4 md:px-6 lg:px-8">
+      {/* <div className="min-h-screen bg-gradient-to-br from-primary/10 via-blue-500/20  to-background dark:from-primary/10 dark:via-blue-500/5 py-0 pt-4"> */}
+      {/* <div className="min-h-screen bg-gradient-to-br from-purple-500/5 via-blue-500/5 to-transparent py-0 pt-4"> */}{" "}
+      {/* use this one */}
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-3xl font-bold mb-8 text-foreground">Problems</h1>
 
-      {isLoading ? (
-        <Skeleton className="h-10 w-full mb-4" />
-      ) : problems.length > 0 ? (
-        <>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Title</TableHead>
-                <TableHead>Difficulty</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {problems.map((problem) => (
-                <TableRow key={problem.id}>
-                  <TableCell>
-                    <Link
-                      href={`/problem/${problem.titleSlug}`}
-                      className="text-blue-600 hover:underline"
-                    >
-                      {problem.title}
-                    </Link>
-                  </TableCell>
-                  <TableCell>
-                    {getDifficultyBadge(problem.difficulty)}
-                  </TableCell>
+        <div className="rounded-lg border bgcard">
+          <div className="relative overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/80">
+                  <TableHead className="w-20 text-center font-semibold">
+                    #
+                  </TableHead>
+                  <TableHead className="font-semibold">Title</TableHead>
+                  <TableHead className="w-32 text-center font-semibold">
+                    Difficulty
+                  </TableHead>
+                  {/* <TableHead className="w-24 text-center font-semibold">
+                    Acceptance
+                  </TableHead> */}
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {isLoading
+                  ? Array.from({ length: 10 }).map((_, i) => (
+                      <TableRow key={i}>
+                        <TableCell>
+                          <Skeleton className="h-5 w-12 mx-auto" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-5 w-full" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-5 w-20 mx-auto" />
+                        </TableCell>
+                        {/* <TableCell>
+                          <Skeleton className="h-5 w-16 mx-auto" />
+                        </TableCell> */}
+                      </TableRow>
+                    ))
+                  : problems.map((problem) => (
+                      <TableRow
+                        key={problem.id}
+                        className="hover:bg-muted/50 transition-colors"
+                      >
+                        <TableCell className="text-center font-mono text-muted-foreground">
+                          {problem.problemNumber}
+                        </TableCell>
+                        <TableCell>
+                          <Link
+                            href={`/problem/${problem.titleSlug}`}
+                            className="font-medium hover:text-primary transition-colors inline-block w-full mx-auto"
+                          >
+                            {problem.title}
+                          </Link>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <span
+                            className={getDifficultyStyles(problem.difficulty)}
+                          >
+                            {problem.difficulty}
+                          </span>
+                        </TableCell>
+                        {/* <TableCell className="text-center text-sm text-muted-foreground">
+                          {problem.acceptanceRate}%
+                        </TableCell> */}
+                      </TableRow>
+                    ))}
+              </TableBody>
+            </Table>
+          </div>
 
-          {/* Pagination */}
-          <div className="flex justify-between items-center mt-4">
-            <Button
-              variant="outline"
-              disabled={page === 1}
-              onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+          <div className="flex items-center justify-between px-4 py-4 border-t">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1 || isLoading}
+              className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground px-4 py-2 h-9"
             >
+              <ChevronLeft className="h-4 w-4 mr-1" />
               Previous
-            </Button>
-            <span className="text-gray-600">
+            </button>
+            <span className="text-sm text-muted-foreground">
               Page {page} of {totalPages}
             </span>
-            <Button
-              variant="outline"
-              disabled={page === totalPages}
-              onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+            <button
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages || isLoading}
+              className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground px-4 py-2 h-9"
             >
               Next
-            </Button>
+              <ChevronRight className="h-4 w-4 ml-1" />
+            </button>
           </div>
-        </>
-      ) : (
-        <p>No problems available.</p>
-      )}
+        </div>
+      </div>
     </div>
   );
 };

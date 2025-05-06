@@ -56,6 +56,7 @@ export const getAllProblemsDataPaginated = async (
         title: true,
         difficulty: true,
         titleSlug: true,
+        problemNumber: true,
       },
       where: {
         isPublic: true,

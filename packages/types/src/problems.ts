@@ -4,6 +4,7 @@ export interface Problem {
   id: string;
   title: string;
   titleSlug: string;
+  problemNumber: number;
   description: string;
   difficulty: ProblemDifficulty;
   testCases: TestCase[]; // Test cases for this problem

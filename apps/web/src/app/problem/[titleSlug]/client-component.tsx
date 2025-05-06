@@ -76,6 +76,7 @@ export default function ProblemPage({
         id: res.id,
         titleSlug: res.titleSlug,
         difficulty: res.difficulty,
+        problemNumber: res.problemNumber,
       });
     } catch (err) {
       console.error(err);

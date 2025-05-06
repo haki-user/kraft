@@ -108,13 +108,14 @@ model Contest {
 }
 
 model Problem {
-  id          String            @id @default(uuid())
-  titleSlug   String            @unique
-  title       String
+  id            String  @id @default(uuid())
+  titleSlug     String  @unique
+  title         String
+  problemNumber Int     @unique @default(autoincrement())
+  isPublic      Boolean @default(false)
+
   description String
   difficulty  ProblemDifficulty
-
-  isPublic Boolean @default(false)
 
   contestProblems ContestProblem[] // Many-to-many relationship
   testCases       TestCase[]
