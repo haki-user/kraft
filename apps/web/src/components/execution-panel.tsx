@@ -185,6 +185,7 @@ export function ExecutionPanel({
                         <span className="text-nowrap text-base">{key}</span>
                       </Label>
                       <Input
+                        disabled
                         className="mt-1"
                         id={`test-case-${testCaseId}-input-${key}`}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
